@@ -3,6 +3,9 @@ package com.bills.billslib.Contracts;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 
+import com.bills.billslib.Contracts.Enums.Language;
+import com.bills.billslib.Contracts.Enums.PageSegmentation;
+
 import java.util.List;
 
 /**
@@ -48,7 +51,7 @@ public interface IOcrEngine {
      * @throws IllegalStateException In case the OCR Engine was not initialized
      * @throws RuntimeException In case of runtime(probably native) exception accured
      */
-    public String getUTF8Text() throws IllegalStateException, RuntimeException;
+    public String GetUTF8Text() throws IllegalStateException, RuntimeException;
 
     /**
      * Sets page segmentation mode
@@ -56,7 +59,7 @@ public interface IOcrEngine {
      * @throws IllegalStateException In case the OCR Engine was not initialized
      * @throws RuntimeException In case of runtime(probably native) exception accured
      */
-    public void setPageSegMode(PageSegmentation pageSegMode) throws IllegalStateException, RuntimeException;
+    public void SetPageSegMode(PageSegmentation pageSegMode) throws IllegalStateException, RuntimeException;
 
     /**
      * Returns flag whether the OCR Engine was initialized or not

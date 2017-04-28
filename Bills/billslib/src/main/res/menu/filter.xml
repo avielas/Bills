@@ -1,0 +1,30 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    >
+
+    <item
+        android:id="@+id/capture"
+        android:title="Capture"
+        android:icon="@android:drawable/ic_menu_camera"
+        app:showAsAction="always"
+        />
+
+    <item
+        android:id="@+id/noFilter"
+        android:title="NoFilter"
+        app:showAsAction="never"
+        />
+
+    <item
+        android:id="@+id/barrelBlurFilter"
+        android:title="BarrelBlur"
+        app:showAsAction="never"
+        />
+
+    <item
+        android:id="@+id/tiltShiftBlurFilter"
+        android:title="TiltShiftBlurBlur"
+        app:showAsAction="never"
+        />
+</menu>

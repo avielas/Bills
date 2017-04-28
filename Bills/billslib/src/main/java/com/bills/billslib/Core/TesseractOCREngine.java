@@ -4,8 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 
 import com.bills.billslib.Contracts.IOcrEngine;
-import com.bills.billslib.Contracts.Language;
-import com.bills.billslib.Contracts.PageSegmentation;
+import com.bills.billslib.Contracts.Enums.Language;
+import com.bills.billslib.Contracts.Enums.PageSegmentation;
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.Pixa;
 import com.googlecode.leptonica.android.WriteFile;
@@ -141,7 +141,7 @@ public class TesseractOCREngine implements IOcrEngine {
     }
 
     @Override
-    public String getUTF8Text() throws IllegalStateException, RuntimeException {
+    public String GetUTF8Text() throws IllegalStateException, RuntimeException {
         CheckInitialized();
 
         try{
@@ -153,7 +153,7 @@ public class TesseractOCREngine implements IOcrEngine {
     }
 
     @Override
-    public void setPageSegMode(PageSegmentation pageSegMode) throws IllegalStateException, RuntimeException {
+    public void SetPageSegMode(PageSegmentation pageSegMode) throws IllegalStateException, RuntimeException {
         CheckInitialized();
 
         try{
