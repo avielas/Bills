@@ -28,6 +28,7 @@ public class TesseractOCREngine implements IOcrEngine {
 
     private boolean _initialized = false;
     private boolean _imageSet = false;
+
     @Override
     public void Init(String datapath, Language language) throws IllegalArgumentException, RuntimeException {
         String tessLanguage = "";
