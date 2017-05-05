@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tools:android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:id="@+id/activity_preprocessing_main"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
+    tools:context="com.bills.testsdebug.TestsDebugActivity">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="2"
+    android:orientation="vertical">
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/layout1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="top"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/originalImageView"
+                />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/processedImageView"
+                />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/processedForCreateNewBillImageView"
+                />
+        </LinearLayout>
+    </ScrollView>
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/scrollView"
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_below="@+id/layout1"
+            android:orientation="vertical">
+
+            <com.gregacucnik.EditableSeekBar
+                android:id="@+id/adaptiveThresholdBlockSizeEditableSeekBar"
+                android:layout_width="230dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                app:esbTitle="Adaptive Threshold Block Size"
+                app:esbMax="150"
+                app:esbValue="60"
+                app:esbMin="3"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true">
+            </com.gregacucnik.EditableSeekBar>
+            <Button
+                android:text="Calc"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/adaptiveThresholdBlockSizeButton"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <com.gregacucnik.EditableSeekBar
+                android:id="@+id/adaptiveThresholdConstantSubtractedEditableSeekBar"
+                android:layout_width="230dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                app:esbTitle="Adaptive Threshold Constant Subtracted"
+                app:esbMax="150"
+                app:esbValue="45"
+                app:esbMin="-100"
+                android:layout_below="@+id/adaptiveThresholdBlockSizeEditableSeekBar"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" >
+            </com.gregacucnik.EditableSeekBar>
+
+            <com.gregacucnik.EditableSeekBar
+                android:id="@+id/dilateEditableSeekBar"
+                android:layout_width="230dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                app:esbTitle="Dilate"
+                app:esbMax="1500"
+                app:esbValue="2"
+                app:esbMin="2"
+                android:layout_below="@+id/adaptiveThresholdConstantSubtractedEditableSeekBar"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+            <Button
+                android:text="Calc"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/erodeEditableSeekBar"
+                android:id="@+id/dilateButton" />
+
+            <com.gregacucnik.EditableSeekBar
+                android:id="@+id/erodeEditableSeekBar"
+                android:layout_width="230dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                app:esbTitle="Erode"
+                app:esbMax="1500"
+                app:esbValue="2"
+                app:esbMin="2"
+                android:layout_below="@+id/dilateEditableSeekBar"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+            <Button
+                android:text="Calc"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/runOcrOnPreprocessedButton"
+                android:layout_alignLeft="@+id/dilateButton"
+                android:layout_alignStart="@+id/dilateButton"
+                android:id="@+id/erodeButton" />
+
+            <!--<com.gregacucnik.EditableSeekBar-->
+            <!--android:id="@+id/morphClosingEditableSeekBar"-->
+            <!--android:layout_width="230dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="right"-->
+            <!--app:esbTitle="Closing"-->
+            <!--app:esbMax="15"-->
+            <!--app:esbValue="2"-->
+            <!--app:esbMin="2"-->
+            <!--android:layout_below="@+id/erodeEditableSeekBar"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_alignParentEnd="true" />-->
+            <!--<Button-->
+            <!--android:text="Calc"-->
+            <!--android:layout_width="60dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_above="@+id/morphOpeningEditableSeekBar"-->
+            <!--android:layout_alignRight="@+id/erodeButton"-->
+            <!--android:layout_alignEnd="@+id/erodeButton"-->
+            <!--android:id="@+id/morphClosingButton"-->
+            <!--android:layout_alignLeft="@+id/erodeButton"-->
+            <!--android:layout_alignStart="@+id/erodeButton" />-->
+
+            <!--<com.gregacucnik.EditableSeekBar-->
+            <!--android:id="@+id/morphOpeningEditableSeekBar"-->
+            <!--android:layout_width="230dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="right"-->
+            <!--app:esbTitle="Opening"-->
+            <!--app:esbMax="15"-->
+            <!--app:esbValue="2"-->
+            <!--app:esbMin="2"-->
+            <!--android:layout_below="@+id/morphClosingEditableSeekBar"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_alignParentEnd="true" />-->
+            <!--<Button-->
+            <!--android:text="Calc"-->
+            <!--android:layout_width="60dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignBottom="@+id/morphOpeningEditableSeekBar"-->
+            <!--android:layout_alignRight="@+id/morphClosingButton"-->
+            <!--android:layout_alignEnd="@+id/morphClosingButton"-->
+            <!--android:id="@+id/morphOpeningButton" />-->
+
+            <Button
+                android:id="@+id/runOcrOnPreprocessedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OCR"
+                android:layout_below="@+id/erodeEditableSeekBar"
+                android:layout_alignRight="@+id/erodeButton"
+                android:layout_alignEnd="@+id/erodeButton" />
+
+            <EditText
+                android:text="1"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/dilateIterationsNumber"
+                android:layout_alignBaseline="@+id/dilateButton"
+                android:layout_alignBottom="@+id/dilateButton"
+                android:layout_alignLeft="@+id/adaptiveThresholdIterationsNumber"
+                android:layout_alignStart="@+id/adaptiveThresholdIterationsNumber" />
+
+            <EditText
+                android:text="1"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/erodeIterationsNumber"
+                android:layout_alignBottom="@+id/erodeButton"
+                android:layout_alignLeft="@+id/dilateIterationsNumber"
+                android:layout_alignStart="@+id/dilateIterationsNumber" />
+
+            <!--<EditText-->
+            <!--android:text="1"-->
+            <!--android:layout_width="40dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/morphClosingIterationsNumber"-->
+            <!--android:layout_above="@+id/morphOpeningEditableSeekBar"-->
+            <!--android:layout_alignLeft="@+id/erodeIterationsNumber"-->
+            <!--android:layout_alignStart="@+id/erodeIterationsNumber" />-->
+
+            <!--<EditText-->
+            <!--android:text="1"-->
+            <!--android:layout_width="40dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/morphOpeningIterationsNumber"-->
+            <!--android:layout_above="@+id/runOcrOnPreprocessedButton"-->
+            <!--android:layout_alignLeft="@+id/morphClosingIterationsNumber"-->
+            <!--android:layout_alignStart="@+id/morphClosingIterationsNumber" />-->
+
+            <EditText
+                android:text="1"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/adaptiveThresholdIterationsNumber"
+                android:layout_alignBottom="@+id/adaptiveThresholdBlockSizeButton"
+                android:layout_toRightOf="@+id/adaptiveThresholdBlockSizeButton"
+                android:layout_toEndOf="@+id/adaptiveThresholdBlockSizeButton"
+                android:layout_marginLeft="17dp"
+                android:layout_marginStart="17dp" />
+
+            <Spinner
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/kernelTypeSpinner"
+                android:layout_above="@+id/dilateEditableSeekBar"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/generateBillButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Warp"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/saveProccessedButton" />
+
+            <Button
+                android:id="@+id/templateMatcherButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TM"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/generateBillButton" />
+
+            <Button
+                android:id="@+id/printWordsLocationButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pr"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/templateMatcherButton" />
+
+            <Button
+                android:id="@+id/saveProccessedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save P"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/runOcrOnPreprocessedButton" />
+        </RelativeLayout>
+    </ScrollView>
+</LinearLayout>
+</tools:android.support.constraint.ConstraintLayout>

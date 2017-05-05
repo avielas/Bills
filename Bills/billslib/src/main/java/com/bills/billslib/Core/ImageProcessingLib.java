@@ -1,10 +1,16 @@
 package com.bills.billslib.Core;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.Log;
 
 
 import com.bills.billslib.Contracts.MutableBoolean;
+import com.googlecode.leptonica.android.Pix;
+import com.googlecode.leptonica.android.Pixa;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -181,4 +187,112 @@ public class ImageProcessingLib {
                 iterations);
     }
 
+//    public static Bitmap PrintWordLocations(Bitmap bitmap, Bitmap _processedBill){
+//        Pixa textlines = null;
+//        Pix textLine = null;
+//        Pixa textWords = null;
+//        Bitmap printedBitmap = Bitmap.createBitmap(bitmap);
+//
+//        ArrayList<ArrayList<Rect>> locations = new ArrayList<>();
+//        try{
+//            int lineCount = 0;
+//            int wordCount = 0;
+//
+//            _ocrEngine.setImage(_processedBill);
+//            _ocrEngine.SetNumbersOnylFormat();
+//            textlines = _ocrEngine.getTextlines();
+//            Rect lineRect = textlines.getBoxRect(lineCount);
+//            int offsetX = 0;
+//            int offsetY = 0;
+//            if(lineRect != null) {
+//                offsetX = lineRect.left;
+//                offsetY = lineRect.top;
+//            }
+//            textLine = textlines.getPix(lineCount++);
+//
+//            // go over each line and find all numbers with their locations.
+//            while(textLine != null){
+//                _ocrEngine.setImage(textLine);
+//                textWords = _ocrEngine.getWords();
+//                Rect wordRect = textWords.getBoxRect(wordCount++);
+//                if(wordRect != null) {
+//                    wordRect.left += offsetX;
+//                    wordRect.right += offsetX;
+//                    wordRect.top += offsetY;
+//                    wordRect.bottom += offsetY;
+//                }
+//                locations.add(new ArrayList<Rect>());
+//                while(wordRect != null){
+//                    locations.get(lineCount-1).add(wordRect);
+//                    wordRect = textWords.getBoxRect(wordCount++);
+//                    if(wordRect != null) {
+//                        wordRect.left += offsetX;
+//                        wordRect.right += offsetX;
+//                        wordRect.top += offsetY;
+//                        wordRect.bottom += offsetY;
+//                    }
+//                }
+//                textLine.recycle();
+//                lineRect = textlines.getBoxRect(lineCount);
+//                offsetX = 0;
+//                offsetY = 0;
+//                if(lineRect != null) {
+//                    offsetX = lineRect.left;
+//                    offsetY = lineRect.top;
+//                }
+//                textLine = textlines.getPix(lineCount++);
+//                wordCount = 0;
+//            }
+//            /************ the following is waiting for GC to finish his job. ********/
+//            /************ without it the red lines will not be printed. *************/
+//            Thread.sleep(50);
+//            /**************************/
+//            /*** print locations on source image ***/
+//            Paint paint = new Paint();
+//            Canvas canvas = new Canvas(printedBitmap);
+//            paint.setColor(Color.RED);
+//            paint.setStyle(Paint.Style.STROKE);
+//            paint.setStrokeWidth(3);
+//
+//            for (ArrayList<Rect> location : locations) {
+//                for (Rect rect: location) {
+//                    canvas.drawRect(rect, paint);
+//                }
+//            }
+//            /*** end of printing ***/
+//        }
+//        catch(Exception ex){
+//            Log.d(this.getClass().getSimpleName(), "Failed to map numbered values to location. Error: " + ex.getMessage());
+//            return null;
+//        }
+//        finally {
+//            if(textlines != null) {
+//                if (textLine != null) {
+//                    try {
+//                        textLine.recycle();
+//                    }
+//                    catch (Exception e){}
+//                }
+//            }
+//
+//            if(textLine != null){
+//                try {
+//                    textLine.recycle();
+//                }
+//                catch (Exception e){}
+//            }
+//
+//            if(textWords != null){
+//                try{
+//                    textWords.recycle();
+//                }
+//                catch (Exception e){}
+//            }
+//
+//
+//            //return locations;
+//            return printedBitmap;
+//        }
+//    }
+//
 }

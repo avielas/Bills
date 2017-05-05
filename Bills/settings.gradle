@@ -1,2 +1,2 @@
-include ':app', ':billslib'
+include ':app', ':billslib', ':testsdebug'
 include ':openCVLibrary320'
