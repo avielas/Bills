@@ -7,9 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
 
-import com.bills.billslib.Camera.IOnCameraFinished;
 import com.bills.billslib.Contracts.IOcrEngine;
-import com.googlecode.leptonica.android.WriteFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,14 +25,14 @@ import java.util.Map;
  */
 
 
-public class TemplateMatcher {
+public class TemplateMatcher  {
     private IOcrEngine mOCREngine;
     private Bitmap mFullBillProcessedImage;
-    private Bitmap mFullBillImage;
+    private Bitmap mFullBillProcessedImageForCreateNewBill;
     private int itemColumn;
     public final ArrayList<Double[]> priceAndQuantity = new ArrayList<>();
     public final ArrayList<Rect> itemLocationsRect = new ArrayList<>();
-    public final ArrayList<byte[]> itemLocationsByteArray = new ArrayList<>();
+    public final ArrayList<Bitmap> itemLocationsByteArray = new ArrayList<>();
     Boolean secondColumnIsConnected;
     Boolean oneBeforeLastColumnConnected;
 
@@ -52,13 +50,14 @@ public class TemplateMatcher {
         oneBeforeLastColumnConnected = false;
     }
 
-    public TemplateMatcher(IOcrEngine ocrEngine, Bitmap fullBillPreprocessedImage, Bitmap fullBillImage) {
+    public TemplateMatcher(IOcrEngine ocrEngine, Bitmap fullBillPreprocessedImageForCreateNewBill,
+                           Bitmap fullBillPreprocessedImage) {
         if (!ocrEngine.Initialized()) {
             throw new IllegalArgumentException("OCREngine must be initialized.");
         }
         mOCREngine = ocrEngine;
         mFullBillProcessedImage = fullBillPreprocessedImage;
-        mFullBillImage = fullBillImage;
+        mFullBillProcessedImageForCreateNewBill = fullBillPreprocessedImageForCreateNewBill;
         secondColumnIsConnected = false;
         oneBeforeLastColumnConnected = false;
     }
@@ -223,10 +222,7 @@ public class TemplateMatcher {
         }
     }
 
-    private void SetItemsLocations(int itemsAreaStart, int itemsAreaEnd,
-                                   LinkedHashMap<Rect, Rect>[] connections,
-                                   ArrayList<ArrayList<Rect>> locations) {
-
+    private void SetItemsLocations(int itemsAreaStart, int itemsAreaEnd, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {
         Rect[][] lineConnectionRects = new Rect[itemsAreaEnd - itemsAreaStart + 1][connections[itemsAreaStart].size()];
         for(int i = itemsAreaStart; i < itemsAreaEnd; i++){
             try {
@@ -268,6 +264,8 @@ public class TemplateMatcher {
                     mOCREngine.SetRectangle(itemLocation);
                     Rect itemsRect = null;
                     try {
+
+
                         //TODO crashing here sometimes
                         List<Rect> textLines =  mOCREngine.GetTextlines();
                         itemsRect = textLines.get(0);
@@ -275,18 +273,13 @@ public class TemplateMatcher {
                         e.printStackTrace();
                         continue;
                     }
-
                     int xBegin = itemsRect.left;
                     int xEnd = itemsRect.right;
                     int yBegin = itemsRect.top;
                     int yEnd = itemsRect.bottom;
                     Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
 
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                    itemLocationsByteArray.add(stream.toByteArray());
-                    bitmap.recycle();
-                    stream.reset();
+                    itemLocationsByteArray.add(bitmap);
                     /****** end ******/
                     break;
                 }
@@ -551,7 +544,11 @@ public class TemplateMatcher {
                 (word.right <= nextLineWord.right && word.right + range >= nextLineWord.right));
     }
 
-    private ArrayList<ArrayList<Rect>> GetWordLocations(Bitmap processedBillImage){
+    private ArrayList<ArrayList<Rect>> GetWordLocations(Bitmap processedBillImage) {
+        List<Rect> textlines = null;
+        Rect textLine = null;
+        List<Rect> textWords = null;
+
         ArrayList<ArrayList<Rect>> locations = new ArrayList<>();
         try {
             int lineCount = 0;
@@ -559,32 +556,27 @@ public class TemplateMatcher {
 
             mOCREngine.SetImage(processedBillImage);
             mOCREngine.SetNumbersOnlyFormat();
-            List<Rect> textlines = mOCREngine.GetTextlines();
+            textlines = mOCREngine.GetTextlines();
 
 
             // go over each line and find all numbers with their locations.
-//            while (textLne != null) {
-            while(lineCount < textlines.size()) {
-                Rect textLine = textlines.get(lineCount++);
+            while (lineCount < textlines.size()) {
+                textLine = textlines.get(lineCount++);
                 mOCREngine.SetRectangle(textLine);
-                List<Rect> textWords = mOCREngine.GetWords();
-                Rect wordRect = textWords.get(wordCount++);
-                if (wordRect != null) {
+                textWords = mOCREngine.GetWords();
 
-                    locations.add(new ArrayList<Rect>());
-                    while (wordRect != null) {
-                        locations.get(lineCount - 1).add(wordRect);
-                        wordRect = textWords.get(wordCount++);
-                    }
-                    wordCount = 0;
+                locations.add(new ArrayList<Rect>());
+                while (wordCount < textWords.size()) {
+                    Rect wordRect = textWords.get(wordCount++);
+                    locations.get(lineCount - 1).add(wordRect);
                 }
+
+                wordCount = 0;
             }
-        }
-        catch(Exception ex){
+        } catch (Exception ex) {
             Log.d(this.getClass().getSimpleName(), "Failed to map numbered values to location. Error: " + ex.getMessage());
             return null;
         }
-
         return locations;
     }
 
@@ -664,6 +656,10 @@ public class TemplateMatcher {
      *      parsed word(to Double) with its location at the Bitmap
      */
     private LinkedHashMap<Integer, LinkedHashMap<Integer, Map.Entry<Double, Rect>>> GetMapper() {
+        List<Rect> textlines = null;
+        Rect textLine = null;
+        List<Rect> textWords = null;
+        Rect textWord = null;
 
         LinkedHashMap<Integer, LinkedHashMap<Integer, Map.Entry<Double, Rect>>> mapper = new LinkedHashMap<>();
 
@@ -673,19 +669,19 @@ public class TemplateMatcher {
 
             mOCREngine.SetImage(mFullBillProcessedImage);
             mOCREngine.SetNumbersOnlyFormat();
-            List<Rect> textlines = mOCREngine.GetTextlines();
+            textlines = mOCREngine.GetTextlines();
 
 
             // go over each line and find all numbers with their locations.
             while (lineCount < textlines.size()) {
-                Rect textLine = textlines.get(lineCount++);
+                textLine = textlines.get(lineCount++);
                 mOCREngine.SetRectangle(textLine);
-                List<Rect> textWords = mOCREngine.GetWords();
-                Rect wordRect = textWords.get(wordCount);
+                textWords = mOCREngine.GetWords();
 
-                Rect textWord = textWords.get(wordCount++);
                 mapper.put(lineCount, new LinkedHashMap<Integer, Map.Entry<Double, Rect>>());
-                while (textWord != null) {
+                while (wordCount < textWords.size()) {
+                    Rect wordRect = textWords.get(wordCount);
+                    textWord = textWords.get(wordCount++);
                     mOCREngine.SetRectangle(textWord);
                     String word = null;
                     try {
@@ -695,9 +691,7 @@ public class TemplateMatcher {
                         }
                     } catch (Exception ex) {
                         mapper.get(lineCount).put(wordCount, new AbstractMap.SimpleEntry<Double, Rect>(new Double(0), wordRect));
-                        wordRect = textWords.get(wordCount);
 
-                        textWord = textWords.get(wordCount++);
                         continue;
                     }
 
@@ -706,15 +700,10 @@ public class TemplateMatcher {
                         parsedWord = Double.parseDouble(word);
                     } catch (Exception ex) {
                         mapper.get(lineCount).put(wordCount, new AbstractMap.SimpleEntry<Double, Rect>(new Double(-1), wordRect));
-                        wordRect = textWords.get(wordCount);
 
-                        textWord = textWords.get(wordCount++);
                         continue;
                     }
                     mapper.get(lineCount).put(wordCount, new AbstractMap.SimpleEntry<Double, Rect>(new Double(parsedWord), wordRect));
-                    wordRect = textWords.get(wordCount);
-
-                    textWord = textWords.get(wordCount++);
                 }
                 wordCount = 0;
             }
@@ -724,7 +713,6 @@ public class TemplateMatcher {
         }
 
         return mapper;
-
     }
 
     private Bitmap CreatingImageFromRects(List<Map.Entry<Integer, Integer>> startEndOfAreasList, LinkedHashMap<Rect, Rect>[] connections) {
@@ -745,7 +733,7 @@ public class TemplateMatcher {
     }
 
     private Bitmap CreateImage(LinkedHashMap<Rect, Rect>[] connections, int beginIndex, int endIndex) {
-        final Bitmap newBill = Bitmap.createBitmap(mFullBillImage.getWidth(), mFullBillImage.getHeight(), Bitmap.Config.ARGB_8888);
+        final Bitmap newBill = Bitmap.createBitmap(mFullBillProcessedImage.getWidth(), mFullBillProcessedImage.getHeight(), Bitmap.Config.ARGB_8888);
         final Paint paint = new Paint();
         final Canvas canvas = new Canvas(newBill);
 
@@ -775,7 +763,7 @@ public class TemplateMatcher {
                 int yBegin    = keyListCurrentIndex.get(j).top;
                 int yEnd = keyListCurrentIndex.get(j).bottom;
                 Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
-                canvas.drawBitmap(mFullBillProcessedImage, keyListCurrentIndex.get(j), keyListCurrentIndex.get(j), paint);
+                canvas.drawBitmap(mFullBillProcessedImageForCreateNewBill, keyListCurrentIndex.get(j), keyListCurrentIndex.get(j), paint);
                 bitmap.recycle();
             }
         }

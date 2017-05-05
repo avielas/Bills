@@ -222,8 +222,8 @@ public class BillAreaDetector {
                 approxPoint.release();
             }
         }
-        Log.d(Tag, "Failed to get bounding rectangle.");
         return false;
+
     }
 
     private int GetThresholdIndex(float[] hist, int histSizeNum) {

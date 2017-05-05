@@ -26,9 +26,9 @@ import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
  */
 
 public class ImageProcessingLib {
-    private final String Tag = this.getClass().getSimpleName();
+    private static final String Tag = "ImageProcessingLib";
 
-    public boolean WarpPerspective(final Bitmap inputImage, final Bitmap outputImage,
+    public static boolean WarpPerspective(final Bitmap inputImage, final Bitmap outputImage,
                                           final Point topLeft, final Point topRight, final Point buttomRight, final Point buttomLeft) {
         final MutableBoolean result = new MutableBoolean(false);
         final Double outputImageWidth = Math.max(Math.abs(topLeft.x - topRight.x), Math.abs(buttomLeft.x - buttomRight.x));
