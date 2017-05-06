@@ -168,10 +168,14 @@ public class ImageProcessingLib {
         }
         Mat rgba = new Mat();
         Bitmap processed = Bitmap.createBitmap(image);
-//        Utils.bitmapToMat(processed, rgba);
+        Utils.bitmapToMat(processed, rgba);
 //        AdaptiveThreshold(rgba, 100, 33.0);
-//        Erode(rgba, 1, 2, StructureElement.VERTICAL_LINE.toString());
-//        Utils.matToBitmap(rgba, processed);
+        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        Utils.matToBitmap(rgba, processed);
         rgba.release();
         return processed;
     }

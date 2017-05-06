@@ -299,8 +299,15 @@ public class TestsDebugActivity extends AppCompatActivity{
     private void CompareExpectedToOcrResult(LinkedHashMap ocrResultCroppedBill, List<String> expectedBillTextLines) {
         _results.append("Validating Ocr Result:");
         _results.append(System.getProperty("line.separator"));
-//        Double accuracyPercent = Compare(ocrResultCroppedBill, expectedBillTextLines);
-        PrintParsedNumbers(ocrResultCroppedBill);
+        Double accuracyPercent = Compare(ocrResultCroppedBill, expectedBillTextLines);
+        _results.append(System.getProperty("line.separator"));
+        if(ocrResultCroppedBill.size() != expectedBillTextLines.size())
+        {
+            _results.append("ocrResultCroppedBill contains "+ ocrResultCroppedBill.size() + " lines, but" +
+                    " expectedBillTextLines contains "+ expectedBillTextLines.size()+" lines");
+        }
+//        PrintParsedNumbers(ocrResultCroppedBill);
+        _results.append("Accuracy is "+ accuracyPercent+"%");
         _results.append(System.getProperty("line.separator"));
         _results.append(System.getProperty("line.separator"));
     }
@@ -453,33 +460,6 @@ public class TestsDebugActivity extends AppCompatActivity{
         });
     }
 
-    private boolean SaveToJPGFile(Bitmap bmp, String path){
-        FileOutputStream out = null;
-        try {
-            File file = new File(path);
-            if(file.exists()){
-                file.delete();
-            }
-            out = new FileOutputStream(path);
-
-            // bmp is your Bitmap instance, PNG is a lossless format, the compression factor (100) is ignored
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
     public void AddListenerPrintWordsLocationButton() {
         _printWordsLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -587,55 +567,6 @@ public class TestsDebugActivity extends AppCompatActivity{
         System.setOut(printStreamToFile);
     }
 
-    /**
-     * # Rectangular Kernel
-     >>> cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
-     array(
-     [[1, 1, 1, 1, 1],
-     [1, 1, 1, 1, 1],
-     [1, 1, 1, 1, 1],
-     [1, 1, 1, 1, 1],
-     [1, 1, 1, 1, 1]], dtype=uint8)
-
-     # Elliptical Kernel
-     >>> cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
-     array(
-     [[0, 0, 1, 0, 0],
-     [1, 1, 1, 1, 1],
-     [1, 1, 1, 1, 1],
-     [1, 1, 1, 1, 1],
-     [0, 0, 1, 0, 0]], dtype=uint8)
-
-     # Cross-shaped Kernel
-     >>> cv2.getStructuringElement(cv2.MORPH_CROSS,(5,5))
-     array(
-     [[0, 0, 1, 0, 0],
-     [0, 0, 1, 0, 0],
-     [1, 1, 1, 1, 1],
-     [0, 0, 1, 0, 0],
-     [0, 0, 1, 0, 0]], dtype=uint8)
-
-     * @return
-     */
-    public Mat GetKernel(String structureElementType, int kernelSize) {
-        switch(structureElementType)
-        {
-            case "HORIZONTAL_LINE":
-                return Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(kernelSize, 1));
-            case "VERTICAL_LINE":
-                return Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(1, kernelSize));
-            case "RECTANGULAR":
-                return Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(kernelSize, kernelSize));
-            case "ELLIPTICAL":
-                return Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(kernelSize, kernelSize));
-            case "CROSS_SHAPED":
-                return Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(kernelSize, kernelSize));
-            default:
-                //RECTANGULAR;
-                return Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(kernelSize, kernelSize));
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         switch (resultCode) {
@@ -690,5 +621,32 @@ public class TestsDebugActivity extends AppCompatActivity{
         boolean saved = TiffSaver.saveBitmap(imagePathToSave + ".tif", croppedImage, options);
 
         return saved;
+    }
+
+    private boolean SaveToJPGFile(Bitmap bmp, String path){
+        FileOutputStream out = null;
+        try {
+            File file = new File(path);
+            if(file.exists()){
+                file.delete();
+            }
+            out = new FileOutputStream(path);
+
+            // bmp is your Bitmap instance, PNG is a lossless format, the compression factor (100) is ignored
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
     }
 }
