@@ -27,12 +27,12 @@ import java.util.List;
  */
 
 public class BillAreaDetector {
-    private String Tag = this.getClass().getSimpleName();
+    private static String Tag = "BillAreaDetector";
 
-    private int _histSizeNum = 64;
-    private int _bucketSize = 256 / _histSizeNum;
+    private static int _histSizeNum = 64;
+    private static int _bucketSize = 256 / _histSizeNum;
 
-    public boolean GetBillCorners(Bitmap source, Point topLeft, Point topRight, Point buttomRight, Point buttomLeft){
+    public static boolean GetBillCorners(Bitmap source, Point topLeft, Point topRight, Point buttomRight, Point buttomLeft){
         Mat image = null;
         Mat newImage = null;
         Mat contrast = null;
@@ -226,7 +226,7 @@ public class BillAreaDetector {
 
     }
 
-    private int GetThresholdIndex(float[] hist, int histSizeNum) {
+    private static int GetThresholdIndex(float[] hist, int histSizeNum) {
         float maxValue = Float.MIN_VALUE;
         int max1Index = Integer.MIN_VALUE;
         int max2Index = Integer.MIN_VALUE;
@@ -265,7 +265,7 @@ public class BillAreaDetector {
         return minIndex;
     }
 
-    private double angle(Point pt1, Point pt2, Point pt0) {
+    private static double angle(Point pt1, Point pt2, Point pt0) {
         double dx1 = pt1.x - pt0.x;
         double dy1 = pt1.y - pt0.y;
         double dx2 = pt2.x - pt0.x;

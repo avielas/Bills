@@ -38,6 +38,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
     compile project(':openCVLibrary320')
-
     compile project(path: ':billslib')
+    compile 'com.github.beyka:androidtiffbitmapfactory:0.9.1'
 }
