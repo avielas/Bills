@@ -338,7 +338,7 @@ public class ImageProcessingLib {
         Bitmap processed = Bitmap.createBitmap(image);
         Utils.bitmapToMat(processed, rgba);
         AdaptiveThreshold(rgba, 60, 45.0);
-//        Erode(rgba, 1, 4, StructureElement.VERTICAL_LINE.toString());
+        Erode(rgba, 1, 4, StructureElement.VERTICAL_LINE.toString());
         Utils.matToBitmap(rgba, processed);
         return processed;
     }

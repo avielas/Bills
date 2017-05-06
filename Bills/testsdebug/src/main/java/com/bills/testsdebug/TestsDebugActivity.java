@@ -107,10 +107,10 @@ public class TestsDebugActivity extends AppCompatActivity{
 //            PreparingEnvironmentUtil.PrepareImagesForTests(this);
 //        }
         _billName = "29112016_2246_croppedCenter.jpg";
-        _restaurantName = "/dovrin/";
+        _restaurantName = "mina";
         _brandAndModelPath = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL;
         //extract date from bill, for creating expected txt file name
-        _expectedTxtFileName = _billName.split("_")[0] + "_expected.txt";
+        _expectedTxtFileName = _restaurantName + ".txt";
         _originalImageView = (ImageView)findViewById(R.id.originalImageView);
         _processedImageView = (ImageView)findViewById(R.id.processedImageView);
         _processedForCreateNewBillImageView = (ImageView)findViewById(R.id.processedForCreateNewBillImageView);
@@ -196,7 +196,7 @@ public class TestsDebugActivity extends AppCompatActivity{
     private Bitmap InitBillFromFile() {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
-        String billPath = _brandAndModelPath + _restaurantName + _billName;
+//        String billPath = _brandAndModelPath + _restaurantName + _billName;
         return GetLastWarpedBillPhoto(); //BitmapFactory.decodeFile(billPath, options); //
     }
 
@@ -239,8 +239,8 @@ public class TestsDebugActivity extends AppCompatActivity{
     }
 
     private void ValidateOcrBillResult(String imageStatus, Bitmap billBitmap) throws Exception{
-        List<String> expectedBillTextLines = ReadTxtFile(_brandAndModelPath + _restaurantName + _expectedTxtFileName);
-        _results.append("Test of " + imageStatus + " " + _restaurantName + _billName);
+        List<String> expectedBillTextLines = ReadTxtFile(_brandAndModelPath + "/" +_restaurantName + "/" + _expectedTxtFileName);
+        _results.append("Test of " + imageStatus + " " + _restaurantName);
         _results.append(System.getProperty("line.separator"));
         LinkedHashMap ocrResultCroppedBill = GetOcrResults();
         CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);
