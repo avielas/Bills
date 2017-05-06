@@ -4,8 +4,10 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -62,6 +64,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
     private static final int TAKE_PICTURE = 1;
     private Uri _cameraOutputFileUri;
 
+    RelativeLayout _cameraPreviewLayout = null;
     TextureView _cameraPreviewView = null;
     Button _cameraCaptureButton = null;
 
@@ -72,7 +75,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
     LinearLayout _billSummarizerUsersLayout = null;
 
 
-    RelativeLayout _billsMainView;
+    LinearLayout _billsMainView;
     CameraRenderer _renderer;
 
     private LinkedHashMap billLines = new LinkedHashMap();
@@ -85,7 +88,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bills_main);
 
-        _billsMainView = (RelativeLayout)findViewById(R.id.activity_bills_main);
+        _billsMainView = (LinearLayout) findViewById(R.id.activity_bills_main);
 
         _renderer = new CameraRenderer(this);
         _renderer.SetOnCameraFinishedListener(this);
@@ -151,7 +154,11 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         try {
             String imagePathToSave = Constants.CAMERA_CAPTURED_PHOTO_PATH;
             File file = new File(imagePathToSave);
+
             _cameraOutputFileUri = Uri.fromFile(file);
+
+            _cameraPreviewLayout = new RelativeLayout(this);
+            _billsMainView.addView(_cameraPreviewLayout);
 
             _cameraPreviewView = new TextureView(this);
             _cameraPreviewView.setSurfaceTextureListener(_renderer);
@@ -174,7 +181,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
                 }
             });
 
-            _billsMainView.addView(_cameraPreviewView);
+            _cameraPreviewLayout.addView(_cameraPreviewView);
 
             _cameraCaptureButton = new Button(this);
             _cameraCaptureButton.setText("Capture");
@@ -183,10 +190,10 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
             RelativeLayout.LayoutParams buttonLayoutParameters = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.WRAP_CONTENT,
                     RelativeLayout.LayoutParams.WRAP_CONTENT);
-            buttonLayoutParameters.addRule(RelativeLayout.CENTER_IN_PARENT);
             buttonLayoutParameters.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            buttonLayoutParameters.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
-            _billsMainView.addView(_cameraCaptureButton, buttonLayoutParameters);
+            _cameraPreviewLayout.addView(_cameraCaptureButton, buttonLayoutParameters);
         } catch (Exception e) {
             Log.e(Tag, e.getMessage());
         }
@@ -214,13 +221,14 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         }
         _pictureData = image;
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-
-        bitmap = BitmapFactory.decodeFile(Constants.IMAGES_PATH+"/tmp.bmp", options);
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//
+//        bitmap = BitmapFactory.decodeFile(Constants.IMAGES_PATH+"/tmp.bmp", options);
 
         //removing prvious views
         _billsMainView.removeView(_cameraCaptureButton);
         _billsMainView.removeView(_cameraPreviewView);
+        _billsMainView.removeView(_cameraPreviewLayout);
 
         AddBillSummarizerView();
 
@@ -239,18 +247,32 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
             return;
         }
 
+        Bitmap warpedBitmap = Bitmap.createBitmap(bitmap);
         if(!ImageProcessingLib.WarpPerspective(bitmap, bitmap, topLeft,topRight, buttomRight, buttomLeft)){
             //TODO: decide what to do. Retake the picture? crash the app?
             TextView textView = new TextView(this);
             textView.setText("Failed to warp perspective on the image.");
             _billSummarizerLayout.addView(textView);
 
-            ImageView imageView = new ImageView(this);
-            imageView.setImageBitmap(bitmap);
-            _billSummarizerLayout.addView(imageView);
-            return;
         }
 
+//        Paint paint = new Paint();
+//        paint.setColor(Color.RED);
+//        Canvas canvas = new Canvas(bitmap);
+//        canvas.drawCircle(Math.round(topLeft.x), Math.round(topLeft.y), 10, paint);
+//        canvas.drawCircle(Math.round(topRight.x), Math.round(topRight.y), 10, paint);
+//        canvas.drawCircle(Math.round(buttomLeft.x), Math.round(buttomLeft.y), 10, paint);
+//        canvas.drawCircle(Math.round(buttomRight.x), Math.round(buttomRight.y), 10, paint);
+//
+//        ImageView imageView = new ImageView(this);
+//        imageView.setImageBitmap(bitmap);
+//        _billsMainView.addView(imageView);
+//
+//        imageView = new ImageView(this);
+//        imageView.setImageBitmap(warpedBitmap);
+//        _billsMainView.addView(imageView);
+//        return;
+//
         Bitmap processedWarpedBill =  ImageProcessingLib.PreprocessingForTemplateMatcher(bitmap);
         Bitmap processedWarpedBillForCreateNewBill =  ImageProcessingLib.PreprocessingForParsing(bitmap);
         TemplateMatcher templateMatcher = new TemplateMatcher(_ocrEngine, processedWarpedBillForCreateNewBill, processedWarpedBill);
@@ -284,7 +306,8 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
     private void AddBillSummarizerView() {
         _billSummarizerLayout = new LinearLayout(this);
         _billSummarizerLayout.setOrientation(LinearLayout.HORIZONTAL);
-
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
+        _billSummarizerLayout.setLayoutParams(params);
         _billsMainView.addView(_billSummarizerLayout);
 
         _billSummarizerTip = new EditText(this);
@@ -295,17 +318,20 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         _billSummarizerLayout.addView(_billSummarizerTip);
 
         _billSummarizerItemsSection = new ScrollView(this);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(MATCH_PARENT, 60);
+        params = new RelativeLayout.LayoutParams(250, MATCH_PARENT);
         _billSummarizerItemsSection.setLayoutParams(params);
         _billSummarizerLayout.addView(_billSummarizerItemsSection);
 
         _billSummarizerItemsLayout = new LinearLayout(this);
-        params = new RelativeLayout.LayoutParams(MATCH_PARENT, 50);
+        params = new RelativeLayout.LayoutParams(250, MATCH_PARENT);
         _billSummarizerItemsLayout.setLayoutParams(params);
         _billSummarizerItemsLayout.setOrientation(LinearLayout.VERTICAL);
         _billSummarizerItemsSection.addView(_billSummarizerItemsLayout);
 
         _billSummarizerUsersLayout = new LinearLayout(this);
+        params = new RelativeLayout.LayoutParams(188, MATCH_PARENT);
+        _billSummarizerUsersLayout.setLayoutParams(params);
+        _billSummarizerUsersLayout.setOrientation(LinearLayout.VERTICAL);
         _billSummarizerLayout.addView(_billSummarizerUsersLayout);
     }
 

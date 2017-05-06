@@ -1,2 +1,3 @@
 include ':app', ':billslib', ':testsdebug'
+include ':app', ':billslib', ':deleteme'
 include ':openCVLibrary320'

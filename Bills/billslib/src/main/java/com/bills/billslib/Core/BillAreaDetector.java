@@ -76,6 +76,7 @@ public class BillAreaDetector {
 
             int thresh = GetThresholdIndex(hist, _histSizeNum) * _bucketSize;
 
+            Log.d(Tag, "Threshold for area detection: " + thresh);
             Imgproc.threshold(newImage, newImage, thresh, 255, Imgproc.THRESH_BINARY);
 
             Imgproc.dilate(newImage, newImage,

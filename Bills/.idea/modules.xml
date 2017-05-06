@@ -5,7 +5,9 @@
       <module fileurl="file://$PROJECT_DIR$/Bills.iml" filepath="$PROJECT_DIR$/Bills.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/billslib/billslib.iml" filepath="$PROJECT_DIR$/billslib/billslib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/deleteme/deleteme.iml" filepath="$PROJECT_DIR$/deleteme/deleteme.iml" />
       <module fileurl="file://$PROJECT_DIR$/openCVLibrary320/openCVLibrary320.iml" filepath="$PROJECT_DIR$/openCVLibrary320/openCVLibrary320.iml" />
+      <module fileurl="file://$PROJECT_DIR$/testsdebug/testsdebug.iml" filepath="$PROJECT_DIR$/testsdebug/testsdebug.iml" />
       <module fileurl="file://$PROJECT_DIR$/testsdebug/testsdebug.iml" filepath="$PROJECT_DIR$/testsdebug/testsdebug.iml" />
     </modules>
   </component>

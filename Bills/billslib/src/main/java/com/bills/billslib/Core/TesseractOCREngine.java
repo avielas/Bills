@@ -109,8 +109,12 @@ public class TesseractOCREngine implements IOcrEngine {
         }
         Pixa wordsPixa = null;
         try {
+            wordsPixa = _tessBaseAPI.getConnectedComponents();
+            Pix pixWithMaxWidth = FindPixWithMaxWidth(wordsPixa);
+            MergeComponentsToWords(pixWithMaxWidth, wordsPixa);
+            pixWithMaxWidth.recycle();
+
             List<Rect> wordsRectangles = new ArrayList<>();
-            wordsPixa = _tessBaseAPI.getWords();
 
             if(wordsPixa == null){
                 throw new RuntimeException("No words found.");
@@ -271,5 +275,44 @@ public class TesseractOCREngine implements IOcrEngine {
                 throw new Exception("Failed parse page segmentation mode to " + pageSegMode.toString());
 
         }
+    }
+
+    private Pixa MergeComponentsToWords(Pix pixWithMaxWidth, Pixa pixa) {
+        int i = 0;
+        Pix currPix = pixa.getPix(0);
+        Pix nextPix = pixa.getPix(1);
+        Rect currRect = pixa.getBoxRect(0);
+        Rect nextRect = pixa.getBoxRect(1);
+        while(null != currPix && null != nextPix) {
+            if(nextRect.left - currRect.right < (pixWithMaxWidth.getWidth() + 1.5*pixWithMaxWidth.getWidth()))
+            {
+                pixa.mergeAndReplacePix(i, i + 1);
+            }
+            else {
+                i++;
+            }
+            currPix = pixa.getPix(i);
+            nextPix = pixa.getPix(i+1);
+            currRect = pixa.getBoxRect(i);
+            nextRect = pixa.getBoxRect(i+1);
+        }
+        return pixa;
+    }
+
+    private Pix FindPixWithMaxWidth(Pixa pixa) {
+        Pix pixWithMaxWidth;
+        int i = 0;
+        Pix currPix = pixa.getPix(0);
+        pixWithMaxWidth = currPix;
+        i++;
+        currPix = pixa.getPix(i);
+        while(null != currPix) {
+            pixWithMaxWidth = currPix.getWidth() > pixWithMaxWidth.getWidth() ?
+                    currPix :
+                    pixWithMaxWidth;
+            i++;
+            currPix = pixa.getPix(i);
+        }
+        return pixWithMaxWidth;
     }
 }
