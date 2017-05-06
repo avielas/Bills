@@ -22,6 +22,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import com.bills.billslib.Contracts.*;
 import com.bills.billslib.Contracts.Enums.Language;
+import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.gregacucnik.EditableSeekBar;
@@ -180,17 +181,22 @@ public class TestsDebugActivity extends AppCompatActivity{
     }
 
     private void PreprocessingForTemplateMatcher() {
-        AdaptiveThreshold(60, 45.0);
-        AdaptiveThresholdForCreateNewBill(100, 33.0);
-        Erode(1, 4, StructureElement.VERTICAL_LINE.toString());
+        _processedBill = ImageProcessingLib.PreprocessingForTemplateMatcher(_bill);
         _processedImageView.setImageBitmap(_processedBill);
         _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
+        _processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTM(_bill);
+        _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
+        _photoViewAttacher = new PhotoViewAttacher(_processedForCreateNewBillImageView);
     }
 
     private void PreprocessingForParsing() {
-        Utils.bitmapToMat(_bill, _rgba);
-        AdaptiveThreshold(100, 33.0);
+//        Utils.bitmapToMat(_bill, _rgba);
+//        AdaptiveThreshold(_rgba, 100, 33.0);
+//        Utils.matToBitmap(_rgba, _processedBill);
+        _originalImageView.setImageBitmap(_bill);
+        _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
         _processedImageView.setImageBitmap(_processedBill);
+        _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
     }
 
     private Bitmap InitBillFromFile() {
@@ -200,42 +206,39 @@ public class TestsDebugActivity extends AppCompatActivity{
         return GetLastWarpedBillPhoto(); //BitmapFactory.decodeFile(billPath, options); //
     }
 
-    private void AdaptiveThreshold(int blockSize, double C){
-        /*** convert block size to odd number according to opencv specs ***/
-        int blockSizeToOddNumber = blockSize%2 == 0 ? blockSize-1 : blockSize;
-        /****************/
-        _algorithmsTracing.setLength(0);
-        _algorithmsTracing.append("Algorithms Tracing:");
-        _algorithmsTracing.append(System.getProperty("line.separator"));
-        _rgba.release();
-        _rgba = new Mat();
-        Utils.bitmapToMat(_bill, _rgba);
-        Imgproc.cvtColor(_rgba, _gray, Imgproc.COLOR_RGB2GRAY, 4);
-        Imgproc.adaptiveThreshold(_gray, _rgba, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, blockSizeToOddNumber, C);
-        Utils.matToBitmap(_rgba, _processedBill);
-        _algorithmsTracing.append("AdaptiveThreshold: block size " + blockSizeToOddNumber + ", constant subtracted " + C);
-        _algorithmsTracing.append(System.getProperty("line.separator"));
-        _processedImageView.setImageBitmap(_processedBill);
-        _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
+    public void AddListenerAdaptiveThresholdButton() {
+        _adaptiveThresholdButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                try {
+                    _algorithmsTracing.setLength(0);
+                    _algorithmsTracing.append("Algorithms Tracing:");
+                    _algorithmsTracing.append(System.getProperty("line.separator"));
+                    int blockSize = _adaptiveThresholdBlockSizeSeekBar.getValue();
+                    int constantSubtracted = _adaptiveThresholdConstantSubtractedSeekBar.getValue();
+                    /*** convert block size to odd number according to opencv specs ***/
+                    int blockSizeToOddNumber = blockSize%2 == 0 ? blockSize-1 : blockSize;
+                    /****************/
+                    _rgba.release();
+                    _rgba = new Mat();
+                    Utils.bitmapToMat(_bill, _rgba);
+                    AdaptiveThreshold(_rgba, blockSizeToOddNumber, constantSubtracted);
+                    Utils.matToBitmap(_rgba, _processedBill);
+                    _processedImageView.setImageBitmap(_processedBill);
+                    _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
-    private void AdaptiveThresholdForCreateNewBill(int blockSize, double C){
-        /*** convert block size to odd number according to opencv specs ***/
-        int blockSizeToOddNumber = blockSize%2 == 0 ? blockSize-1 : blockSize;
-        /****************/
-        _algorithmsTracing.setLength(0);
-        _algorithmsTracing.append("Algorithms Tracing:");
+    private void AdaptiveThreshold(Mat rgba, int blockSize, double C){
+//        Utils.bitmapToMat(_bill, _rgba);
+        ImageProcessingLib.AdaptiveThreshold(rgba, blockSize, C);
+//        Utils.matToBitmap(_rgba, _processedBill);
+        _algorithmsTracing.append("AdaptiveThreshold: block size " + blockSize + ", constant subtracted " + C);
         _algorithmsTracing.append(System.getProperty("line.separator"));
-        _rgba.release();
-        _rgba = new Mat();
-        Utils.bitmapToMat(_bill, _rgba);
-        Imgproc.cvtColor(_rgba, _gray, Imgproc.COLOR_RGB2GRAY, 4);
-        Imgproc.adaptiveThreshold(_gray, _rgba, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, blockSizeToOddNumber, C);
-        Utils.matToBitmap(_rgba, _processedBillForCreateNewBill);
-        _algorithmsTracing.append("AdaptiveThresholdForCreateNewBill: block size " + blockSizeToOddNumber + ", constant subtracted " + C);
-        _algorithmsTracing.append(System.getProperty("line.separator"));
-        _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
-        _photoViewAttacher = new PhotoViewAttacher(_processedForCreateNewBillImageView);
     }
 
     private void ValidateOcrBillResult(String imageStatus, Bitmap billBitmap) throws Exception{
@@ -365,21 +368,6 @@ public class TestsDebugActivity extends AppCompatActivity{
         }
     }
 
-    public void AddListenerAdaptiveThresholdButton() {
-        _adaptiveThresholdButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                try {
-                    int blockSize = _adaptiveThresholdBlockSizeSeekBar.getValue();
-                    int constantSubtracted = _adaptiveThresholdConstantSubtractedSeekBar.getValue();
-                    AdaptiveThreshold(blockSize, constantSubtracted);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
     public void AddListenerDilateButton() {
         _dilateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -389,25 +377,17 @@ public class TestsDebugActivity extends AppCompatActivity{
                     int iterations = Integer.parseInt(_dilateIterationsEditText.getText().toString());
                     int kernelSize = _dilateKernelSizeSeekBar.getValue();
                     String selectedStructureElement = _kernelTypeSpinner.getSelectedItem().toString();
-                    Dilate(iterations, kernelSize, selectedStructureElement);
+                    Utils.bitmapToMat(_processedBill, _rgba);
+                    ImageProcessingLib.Dilate(_rgba, iterations, kernelSize, selectedStructureElement);
+                    Utils.matToBitmap(_rgba, _processedBill);
+                    _algorithmsTracing.append("Dilate: iterations " + iterations + ", kernel size " + kernelSize);
+                    _algorithmsTracing.append(System.getProperty("line.separator"));
                     _processedImageView.setImageBitmap(_processedBill);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-    }
-
-    private void Dilate(int iterations, int kernelSize, String structureElementType){
-        /**** run erode which behave as dilate because of *********/
-        /**** using THRESH_BINARY instead of THRESH_BINARY_INV ****/
-        /**** on AdaptiveThreshold function ***********************/
-        Mat horizontalStructure = GetKernel(structureElementType, kernelSize);
-        Imgproc.erode(_rgba, _rgba, horizontalStructure, new Point(-1,-1), iterations);
-        horizontalStructure.release();
-        Utils.matToBitmap(_rgba, _processedBill);
-        _algorithmsTracing.append("Dilate: iterations " + iterations + ", kernel size " + kernelSize);
-        _algorithmsTracing.append(System.getProperty("line.separator"));
     }
 
     public void AddListenerErodeButton() {
@@ -418,25 +398,17 @@ public class TestsDebugActivity extends AppCompatActivity{
                     int iterations = Integer.parseInt(_erodeIterationsEditText.getText().toString());
                     int kernelSize = _erodeKernelSizeSeekBar.getValue();
                     String selectedStructureElement = _kernelTypeSpinner.getSelectedItem().toString();
-                    Erode(iterations, kernelSize, selectedStructureElement);
+                    Utils.bitmapToMat(_processedBill, _rgba);
+                    ImageProcessingLib.Erode(_rgba, iterations, kernelSize, selectedStructureElement);
+                    Utils.matToBitmap(_rgba, _processedBill);
+                    _algorithmsTracing.append("Erode: iterations " + iterations + ", kernel size " + kernelSize);
+                    _algorithmsTracing.append(System.getProperty("line.separator"));
                     _processedImageView.setImageBitmap(_processedBill);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-    }
-
-    private void Erode(int iterations, int kernelSize, String structureElementType){
-        /**** run dilate which behave as erode because of *********/
-        /**** using THRESH_BINARY instead of THRESH_BINARY_INV ****/
-        /**** on AdaptiveThreshold function ***********************/
-        Mat verticalStructure = GetKernel(structureElementType, kernelSize);
-        Imgproc.dilate(_rgba, _rgba, verticalStructure, new Point(-1,-1), iterations);
-        verticalStructure.release();
-        Utils.matToBitmap(_rgba, _processedBill);
-        _algorithmsTracing.append("Erode: iterations " + iterations + ", kernel size " + kernelSize);
-        _algorithmsTracing.append(System.getProperty("line.separator"));
     }
 
     public void AddListenerOcrOnPreprocessedButton() {
@@ -472,8 +444,7 @@ public class TestsDebugActivity extends AppCompatActivity{
                     _processedBill.recycle();
                     _bill = matched.copy(matched.getConfig(), true);
                     matched.recycle();
-                    _originalImageView.setImageBitmap(_bill);
-                    _processedBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
+                    _processedBill = _bill.copy(_bill.getConfig(), true);
                     PreprocessingForParsing();
                 } catch (Exception e) {
                     e.printStackTrace();
