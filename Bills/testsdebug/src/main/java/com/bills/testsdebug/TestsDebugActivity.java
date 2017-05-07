@@ -4,7 +4,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -31,9 +34,6 @@ import org.beyka.tiffbitmapfactory.TiffSaver;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,8 +48,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import uk.co.senab.photoview.PhotoViewAttacher;
-import static org.opencv.imgproc.Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C;
-import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
 
 public class TestsDebugActivity extends AppCompatActivity{
     private enum StructureElement {
@@ -263,15 +261,6 @@ public class TestsDebugActivity extends AppCompatActivity{
         return imageLinesLinkedHashMap;
     }
 
-    private void PrintLocations(Bitmap billBitmap, Bitmap _processedBill) throws Exception{
-        //TODO to create new TesseractOCREngine inside PrintWordLocations and use Rects (new TesseractOCREngine
-        //TODO return Rects!!) tp print all words
-//        OCRWrapper ocrWrapper = new OCRWrapper(Consts.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
-//        _billWithPrintedRedLines.recycle();
-//        _billWithPrintedRedLines = ocrWrapper.PrintWordLocations(billBitmap, _processedBill);
-//        _originalImageView.setImageBitmap(_billWithPrintedRedLines);
-    }
-
     /**
      *
      * @param fileFullName txt file full name on device
@@ -430,7 +419,6 @@ public class TestsDebugActivity extends AppCompatActivity{
                     templateMatcher.ParsingItemsArea(numOfItems);
                     //ValidateOcrBillResult("Original", _bill);
                     ValidateOcrBillResult("Processed", _processedBill);
-//                    PrintLocations(_bill, _processedBill);
                     OpenUserInputDialog();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -465,7 +453,9 @@ public class TestsDebugActivity extends AppCompatActivity{
             @Override
             public void onClick(View arg0) {
                 try {
-                    PrintLocations(_bill, _processedBill);
+                    _billWithPrintedRedLines.recycle();
+                    _billWithPrintedRedLines = PrintWordsRects(_bill, _processedBill);
+                    _originalImageView.setImageBitmap(_billWithPrintedRedLines);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -649,4 +639,36 @@ public class TestsDebugActivity extends AppCompatActivity{
             }
         }
     }
+
+    public Bitmap PrintWordsRects(Bitmap bitmap, Bitmap _processedBill){
+        List<Rect> words;
+        Bitmap printedBitmap = Bitmap.createBitmap(bitmap);
+        try{
+            tesseractOCREngine.SetImage(_processedBill);
+            List<Rect> lineRects = tesseractOCREngine.GetTextlines();
+
+            /************ the following is waiting for GC to finish his job. ********/
+            /************ without it the red lines will not be printed. *************/
+//            Thread.sleep(50);
+            /**************************/
+            Paint paint = new Paint();
+            Canvas canvas = new Canvas(printedBitmap);
+            paint.setColor(Color.RED);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(3);
+
+            for (Rect line: lineRects) {
+                tesseractOCREngine.SetRectangle(line);
+                words = tesseractOCREngine.GetWords();
+                for (Rect rect : words) {
+                    canvas.drawRect(rect, paint);
+                }
+            }
+        }
+        catch(Exception ex){
+            Log.d(this.getClass().getSimpleName(), "Failed to map numbered values to location. Error: " + ex.getMessage());
+            return null;
+        }
+            return printedBitmap;
+        }
 }
