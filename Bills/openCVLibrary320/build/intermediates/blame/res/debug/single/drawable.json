@@ -4,12 +4,12 @@
         "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/drawable/abc_ic_voice_search_api_material.xml"
     },
     {
-        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/drawable/abc_seekbar_tick_mark_material.xml",
-        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/drawable/abc_seekbar_tick_mark_material.xml"
-    },
-    {
         "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/drawable/abc_list_selector_background_transition_holo_dark.xml",
         "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/drawable/abc_list_selector_background_transition_holo_dark.xml"
+    },
+    {
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/drawable/abc_seekbar_tick_mark_material.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/drawable/abc_seekbar_tick_mark_material.xml"
     },
     {
         "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_dark.xml",

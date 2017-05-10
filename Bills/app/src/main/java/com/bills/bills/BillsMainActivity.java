@@ -8,22 +8,23 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.AttributeSet;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -45,43 +46,44 @@ import com.bills.billslib.CustomViews.NameView;
 import org.opencv.core.Point;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import static android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL;
-import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
+import static android.view.View.GONE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 public class BillsMainActivity extends AppCompatActivity implements IOnCameraFinished, View.OnClickListener {
     private String Tag = this.getClass().getSimpleName();
     private static final int REQUEST_CAMERA_PERMISSION = 101;
 
-    private static final int TAKE_PICTURE = 1;
-    private Uri _cameraOutputFileUri;
 
     RelativeLayout _cameraPreviewLayout = null;
     TextureView _cameraPreviewView = null;
     Button _cameraCaptureButton = null;
 
-    LinearLayout _billSummarizerLayout = null;
+    LinearLayout _billSummarizerContainerView = null;
     EditText _billSummarizerTip = null;
-    ScrollView _billSummarizerItemsSection = null;
     LinearLayout _billSummarizerItemsLayout = null;
     LinearLayout _billSummarizerUsersLayout = null;
-
+    TextView _billSummarizerTotalSum = null;
 
     LinearLayout _billsMainView;
     CameraRenderer _renderer;
 
-    private LinkedHashMap billLines = new LinkedHashMap();
-    private byte[] _pictureData;
+    
+
+    HashMap<Integer, NameView> _billSummarizerColorToViewMapper = new HashMap<>();
+    HashMap<ItemView, Integer> _billSummarizerItemToColorMapper = new HashMap<>();
+    Double _marked = 0.0;
+    Double _markedWithTip = 0.0;
+    Double _total = 0.0;
 
     IOcrEngine _ocrEngine;
+    private int tip = 10;
+    private int currentColorIndex = -1;
+    private NameView curNameView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +91,17 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         setContentView(R.layout.activity_bills_main);
 
         _billsMainView = (LinearLayout) findViewById(R.id.activity_bills_main);
+
+        _billSummarizerTotalSum = (TextView)findViewById(R.id.totalSum);
+        _billSummarizerTotalSum.setVisibility(GONE);
+        _billSummarizerTip = (EditText)findViewById(R.id.tipTextView);
+        _billSummarizerTip.setVisibility(GONE);
+        _billSummarizerItemsLayout = (LinearLayout)findViewById(R.id.itemsView);
+        _billSummarizerItemsLayout.setVisibility(GONE);
+        _billSummarizerUsersLayout = (LinearLayout)findViewById(R.id.namesView);
+        _billSummarizerUsersLayout.setVisibility(GONE);
+        _billSummarizerContainerView = (LinearLayout)findViewById(R.id.summarizerContainerView);
+        _billSummarizerContainerView.setVisibility(GONE);
 
         _renderer = new CameraRenderer(this);
         _renderer.SetOnCameraFinishedListener(this);
@@ -146,17 +159,75 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
                 }
             } else {
                 StartCameraActivity();
+//                StartSummarizerView();
             }
         }
     }
 
+    private void StartSummarizerView() {
+        AddBillSummarizerView();
+        int numOfEntries = 5;
+        int color = Color.WHITE;
+        Bitmap[] Items = CreateItems(numOfEntries);
+        Double[] prices = {12.3, 34.0, 50.0, 45.0, 55.0};
+        for(int i = 0; i < numOfEntries; i++){
+            ItemView itemView = new ItemView(this, prices[i], Items[i]);
+            itemView.SetItemBackgroundColor(color);
+            itemView.setOnClickListener(this);
+            _billSummarizerItemsLayout.addView(itemView, i);
+            _billSummarizerItemToColorMapper.put(itemView, color);
+            _total+=prices[i];
+        }
+
+        NameView nameView = new NameView(this, "Aviel", 10);
+        nameView.setBackgroundColor(Color.RED);
+        nameView.setOnClickListener(this);
+        _billSummarizerUsersLayout.addView(nameView);
+        _billSummarizerColorToViewMapper.put(Color.RED, nameView);
+        nameView = new NameView(this, "Mike", 10);
+        nameView.setBackgroundColor(Color.BLUE);
+        nameView.setOnClickListener(this);
+        _billSummarizerUsersLayout.addView(nameView);
+        _billSummarizerColorToViewMapper.put(Color.BLUE, nameView);
+
+
+    }
+
+    private Bitmap[] CreateItems(int numOfEntries) {
+        Bitmap[] res = new Bitmap[numOfEntries];
+
+        for (int i = 0; i < numOfEntries; i++){
+            res[i] = CreateItemBitmap(i);
+        }
+        return res;
+    }
+
+    private Bitmap CreateItemBitmap(int i) {
+        int width = 50;
+        int height = 30;
+
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+
+        // The gesture threshold expressed in dip
+        float GESTURE_THRESHOLD_DIP = 12.0f;
+
+        final float scale = getResources().getDisplayMetrics().density;
+        int gestureThreshold = (int) (GESTURE_THRESHOLD_DIP * scale + 0.5f);
+
+        paint.setTextSize(gestureThreshold);
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
+        Bitmap res = Bitmap.createBitmap((int) (width * scale + 0.5f),(int) (height * scale + 0.5f), conf);
+
+        Canvas canvas = new Canvas(res);
+
+        canvas.drawText("" + i + i + i, 30, 30, paint);
+
+        return res;
+    }
+
     private void StartCameraActivity() {
         try {
-            String imagePathToSave = Constants.CAMERA_CAPTURED_PHOTO_PATH;
-            File file = new File(imagePathToSave);
-
-            _cameraOutputFileUri = Uri.fromFile(file);
-
             _cameraPreviewLayout = new RelativeLayout(this);
             _billsMainView.addView(_cameraPreviewLayout);
 
@@ -201,8 +272,9 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
 
     @Override
     public void OnCameraFinished(byte[] image) {
-        //Add parsing here
 
+//        StartSummarizerView();
+//        return;
         BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
         bitmapOptions.inMutable = true;
         bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -219,7 +291,6 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
 //            _billsMainView.addView(imageVieww);
 //            return;
         }
-        _pictureData = image;
 
 //        BitmapFactory.Options options = new BitmapFactory.Options();
 //
@@ -248,11 +319,11 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         }
 
         Bitmap warpedBitmap = Bitmap.createBitmap(bitmap);
-        if(!ImageProcessingLib.WarpPerspective(bitmap, bitmap, topLeft,topRight, buttomRight, buttomLeft)){
+        if(!ImageProcessingLib.WarpPerspective(bitmap, warpedBitmap, topLeft,topRight, buttomRight, buttomLeft)){
             //TODO: decide what to do. Retake the picture? crash the app?
             TextView textView = new TextView(this);
             textView.setText("Failed to warp perspective on the image.");
-            _billSummarizerLayout.addView(textView);
+            _billSummarizerContainerView.addView(textView);
 
         }
 
@@ -272,7 +343,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
 //        imageView.setImageBitmap(warpedBitmap);
 //        _billsMainView.addView(imageView);
 //        return;
-//
+
         Bitmap processedWarpedBill =  ImageProcessingLib.PreprocessingForTemplateMatcher(bitmap);
         Bitmap processedWarpedBillForCreateNewBill =  ImageProcessingLib.PreprocessingForParsing(bitmap);
         TemplateMatcher templateMatcher = new TemplateMatcher(_ocrEngine, processedWarpedBillForCreateNewBill, processedWarpedBill);
@@ -304,35 +375,46 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
     }
 
     private void AddBillSummarizerView() {
-        _billSummarizerLayout = new LinearLayout(this);
-        _billSummarizerLayout.setOrientation(LinearLayout.HORIZONTAL);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
-        _billSummarizerLayout.setLayoutParams(params);
-        _billsMainView.addView(_billSummarizerLayout);
+        _billSummarizerContainerView.setVisibility(View.VISIBLE);
+        _billSummarizerTip.setVisibility(View.VISIBLE);
+        _billSummarizerItemsLayout.setVisibility(View.VISIBLE);
+        _billSummarizerTotalSum.setVisibility(View.VISIBLE);
+        _billSummarizerUsersLayout.setVisibility(View.VISIBLE);
 
-        _billSummarizerTip = new EditText(this);
         _billSummarizerTip.setClickable(true);
-        _billSummarizerTip.setOnClickListener(this);
-        _billSummarizerTip.setInputType(TYPE_NUMBER_FLAG_DECIMAL);
-        _billSummarizerTip.setText("10");
-        _billSummarizerLayout.addView(_billSummarizerTip);
+        _billSummarizerTip.addTextChangedListener(new TextWatcher() {
+            private String curTip = "10";
+            public void afterTextChanged(Editable s) {
+                if(s.toString().equalsIgnoreCase("")) {
+                    tip = 0;
+                }else {
+                    int newTip = Integer.parseInt(s.toString());
+                    if (newTip < 0 || newTip > 100) {
+                        _billSummarizerTip.setText(curTip);
+                    } else {
+                        curTip = s.toString();
+                        tip = newTip;
+                        _markedWithTip = _marked * (1 + (double) tip / 100);
 
-        _billSummarizerItemsSection = new ScrollView(this);
-        params = new RelativeLayout.LayoutParams(250, MATCH_PARENT);
-        _billSummarizerItemsSection.setLayoutParams(params);
-        _billSummarizerLayout.addView(_billSummarizerItemsSection);
+                        _billSummarizerTotalSum.setText("Total: " + _total + "\n Marked: " + _marked + "(" + String.format("%.2f", _markedWithTip) + ")");
+                    }
+                }
+                for(NameView name : _billSummarizerColorToViewMapper.values()){
+                    name.SetTip(tip);
+                }
+            }
 
-        _billSummarizerItemsLayout = new LinearLayout(this);
-        params = new RelativeLayout.LayoutParams(250, MATCH_PARENT);
-        _billSummarizerItemsLayout.setLayoutParams(params);
-        _billSummarizerItemsLayout.setOrientation(LinearLayout.VERTICAL);
-        _billSummarizerItemsSection.addView(_billSummarizerItemsLayout);
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
 
-        _billSummarizerUsersLayout = new LinearLayout(this);
-        params = new RelativeLayout.LayoutParams(188, MATCH_PARENT);
-        _billSummarizerUsersLayout.setLayoutParams(params);
-        _billSummarizerUsersLayout.setOrientation(LinearLayout.VERTICAL);
-        _billSummarizerLayout.addView(_billSummarizerUsersLayout);
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+            }
+        });
+        _billSummarizerTotalSum.setClickable(false);
+        _billSummarizerTotalSum.setText("Total: " + _total + "\n Marked: " + _marked + "(" + String.format("%.2f", _markedWithTip) + ")");
+        _billSummarizerTip.setText("10", TextView.BufferType.EDITABLE);
     }
 
     @Override
@@ -341,6 +423,8 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
             case REQUEST_CAMERA_PERMISSION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     StartCameraActivity();
+//                    StartSummarizerView();
+
                 }
             }
         }
@@ -348,6 +432,53 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
 
     @Override
     public void onClick(View v) {
-        _renderer.takePicture();
+
+        if(v == _billSummarizerTip) {
+
+            return;
+        }
+        if (v == _cameraCaptureButton){
+                _renderer.takePicture();
+                return;
+        }
+        if(((LinearLayout)v.getParent()).getId() == R.id.namesView) {
+            currentColorIndex = ((ColorDrawable) v.getBackground()).getColor();
+            curNameView = (NameView) v;
+            return;
+        }
+
+        //item selected
+        if(((LinearLayout) v.getParent()).getId() == R.id.itemsView){
+            //no color was chosen, nothing to do
+            if(currentColorIndex == Color.WHITE){
+                return;
+            }
+
+            int color = 0;
+            ItemView currentItemView;
+            if (v instanceof ItemView)
+            {
+                currentItemView = (ItemView)v;
+            }
+            else{
+                currentItemView = (ItemView)(v.getParent());
+            }
+            color = ((ColorDrawable)(v.getBackground())).getColor();
+
+            //the item has not been marked yet
+            if(color == Color.WHITE) {
+                _marked += currentItemView.Price;
+                curNameView.AddToBill(((ItemView)v).Price);
+            }
+            else {
+                _billSummarizerColorToViewMapper.get(color).RemvoeFromBill(((ItemView)v).Price);
+                _billSummarizerColorToViewMapper.get(currentColorIndex).AddToBill(((ItemView)v).Price);
+            }
+
+            currentItemView.SetItemBackgroundColor(currentColorIndex);
+            _markedWithTip = _marked * (1+ (double)tip/100);
+            _billSummarizerTotalSum.setText("Total/Marked: " + _total + "/" + _marked + "(" + String.format("%.2f", _markedWithTip) + ")");
+        }
+        
     }
 }

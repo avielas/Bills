@@ -4,12 +4,12 @@
         "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout/notification_template_part_time.xml"
     },
     {
-        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/androidTest/debug/layout/abc_dialog_title_material.xml",
-        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout/abc_dialog_title_material.xml"
-    },
-    {
         "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/androidTest/debug/layout/notification_template_media.xml",
         "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout/notification_template_media.xml"
+    },
+    {
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/androidTest/debug/layout/abc_dialog_title_material.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout/abc_dialog_title_material.xml"
     },
     {
         "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/androidTest/debug/layout/abc_activity_chooser_view_list_item.xml",

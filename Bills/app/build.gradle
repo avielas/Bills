@@ -22,6 +22,23 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+        // When building a variant that uses this flavor, the following configurations
+        // override those in the defaultConfig block.
+        dev {
+            // To avoid using legacy multidex, set minSdkVersion to 21 or higher.
+            minSdkVersion 21
+            versionNameSuffix "-dev"
+            applicationIdSuffix '.dev'
+        }
+
+        prod {
+            // If you've configured the defaultConfig block for the release version of
+            // your app, you can leave this block empty and Gradle uses configurations in
+            // the defaultConfig block instead. You still need to create this flavor.
+            // Otherwise, all variants use the "dev" flavor configurations.
+        }
+    }
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
