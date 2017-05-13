@@ -8,14 +8,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.TextureView;
@@ -81,9 +79,6 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
     Double _total = 0.0;
 
     IOcrEngine _ocrEngine;
-    private int tip = 10;
-    private int currentColorIndex = -1;
-    private NameView curNameView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,17 +86,6 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         setContentView(R.layout.activity_bills_main);
 
         _billsMainView = (LinearLayout) findViewById(R.id.activity_bills_main);
-
-        _billSummarizerTotalSum = (TextView)findViewById(R.id.totalSum);
-        _billSummarizerTotalSum.setVisibility(GONE);
-        _billSummarizerTip = (EditText)findViewById(R.id.tipTextView);
-        _billSummarizerTip.setVisibility(GONE);
-        _billSummarizerItemsLayout = (LinearLayout)findViewById(R.id.itemsView);
-        _billSummarizerItemsLayout.setVisibility(GONE);
-        _billSummarizerUsersLayout = (LinearLayout)findViewById(R.id.namesView);
-        _billSummarizerUsersLayout.setVisibility(GONE);
-        _billSummarizerContainerView = (LinearLayout)findViewById(R.id.summarizerContainerView);
-        _billSummarizerContainerView.setVisibility(GONE);
 
         _renderer = new CameraRenderer(this);
         _renderer.SetOnCameraFinishedListener(this);

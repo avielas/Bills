@@ -16,8 +16,6 @@
 package com.bills.billslib.Camera;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES11Ext;
@@ -33,9 +31,6 @@ import com.bills.billslib.Camera.filter.OriginalFilter;
 import com.bills.billslib.Camera.filter.TiltShiftBlurFilter;
 import com.bills.billslib.R;
 
-import org.beyka.tiffbitmapfactory.TiffSaver;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -270,27 +265,8 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
 
     Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-            _cameraListener.OnCameraFinished(data);
-        }
+        public void onPictureTaken(byte[] data, Camera camera) {_cameraListener.OnCameraFinished(data);}
     };
-
-    private boolean WriteCroppedImageToTIFFile(byte[] croppedImage, String imagePathToSave) {
-        File file = new File(imagePathToSave);
-        if(file.exists())
-        {
-            file.delete();
-        }
-        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-        bitmapOptions.inMutable = true;
-        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        Bitmap  bitmap = BitmapFactory.decodeByteArray(croppedImage, 0, croppedImage.length, bitmapOptions);
-        TiffSaver.SaveOptions options = new TiffSaver.SaveOptions();
-        options.author = "aviel";
-        options.copyright = "aviel copyright";
-        boolean saved = TiffSaver.saveBitmap(imagePathToSave, bitmap, options);
-        return saved;
-    }
 
     public void SetOnCameraFinishedListener(IOnCameraFinished listener){
         _cameraListener = listener;

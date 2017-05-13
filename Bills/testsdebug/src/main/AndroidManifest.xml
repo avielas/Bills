@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:largeHeap="true">
+        <activity android:name=".BillsMainActivity">
+            <intent-filter>
+                <action android:name=".BillsMainActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".TestsDebugActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

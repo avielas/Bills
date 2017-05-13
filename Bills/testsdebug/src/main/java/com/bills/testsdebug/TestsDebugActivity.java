@@ -28,16 +28,14 @@ import com.bills.billslib.Contracts.Enums.Language;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
+import com.bills.billslib.Utilities.FilesHandler;
 import com.gregacucnik.EditableSeekBar;
-import org.beyka.tiffbitmapfactory.TiffBitmapFactory;
-import org.beyka.tiffbitmapfactory.TiffSaver;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -152,8 +150,16 @@ public class TestsDebugActivity extends AppCompatActivity{
 
         _rgba = new Mat();
         _gray = new Mat();
-        _bill = InitBillFromFile();
-        _billWithPrintedRedLines = InitBillFromFile();
+        try {
+            _bill = InitBillFromFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            _billWithPrintedRedLines = InitBillFromFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         _processedBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
         _processedBillForCreateNewBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
 
@@ -181,7 +187,6 @@ public class TestsDebugActivity extends AppCompatActivity{
     private void PreprocessingForTemplateMatcher() {
         _processedBill = ImageProcessingLib.PreprocessingForTemplateMatcher(_bill);
         _processedImageView.setImageBitmap(_processedBill);
-        _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
         _processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTM(_bill);
         _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedForCreateNewBillImageView);
@@ -197,7 +202,7 @@ public class TestsDebugActivity extends AppCompatActivity{
         _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
     }
 
-    private Bitmap InitBillFromFile() {
+    private Bitmap InitBillFromFile() throws IOException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
 //        String billPath = _brandAndModelPath + _restaurantName + _billName;
@@ -454,6 +459,9 @@ public class TestsDebugActivity extends AppCompatActivity{
             public void onClick(View arg0) {
                 try {
                     _billWithPrintedRedLines.recycle();
+                    String pathToSave = Constants.IMAGES_PATH;
+                    FilesHandler.SaveToJPGFile(_bill, pathToSave + "/bill.jpg");
+                    FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/processedBill.jpg");
                     _billWithPrintedRedLines = PrintWordsRects(_bill, _processedBill);
                     _originalImageView.setImageBitmap(_billWithPrintedRedLines);
                 } catch (Exception e) {
@@ -475,7 +483,7 @@ public class TestsDebugActivity extends AppCompatActivity{
                     String processedImagePathToSave = _brandAndModelPath + _restaurantName
                             + "processed_nili_24_2_17";
 
-                    WriteCroppedImageToTIFFile(_billWithPrintedRedLines, processedImagePathToSave);
+//                    WriteCroppedImageToTIFFile(_billWithPrintedRedLines, processedImagePathToSave);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -497,18 +505,16 @@ public class TestsDebugActivity extends AppCompatActivity{
     }
 
     private void RunBillsMainFlow(int requestCode) {
-//        try {
-//            String imagePathToSave = Consts.CAMERA_CAPTURED_PHOTO_PATH;
-//            File file = new File(imagePathToSave);
-//            mCameraOutputFileUri = Uri.fromFile(file);
-//            Intent intent = new Intent(getBaseContext(), BillsMainActivity.class);
-//            intent.putExtra(BillsMainActivity.BILLS_CROPPED_PHOTO_EXTRA_NAME, imagePathToSave);
-//            if (intent.resolveActivity(getPackageManager()) != null) {
-//                startActivityForResult(intent, requestCode);
-//            }
-//        } catch (Exception e) {
-//            Log.e(this.getClass().getSimpleName(), e.getMessage());
-//        }
+        try {
+            String imagePathToSave = Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH;
+            Intent intent = new Intent(getBaseContext(), BillsMainActivity.class);
+            intent.putExtra(BillsMainActivity.BILLS_CROPPED_PHOTO_EXTRA_NAME, imagePathToSave);
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(intent, requestCode);
+            }
+        } catch (Exception e) {
+            Log.e(this.getClass().getSimpleName(), e.getMessage());
+        }
     }
 
     private void OpenUserInputDialog() throws FileNotFoundException {
@@ -557,87 +563,14 @@ public class TestsDebugActivity extends AppCompatActivity{
         System.setOut(printStreamToFile);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        switch (resultCode) {
-            case RESULT_OK:
-                _bill.recycle();
-                _processedBill.recycle();
-                _bill = GetImageOfMainFlow();
-                _processedBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
-                _originalImageView.setImageBitmap(_bill);
-//                PreprocessingForTemplateMatcher();
-                break;
-            default:
-                //mBeginBillSplitFlowButton.setVisibility(View.VISIBLE);
-        }
-    }
+    private Bitmap GetLastWarpedBillPhoto() throws IOException {
+//        byte[] bytes = FilesHandler.ReadFromTXTFile(Constants.WARPED_TXT_PHOTO_PATH);
+        byte[] bytes = FilesHandler.ReadFromTXTFile(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
+//        Bitmap bitmapWarped = FilesHandler.ByteArrayToBitmap(bytesWarped);
+        Bitmap bitmap = FilesHandler.ByteArrayToBitmap(bytes);
 
-    private Bitmap GetImageOfMainFlow() {
-        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-        Bitmap bitmap = null;
-        bitmapOptions.inMutable = true;
-        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        TiffBitmapFactory.Options options = new TiffBitmapFactory.Options();
-        options.inAvailableMemory = 1024 * 1024 * 10 * 2; //30 mb
-//        File file = new File(mCameraOutputFileUri.getPath());
-        File file = new File(Constants.WARPED_PHOTO_PATH);
-        bitmap = TiffBitmapFactory.decodeFile(file, options);
+//        Bitmap bitmap = FilesHandler.GetBitmapFromTifFile();
         return bitmap;
-    }
-
-    private Bitmap GetLastWarpedBillPhoto() {
-        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-        Bitmap bitmap = null;
-        bitmapOptions.inMutable = true;
-        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        TiffBitmapFactory.Options options = new TiffBitmapFactory.Options();
-        options.inAvailableMemory = 1024 * 1024 * 10 * 2; //30 mb
-        File file = new File(Constants.WARPED_PHOTO_PATH);
-        bitmap = TiffBitmapFactory.decodeFile(file, options);
-        return bitmap;
-    }
-
-    private boolean WriteCroppedImageToTIFFile(Bitmap croppedImage, String imagePathToSave) {
-        TiffSaver.SaveOptions options = new TiffSaver.SaveOptions();
-//By default compression mode is none
-//        options.compressionMode = TiffSaver.CompressionMode.COMPRESSION_LZW;
-//By default orientation is top left
-//        options.orientation = TiffSaver.Orientation.ORIENTATION_LEFTTOP;
-//Add author tag to output file
-        options.author = "aviel";
-//Add copyright tag to output file
-        options.copyright = "aviel copyright";
-        boolean saved = TiffSaver.saveBitmap(imagePathToSave + ".tif", croppedImage, options);
-
-        return saved;
-    }
-
-    private boolean SaveToJPGFile(Bitmap bmp, String path){
-        FileOutputStream out = null;
-        try {
-            File file = new File(path);
-            if(file.exists()){
-                file.delete();
-            }
-            out = new FileOutputStream(path);
-
-            // bmp is your Bitmap instance, PNG is a lossless format, the compression factor (100) is ignored
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
     }
 
     public Bitmap PrintWordsRects(Bitmap bitmap, Bitmap _processedBill){
@@ -671,4 +604,28 @@ public class TestsDebugActivity extends AppCompatActivity{
         }
             return printedBitmap;
         }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        switch (resultCode) {
+            case RESULT_OK:
+                _bill.recycle();
+                _billWithPrintedRedLines.recycle();
+                _processedBill.recycle();
+                _processedBillForCreateNewBill.recycle();
+                try {
+                    _bill = GetLastWarpedBillPhoto();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                _billWithPrintedRedLines = _bill.copy(_bill.getConfig(), true);
+//                _processedBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
+//                _processedBillForCreateNewBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
+                _originalImageView.setImageBitmap(_bill);
+                PreprocessingForTemplateMatcher();
+                break;
+            default:
+                //mBeginBillSplitFlowButton.setVisibility(View.VISIBLE);
+        }
+    }
 }

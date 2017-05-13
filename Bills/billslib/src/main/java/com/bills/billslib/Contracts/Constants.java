@@ -21,8 +21,12 @@ public final class Constants
 
     public static final String IMAGES_PATH = STORAGE_DIRECTORY + "/TesseractSample/imgs";
     public static final String CAMERA_CAPTURED_PHOTO_PATH = IMAGES_PATH + "/ocr.tif";
+    public static final String CAMERA_CAPTURED_JPG_PHOTO_PATH = IMAGES_PATH + "/ocr.jpg";
+    public static final String CAMERA_CAPTURED_TXT_PHOTO_PATH = IMAGES_PATH + "/ocrBytes.txt";
     public static final String CAMERA_CAPTURED_PHOTO_PATH_TO_DELETE = IMAGES_PATH + "/ocrToDelete.tif";
     public static final String WARPED_PHOTO_PATH = IMAGES_PATH + "/warped.tif";
+    public static final String WARPED_TXT_PHOTO_PATH = IMAGES_PATH + "/warped.txt";
+    public static final String WARPED_JPG_PHOTO_PATH = IMAGES_PATH + "/warped.jpg";
     public static final String PREPROCESSED_CAPTURED_PHOTO_PATH = IMAGES_PATH + "/preprocessed.jpg";
     public static final String TESSDATA = "tessdata";
     public static final String BILLS_TO_TEST = "billsToTest";

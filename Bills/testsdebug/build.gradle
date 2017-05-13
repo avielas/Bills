@@ -32,7 +32,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.github.chrisbanes:PhotoView:1.3.1'
     compile 'com.gregacucnik:editableseekbar:1.2'
-    compile 'com.github.beyka:androidtiffbitmapfactory:0.9.1'
     compile project(':billslib')
     compile project(':openCVLibrary320')
 }
