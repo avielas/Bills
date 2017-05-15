@@ -173,12 +173,12 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         _rgba = new Mat();
         _gray = new Mat();
         try {
-            _bill = InitBillFromFile();
+            _bill = GetLastCapturedBillAfterCropAndWarp();
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            _billWithPrintedRedLines = InitBillFromFile();
+            _billWithPrintedRedLines = GetLastCapturedBillAfterCropAndWarp();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -222,13 +222,6 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
         _processedImageView.setImageBitmap(_processedBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
-    }
-
-    private Bitmap InitBillFromFile() throws IOException {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inMutable = true;
-//        String billPath = _brandAndModelPath + _restaurantName + _billName;
-        return GetLastWarpedBillPhoto(); //BitmapFactory.decodeFile(billPath, options); //
     }
 
     public void AddListenerAdaptiveThresholdButton() {
@@ -585,15 +578,47 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         System.setOut(printStreamToFile);
     }
 
-    private Bitmap GetLastWarpedBillPhoto() throws IOException {
-//        byte[] bytes = FilesHandler.ReadFromTXTFile(Constants.WARPED_TXT_PHOTO_PATH);
+    private Bitmap GetLastCapturedBillAfterCropAndWarp() throws IOException {
+        Bitmap bitmap = GetLastCapturedBill();
+        BillAreaDetector areaDetector = new BillAreaDetector();
+        if (!areaDetector.GetBillCorners(bitmap , _topLeft, _topRight, _buttomRight, _buttomLeft)) {
+            Log.d(this.getClass().getSimpleName(), "Failed ot get bounding rectangle automatically.");
+            return bitmap;
+        }
+        /** Preparing Warp Perspective Dimensions **/
+        int newWidth = (int) Math.max(_buttomRight.x - _buttomLeft.x, _topRight.x - _topLeft.x);
+        int newHeight = (int) Math.max(_buttomRight.y - _topRight.y, _buttomLeft.y - _topLeft.y);
+        int xBegin = (int) Math.min(_topLeft.x, _buttomLeft.x);
+        int yBegin = (int) Math.min(_topLeft.y, _topRight.y);
+        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, xBegin, yBegin, newWidth, newHeight);
+        Bitmap warpedBitmap = Bitmap.createBitmap(newWidth , newHeight, bitmap.getConfig());
+        _topLeft.x = _topLeft.x - xBegin;
+        _topLeft.y = _topLeft.y - yBegin;
+        _topRight.x = _topRight.x - xBegin;
+        _topRight.y = _topRight.y - yBegin;
+        _buttomRight.x = _buttomRight.x - xBegin;
+        _buttomRight.y = _buttomRight.y - yBegin;
+        _buttomLeft.x = _buttomLeft.x - xBegin;
+        _buttomLeft.y = _buttomLeft.y - yBegin;
+        if(!ImageProcessingLib.WarpPerspective(resizedBitmap, warpedBitmap, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
+            Log.d(this.getClass().getSimpleName(), "Failed to warp perspective");
+            resizedBitmap.recycle();
+            warpedBitmap.recycle();
+            return bitmap;
+        }
+        resizedBitmap.recycle();
+        bitmap.recycle();
+        FilesHandler.SaveToJPGFile(warpedBitmap, Constants.WARPED_JPG_PHOTO_PATH);
+        return warpedBitmap;
+    }
+
+    private Bitmap GetLastCapturedBill() throws IOException {
         byte[] bytes = FilesHandler.ReadFromTXTFile(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
-//        Bitmap bitmapWarped = FilesHandler.ByteArrayToBitmap(bytesWarped);
         Bitmap bitmap = FilesHandler.ByteArrayToBitmap(bytes);
         bitmap = FilesHandler.Rotating(bitmap);
-//        Bitmap bitmap = FilesHandler.GetBitmapFromTifFile();
         return bitmap;
     }
+
 
     public Bitmap PrintWordsRects(Bitmap bitmap, Bitmap _processedBill){
         List<Rect> words;
@@ -633,7 +658,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             case RESULT_OK:
                 _bill.recycle();
                 try {
-                    _bill = GetLastWarpedBillPhoto();
+                    _bill = GetLastCapturedBill();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
