@@ -7,7 +7,7 @@ import android.widget.TextView;
  * Created by mvalersh on 10/7/2016.
  */
 
-public class NameView extends TextView {
+public class NameView extends android.support.v7.widget.AppCompatTextView {
     private String _name;
     private Integer _tip;
     private Double _bill;
@@ -35,6 +35,7 @@ public class NameView extends TextView {
         }
 
         _bill -= itemPrice;
+        _bill = Math.round(_bill*100)/100.0;
         UpdateText();
         return true;
     }
