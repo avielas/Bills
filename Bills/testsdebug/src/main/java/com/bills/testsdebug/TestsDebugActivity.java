@@ -103,22 +103,22 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
     List<String> _kernelTypes;
     private final int BILLS_REQUEST_CODE = 1;
     TemplateMatcher templateMatcher;
-    private Button mUserCropFinished;
-    private DragRectView mDragRectView;
-    private Point mTopLeft = new Point();
-    private Point mTopRight = new Point();
-    private Point mButtomLeft = new Point();
-    private Point mButtomRight = new Point();
+    private Button _userCropFinished;
+    private DragRectView _dragRectView;
+    private Point _topLeft = new Point();
+    private Point _topRight = new Point();
+    private Point _buttomLeft = new Point();
+    private Point _buttomRight = new Point();
     private LinearLayout _testsDebugView;
-    private RelativeLayout _dragRectView;
+    private RelativeLayout _emptyRelativeLayoutView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tests_debug_view);
         _testsDebugView = (LinearLayout)findViewById(R.id.tests_debug_view);
-        _dragRectView = (RelativeLayout)findViewById(R.id.drag_rect_view);
-        _dragRectView.setVisibility(GONE);
+        _emptyRelativeLayoutView = (RelativeLayout)findViewById(R.id.empty_relative_layout_view);
+        _emptyRelativeLayoutView.setVisibility(GONE);
 //        PreparingEnvironmentUtil.PrepareTesseract(this);
         //copy images to internal memory just in case of emulator
 //        if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
@@ -637,48 +637,48 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                mUserCropFinished = new Button(this);
-                mUserCropFinished.setText("Done");
-                mUserCropFinished.setOnClickListener(this);
-                mDragRectView = new DragRectView(this);
+                _userCropFinished = new Button(this);
+                _userCropFinished.setText("Done");
+                _userCropFinished.setOnClickListener(this);
+                _dragRectView = new DragRectView(this);
                 BillAreaDetector areaDetector = new BillAreaDetector();
 
-                if (!areaDetector.GetBillCorners(_bill , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+                if (!areaDetector.GetBillCorners(_bill , _topLeft, _topRight, _buttomRight, _buttomLeft)) {
                     Log.d(this.getClass().getSimpleName(), "Failed ot get bounding rectangle automatically.");
-                    mDragRectView.TopLeft = null;
-                    mDragRectView.TopRight = null;
-                    mDragRectView.ButtomLeft = null;
-                    mDragRectView.ButtomRight = null;
+                    _dragRectView.TopLeft = null;
+                    _dragRectView.TopRight = null;
+                    _dragRectView.ButtomLeft = null;
+                    _dragRectView.ButtomRight = null;
                 }
                 else {
-                    int x = (int) Math.round((720.0/_bill.getWidth())*mTopLeft.x);
-                    int y = (int) Math.round((1118.0/_bill.getHeight())*mTopLeft.y);
-                    mDragRectView.TopLeft = new android.graphics.Point(x, y);
+                    int x = (int) Math.round((720.0/_bill.getWidth())* _topLeft.x);
+                    int y = (int) Math.round((1118.0/_bill.getHeight())* _topLeft.y);
+                    _dragRectView.TopLeft = new android.graphics.Point(x, y);
 
-                    x = (int) Math.round((720.0/_bill.getWidth())*mTopRight.x);
-                    y = (int) Math.round((1118.0/_bill.getHeight())*mTopRight.y);
-                    mDragRectView.TopRight = new android.graphics.Point(x, y);
+                    x = (int) Math.round((720.0/_bill.getWidth())* _topRight.x);
+                    y = (int) Math.round((1118.0/_bill.getHeight())* _topRight.y);
+                    _dragRectView.TopRight = new android.graphics.Point(x, y);
 
-                    x = (int) Math.round((720.0/_bill.getWidth())*mButtomRight.x);
-                    y = (int) Math.round((1118.0/_bill.getHeight())*mButtomRight.y);
-                    mDragRectView.ButtomRight = new android.graphics.Point(x, y);
+                    x = (int) Math.round((720.0/_bill.getWidth())* _buttomRight.x);
+                    y = (int) Math.round((1118.0/_bill.getHeight())* _buttomRight.y);
+                    _dragRectView.ButtomRight = new android.graphics.Point(x, y);
 
-                    x = (int) Math.round((720.0/_bill.getWidth())*mButtomLeft.x);
-                    y = (int) Math.round((1118.0/_bill.getHeight())*mButtomLeft.y);
-                    mDragRectView.ButtomLeft = new android.graphics.Point(x, y);
+                    x = (int) Math.round((720.0/_bill.getWidth())* _buttomLeft.x);
+                    y = (int) Math.round((1118.0/_bill.getHeight())* _buttomLeft.y);
+                    _dragRectView.ButtomLeft = new android.graphics.Point(x, y);
                 }
 
                 BitmapDrawable bitmapDrawable = new BitmapDrawable(_bill);
-                mDragRectView.setBackground(bitmapDrawable);
-                mDragRectView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                _dragRectView.setBackground(bitmapDrawable);
+                _dragRectView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params.gravity = Gravity.BOTTOM;
-                mUserCropFinished.setLayoutParams(params);
+                _userCropFinished.setLayoutParams(params);
                 _testsDebugView.setVisibility(GONE);
-                _dragRectView.setVisibility(View.VISIBLE);
-                _dragRectView.addView(mDragRectView);
-                _dragRectView.addView(mUserCropFinished);
+                _emptyRelativeLayoutView.setVisibility(View.VISIBLE);
+                _emptyRelativeLayoutView.addView(_dragRectView);
+                _emptyRelativeLayoutView.addView(_userCropFinished);
                 break;
             default:
                 //mBeginBillSplitFlowButton.setVisibility(View.VISIBLE);
@@ -688,43 +688,43 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onClick(View v) {
 
-        if(v == mUserCropFinished){
-            double stretchFactorX = (1.0 * _bill.getWidth()) / mDragRectView.getBackground().getBounds().width();
-            double stretchFactorY = (1.0 * _bill.getHeight()) / mDragRectView.getBackground().getBounds().height();
+        if(v == _userCropFinished){
+            double stretchFactorX = (1.0 * _bill.getWidth()) / _dragRectView.getBackground().getBounds().width();
+            double stretchFactorY = (1.0 * _bill.getHeight()) / _dragRectView.getBackground().getBounds().height();
 
-            double x = mDragRectView.TopLeft.x * stretchFactorX;
-            double y = mDragRectView.TopLeft.y * stretchFactorY ;
-            mTopLeft = new Point(x,y);
+            double x = _dragRectView.TopLeft.x * stretchFactorX;
+            double y = _dragRectView.TopLeft.y * stretchFactorY ;
+            _topLeft = new Point(x,y);
 
-            x = mDragRectView.TopRight.x * stretchFactorX;
-            y = mDragRectView.TopRight.y * stretchFactorY;
-            mTopRight = new Point(x,y);
+            x = _dragRectView.TopRight.x * stretchFactorX;
+            y = _dragRectView.TopRight.y * stretchFactorY;
+            _topRight = new Point(x,y);
 
-            x = mDragRectView.ButtomLeft.x * stretchFactorX;
-            y = mDragRectView.ButtomLeft.y * stretchFactorY;
-            mButtomLeft= new Point(x,y);
+            x = _dragRectView.ButtomLeft.x * stretchFactorX;
+            y = _dragRectView.ButtomLeft.y * stretchFactorY;
+            _buttomLeft = new Point(x,y);
 
-            x = mDragRectView.ButtomRight.x * stretchFactorX;
-            y = mDragRectView.ButtomRight.y * stretchFactorY;
-            mButtomRight = new Point(x,y);
+            x = _dragRectView.ButtomRight.x * stretchFactorX;
+            y = _dragRectView.ButtomRight.y * stretchFactorY;
+            _buttomRight = new Point(x,y);
 
             /** Preparing Warp Perspective Dimensions **/
-            int newWidth = (int) Math.max(mButtomRight.x - mButtomLeft.x, mTopRight.x - mTopLeft.x);
-            int newHeight = (int) Math.max(mButtomRight.y - mTopRight.y, mButtomLeft.y - mTopLeft.y);
-            int xBegin = (int) Math.min(mTopLeft.x, mButtomLeft.x);
-            int yBegin = (int) Math.min(mTopLeft.y, mTopRight.y);
+            int newWidth = (int) Math.max(_buttomRight.x - _buttomLeft.x, _topRight.x - _topLeft.x);
+            int newHeight = (int) Math.max(_buttomRight.y - _topRight.y, _buttomLeft.y - _topLeft.y);
+            int xBegin = (int) Math.min(_topLeft.x, _buttomLeft.x);
+            int yBegin = (int) Math.min(_topLeft.y, _topRight.y);
             Bitmap resizedBitmap = Bitmap.createBitmap(_bill, xBegin, yBegin, newWidth, newHeight);
             Bitmap warpedBitmap = Bitmap.createBitmap(newWidth , newHeight, _bill.getConfig());
-            mTopLeft.x = mTopLeft.x - xBegin;
-            mTopLeft.y = mTopLeft.y - yBegin;
-            mTopRight.x = mTopRight.x - xBegin;
-            mTopRight.y = mTopRight.y - yBegin;
-            mButtomRight.x = mButtomRight.x - xBegin;
-            mButtomRight.y = mButtomRight.y - yBegin;
-            mButtomLeft.x = mButtomLeft.x - xBegin;
-            mButtomLeft.y = mButtomLeft.y - yBegin;
+            _topLeft.x = _topLeft.x - xBegin;
+            _topLeft.y = _topLeft.y - yBegin;
+            _topRight.x = _topRight.x - xBegin;
+            _topRight.y = _topRight.y - yBegin;
+            _buttomRight.x = _buttomRight.x - xBegin;
+            _buttomRight.y = _buttomRight.y - yBegin;
+            _buttomLeft.x = _buttomLeft.x - xBegin;
+            _buttomLeft.y = _buttomLeft.y - yBegin;
 
-            if(!ImageProcessingLib.WarpPerspective(resizedBitmap, warpedBitmap, mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+            if(!ImageProcessingLib.WarpPerspective(resizedBitmap, warpedBitmap, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
                 Log.d(this.getClass().getSimpleName(), "Failed to warp perspective");
                 resizedBitmap.recycle();
                 warpedBitmap.recycle();
@@ -739,9 +739,9 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             _billWithPrintedRedLines = _bill.copy(_bill.getConfig(), true);
 //                _processedBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
 //                _processedBillForCreateNewBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888)
-            _dragRectView.removeView(mDragRectView);
-            _dragRectView.removeView(mUserCropFinished);
-            _dragRectView.setVisibility(GONE);
+            _emptyRelativeLayoutView.removeView(_dragRectView);
+            _emptyRelativeLayoutView.removeView(_userCropFinished);
+            _emptyRelativeLayoutView.setVisibility(GONE);
             _testsDebugView.setVisibility(View.VISIBLE);
             _originalImageView.setImageBitmap(_bill);
             warpedBitmap.recycle();
