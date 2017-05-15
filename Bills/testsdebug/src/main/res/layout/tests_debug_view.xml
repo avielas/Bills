@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tools:android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<tools:android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:id="@+id/activity_preprocessing_main"
     android:layout_height="match_parent"
     android:focusableInTouchMode="true"
     tools:context="com.bills.testsdebug.TestsDebugActivity">
@@ -12,6 +12,7 @@
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/tests_debug_view"
     android:weightSum="2"
     android:orientation="vertical">
     <ScrollView
@@ -279,4 +280,11 @@
         </RelativeLayout>
     </ScrollView>
 </LinearLayout>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/drag_rect_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.bills.testsdebug.TestsDebugActivity">
+</RelativeLayout>
 </tools:android.support.constraint.ConstraintLayout>

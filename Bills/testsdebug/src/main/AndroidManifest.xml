@@ -12,9 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:largeHeap="true">
-        <activity android:name=".BillsMainActivity">
+        <activity android:name=".CameraActivity">
             <intent-filter>
-                <action android:name=".BillsMainActivity" />
+                <action android:name=".CameraActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

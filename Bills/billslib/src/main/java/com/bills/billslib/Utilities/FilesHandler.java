@@ -46,14 +46,6 @@ public class FilesHandler {
         }
     }
 
-//    public static boolean SaveToTIFFile(Bitmap bmp, String path) {
-//        TiffSaver.SaveOptions options = new TiffSaver.SaveOptions();
-//        options.author = "bills";
-//        options.copyright = "bills copyright";
-//        boolean saved = TiffSaver.saveBitmap(path, bmp, options);
-//        return saved;
-//    }
-
     public static boolean SaveToTXTFile(byte[] image, String path){
         try {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path));
@@ -126,7 +118,6 @@ public class FilesHandler {
 //        bitmap = TiffBitmapFactory.decodeFile(file, options);
 //        return bitmap;
 //    }
-
 //    public static Bitmap GetBitmapFromTifFile() {
 //        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 //        Bitmap bitmap = null;
@@ -138,5 +129,12 @@ public class FilesHandler {
 //        options.inAvailableMemory = 1024 * 1024 * 10 * 3; //30 mb
 //        bitmap = TiffBitmapFactory.decodeFile(pictureFile, options);
 //        return FilesHandler.Rotating(bitmap);
+//    }
+//    public static boolean SaveToTIFFile(Bitmap bmp, String path) {
+//        TiffSaver.SaveOptions options = new TiffSaver.SaveOptions();
+//        options.author = "bills";
+//        options.copyright = "bills copyright";
+//        boolean saved = TiffSaver.saveBitmap(path, bmp, options);
+//        return saved;
 //    }
 }

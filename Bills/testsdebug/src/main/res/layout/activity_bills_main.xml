@@ -4,7 +4,7 @@
     android:id="@+id/activity_bills_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.bills.testsdebug.BillsMainActivity">
+    tools:context="com.bills.testsdebug.CameraActivity">
 
     <TextureView
         android:id="@+id/textureView"

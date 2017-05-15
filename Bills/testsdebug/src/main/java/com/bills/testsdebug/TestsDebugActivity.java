@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -15,24 +16,32 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import com.bills.billslib.Contracts.*;
 import com.bills.billslib.Contracts.Enums.Language;
+import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
+import com.bills.billslib.CustomViews.DragRectView;
 import com.bills.billslib.Utilities.FilesHandler;
 import com.gregacucnik.EditableSeekBar;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -47,7 +56,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
-public class TestsDebugActivity extends AppCompatActivity{
+import static android.view.View.GONE;
+
+public class TestsDebugActivity extends AppCompatActivity implements View.OnClickListener{
     private enum StructureElement {
         NONE,
         HORIZONTAL_LINE,
@@ -92,11 +103,22 @@ public class TestsDebugActivity extends AppCompatActivity{
     List<String> _kernelTypes;
     private final int BILLS_REQUEST_CODE = 1;
     TemplateMatcher templateMatcher;
+    private Button mUserCropFinished;
+    private DragRectView mDragRectView;
+    private Point mTopLeft = new Point();
+    private Point mTopRight = new Point();
+    private Point mButtomLeft = new Point();
+    private Point mButtomRight = new Point();
+    private LinearLayout _testsDebugView;
+    private RelativeLayout _dragRectView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tests_debug);
+        setContentView(R.layout.tests_debug_view);
+        _testsDebugView = (LinearLayout)findViewById(R.id.tests_debug_view);
+        _dragRectView = (RelativeLayout)findViewById(R.id.drag_rect_view);
+        _dragRectView.setVisibility(GONE);
 //        PreparingEnvironmentUtil.PrepareTesseract(this);
         //copy images to internal memory just in case of emulator
 //        if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
@@ -507,8 +529,8 @@ public class TestsDebugActivity extends AppCompatActivity{
     private void RunBillsMainFlow(int requestCode) {
         try {
             String imagePathToSave = Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH;
-            Intent intent = new Intent(getBaseContext(), BillsMainActivity.class);
-            intent.putExtra(BillsMainActivity.BILLS_CROPPED_PHOTO_EXTRA_NAME, imagePathToSave);
+            Intent intent = new Intent(getBaseContext(), CameraActivity.class);
+            intent.putExtra(CameraActivity.BILLS_CROPPED_PHOTO_EXTRA_NAME, imagePathToSave);
             if (intent.resolveActivity(getPackageManager()) != null) {
                 startActivityForResult(intent, requestCode);
             }
@@ -568,7 +590,7 @@ public class TestsDebugActivity extends AppCompatActivity{
         byte[] bytes = FilesHandler.ReadFromTXTFile(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
 //        Bitmap bitmapWarped = FilesHandler.ByteArrayToBitmap(bytesWarped);
         Bitmap bitmap = FilesHandler.ByteArrayToBitmap(bytes);
-
+        bitmap = FilesHandler.Rotating(bitmap);
 //        Bitmap bitmap = FilesHandler.GetBitmapFromTifFile();
         return bitmap;
     }
@@ -610,22 +632,120 @@ public class TestsDebugActivity extends AppCompatActivity{
         switch (resultCode) {
             case RESULT_OK:
                 _bill.recycle();
-                _billWithPrintedRedLines.recycle();
-                _processedBill.recycle();
-                _processedBillForCreateNewBill.recycle();
                 try {
                     _bill = GetLastWarpedBillPhoto();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                _billWithPrintedRedLines = _bill.copy(_bill.getConfig(), true);
-//                _processedBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
-//                _processedBillForCreateNewBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
-                _originalImageView.setImageBitmap(_bill);
-                PreprocessingForTemplateMatcher();
+                mUserCropFinished = new Button(this);
+                mUserCropFinished.setText("Done");
+                mUserCropFinished.setOnClickListener(this);
+                mDragRectView = new DragRectView(this);
+                BillAreaDetector areaDetector = new BillAreaDetector();
+
+                if (!areaDetector.GetBillCorners(_bill , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+                    Log.d(this.getClass().getSimpleName(), "Failed ot get bounding rectangle automatically.");
+                    mDragRectView.TopLeft = null;
+                    mDragRectView.TopRight = null;
+                    mDragRectView.ButtomLeft = null;
+                    mDragRectView.ButtomRight = null;
+                }
+                else {
+                    int x = (int) Math.round((720.0/_bill.getWidth())*mTopLeft.x);
+                    int y = (int) Math.round((1118.0/_bill.getHeight())*mTopLeft.y);
+                    mDragRectView.TopLeft = new android.graphics.Point(x, y);
+
+                    x = (int) Math.round((720.0/_bill.getWidth())*mTopRight.x);
+                    y = (int) Math.round((1118.0/_bill.getHeight())*mTopRight.y);
+                    mDragRectView.TopRight = new android.graphics.Point(x, y);
+
+                    x = (int) Math.round((720.0/_bill.getWidth())*mButtomRight.x);
+                    y = (int) Math.round((1118.0/_bill.getHeight())*mButtomRight.y);
+                    mDragRectView.ButtomRight = new android.graphics.Point(x, y);
+
+                    x = (int) Math.round((720.0/_bill.getWidth())*mButtomLeft.x);
+                    y = (int) Math.round((1118.0/_bill.getHeight())*mButtomLeft.y);
+                    mDragRectView.ButtomLeft = new android.graphics.Point(x, y);
+                }
+
+                BitmapDrawable bitmapDrawable = new BitmapDrawable(_bill);
+                mDragRectView.setBackground(bitmapDrawable);
+                mDragRectView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.gravity = Gravity.BOTTOM;
+                mUserCropFinished.setLayoutParams(params);
+                _testsDebugView.setVisibility(GONE);
+                _dragRectView.setVisibility(View.VISIBLE);
+                _dragRectView.addView(mDragRectView);
+                _dragRectView.addView(mUserCropFinished);
                 break;
             default:
                 //mBeginBillSplitFlowButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        if(v == mUserCropFinished){
+            double stretchFactorX = (1.0 * _bill.getWidth()) / mDragRectView.getBackground().getBounds().width();
+            double stretchFactorY = (1.0 * _bill.getHeight()) / mDragRectView.getBackground().getBounds().height();
+
+            double x = mDragRectView.TopLeft.x * stretchFactorX;
+            double y = mDragRectView.TopLeft.y * stretchFactorY ;
+            mTopLeft = new Point(x,y);
+
+            x = mDragRectView.TopRight.x * stretchFactorX;
+            y = mDragRectView.TopRight.y * stretchFactorY;
+            mTopRight = new Point(x,y);
+
+            x = mDragRectView.ButtomLeft.x * stretchFactorX;
+            y = mDragRectView.ButtomLeft.y * stretchFactorY;
+            mButtomLeft= new Point(x,y);
+
+            x = mDragRectView.ButtomRight.x * stretchFactorX;
+            y = mDragRectView.ButtomRight.y * stretchFactorY;
+            mButtomRight = new Point(x,y);
+
+            /** Preparing Warp Perspective Dimensions **/
+            int newWidth = (int) Math.max(mButtomRight.x - mButtomLeft.x, mTopRight.x - mTopLeft.x);
+            int newHeight = (int) Math.max(mButtomRight.y - mTopRight.y, mButtomLeft.y - mTopLeft.y);
+            int xBegin = (int) Math.min(mTopLeft.x, mButtomLeft.x);
+            int yBegin = (int) Math.min(mTopLeft.y, mTopRight.y);
+            Bitmap resizedBitmap = Bitmap.createBitmap(_bill, xBegin, yBegin, newWidth, newHeight);
+            Bitmap warpedBitmap = Bitmap.createBitmap(newWidth , newHeight, _bill.getConfig());
+            mTopLeft.x = mTopLeft.x - xBegin;
+            mTopLeft.y = mTopLeft.y - yBegin;
+            mTopRight.x = mTopRight.x - xBegin;
+            mTopRight.y = mTopRight.y - yBegin;
+            mButtomRight.x = mButtomRight.x - xBegin;
+            mButtomRight.y = mButtomRight.y - yBegin;
+            mButtomLeft.x = mButtomLeft.x - xBegin;
+            mButtomLeft.y = mButtomLeft.y - yBegin;
+
+            if(!ImageProcessingLib.WarpPerspective(resizedBitmap, warpedBitmap, mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+                Log.d(this.getClass().getSimpleName(), "Failed to warp perspective");
+                resizedBitmap.recycle();
+                warpedBitmap.recycle();
+                return;
+            }
+            resizedBitmap.recycle();
+            FilesHandler.SaveToJPGFile(warpedBitmap, Constants.WARPED_JPG_PHOTO_PATH);
+            _billWithPrintedRedLines.recycle();
+            _processedBill.recycle();
+            _processedBillForCreateNewBill.recycle();
+            _bill = warpedBitmap.copy(warpedBitmap.getConfig(), true);
+            _billWithPrintedRedLines = _bill.copy(_bill.getConfig(), true);
+//                _processedBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
+//                _processedBillForCreateNewBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888)
+            _dragRectView.removeView(mDragRectView);
+            _dragRectView.removeView(mUserCropFinished);
+            _dragRectView.setVisibility(GONE);
+            _testsDebugView.setVisibility(View.VISIBLE);
+            _originalImageView.setImageBitmap(_bill);
+            warpedBitmap.recycle();
+            PreprocessingForTemplateMatcher();
         }
     }
 }
