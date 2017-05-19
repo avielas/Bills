@@ -43,6 +43,7 @@ public class TestBench {
     Context _context;
     private Double _testsCount = 0.0;
     private Double _testsAccuracyPercentSum = 0.0;
+    private long _timeMs;
 
     /*********** Tests Configuration ************/
     /**
@@ -68,6 +69,7 @@ public class TestBench {
     @Test
     public void begin() throws Exception {
         _context = getInstrumentation().getContext();
+        _timeMs = System.currentTimeMillis();
         SetOutputStream();
         String sourceDirectory;
         //copy images to internal memory
@@ -172,6 +174,8 @@ public class TestBench {
         Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (_testsCount*100)) * 100;
         System.out.println("Conclusions:");
         System.out.println("Accuracy of tests bench is "+ accuracyPercentTestsBench.intValue()+"%");
+        _timeMs = System.currentTimeMillis() - _timeMs;
+        System.out.println("It took " + _timeMs/1000 + " s");
         System.out.println(System.getProperty("line.separator"));
     }
 

@@ -27,7 +27,7 @@ android {
         // override those in the defaultConfig block.
         dev {
             // To avoid using legacy multidex, set minSdkVersion to 21 or higher.
-            minSdkVersion 21
+            minSdkVersion 16
             versionNameSuffix "-dev"
             applicationIdSuffix '.dev'
         }
