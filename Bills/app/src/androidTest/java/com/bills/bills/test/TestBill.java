@@ -33,12 +33,14 @@ public class TestBill extends Thread{
     String _rootBrandModelDirectory;
     String _restaurant;
     String _bill;
+    StringBuilder _results;
 
     public TestBill(String rootBrandModelDirectory, String restaurant, String bill)
     {
         _rootBrandModelDirectory = rootBrandModelDirectory;
         _restaurant = restaurant;
         _bill = bill;
+        _results = new StringBuilder();
     }
 
     @Override
@@ -63,7 +65,7 @@ public class TestBill extends Thread{
                 e.printStackTrace();
             }
 
-            System.out.println("Test of " + currBill);
+            _results.append("Test of " + currBill + System.getProperty("line.separator"));
             Bitmap bill = TifToBitmap(currBill);
             Bitmap warped = CropAndWarpPerspective(bill, currBill);
             Bitmap processedBill = ImageProcessingLib.PreprocessingForTemplateMatcher(warped);
@@ -89,6 +91,11 @@ public class TestBill extends Thread{
             processedBillForCreateNewBill.recycle();
             itemsArea.recycle();
             processedItemsArea.recycle();
+            tesseractOCREngine.End();
+
+            synchronized (System.out) {
+                System.out.println(_results);
+            }
         }
     }
 
@@ -216,7 +223,7 @@ public class TestBill extends Thread{
         mButtomLeft.y = mButtomLeft.y - yBegin;
 
         if(!ImageProcessingLib.WarpPerspective(resizedBitmap, warpedBitmap, mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
-            System.out.println("Failed to warp perspective " + billFullName);
+            _results.append("Failed to warp perspective " + billFullName + System.getProperty("line.separator"));
             warpedBitmap.recycle();
             resizedBitmap.recycle();
             return null;
@@ -236,17 +243,16 @@ public class TestBill extends Thread{
      * @param expectedBillTextLines expected bill lines from txt file
      */
     private void CompareExpectedToOcrResult(LinkedHashMap ocrResultCroppedBill, List<String> expectedBillTextLines) {
-        System.out.println("Validating Ocr Result");
+        _results.append("Validating Ocr Result" + System.getProperty("line.separator"));
         Integer accuracyPercent = Compare(ocrResultCroppedBill, expectedBillTextLines);
 
         if(ocrResultCroppedBill.size() != expectedBillTextLines.size())
         {
-            System.out.println("ocrResultCroppedBill contains "+ ocrResultCroppedBill.size() + " lines, but" +
-                    " expectedBillTextLines contains "+ expectedBillTextLines.size()+" lines");
+            _results.append("ocrResultCroppedBill contains "+ ocrResultCroppedBill.size() + " lines, but" +
+                    " expectedBillTextLines contains "+ expectedBillTextLines.size()+" lines" + System.getProperty("line.separator"));
         }
 
-        System.out.println("Accuracy is "+ accuracyPercent+"%");
-        System.out.println(System.getProperty("line.separator"));
+        _results.append("Accuracy is " + accuracyPercent + "%" + System.getProperty("line.separator"));
 
 //        _testsCount++;
 //        _testsAccuracyPercentSum += accuracyPercent;
@@ -285,7 +291,7 @@ public class TestBill extends Thread{
             HashMap ocrResultLine = (HashMap)ocrResult.get(lineNumber);
             if(null == ocrResultLine)
             {
-                System.out.println("line "+ lineNumber +" doesn't exist on ocr results");
+                _results.append("line "+ lineNumber +" doesn't exist on ocr results" + System.getProperty("line.separator"));
                 lineNumber++;
                 continue;
             }
@@ -294,12 +300,14 @@ public class TestBill extends Thread{
             Double ocrResultPrice = (Double)ocrResultLine.get("price");
             if(!expectedPrice.equals(ocrResultPrice))
             {
-                System.out.println("line "+lineNumber+" - Price: expected "+expectedPrice+", "+"ocr "+ocrResultPrice);
+                _results.append("line "+lineNumber+" - Price: expected "+expectedPrice+", "+"ocr "+ocrResultPrice
+                        + System.getProperty("line.separator"));
                 ++countInvalids;
             }
             if(!expectedQuantity.equals(ocrResultQuantity))
             {
-                System.out.println("line "+lineNumber+" - Quantity: expected "+expectedQuantity+", "+"ocr "+ocrResultQuantity);
+                _results.append("line "+lineNumber+" - Quantity: expected "+expectedQuantity+", "+"ocr "+ocrResultQuantity
+                        + System.getProperty("line.separator"));
                 ++countInvalids;
             }
             lineNumber++;
@@ -308,7 +316,5 @@ public class TestBill extends Thread{
         accuracyPercent = ((lineNumber*2 - countInvalids)/(lineNumber*2)) * 100;
         return accuracyPercent.intValue();
     }
-
-
 }
 
