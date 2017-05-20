@@ -7,7 +7,9 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
 
+import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.IOcrEngine;
+import com.bills.billslib.Utilities.FilesHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -19,6 +21,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.FileHandler;
 
 /**
  * Created by mvalersh on 12/2/2016.
@@ -743,30 +746,50 @@ public class TemplateMatcher  {
         paint.setAntiAlias(true);
         paint.setTextAlign(Paint.Align.RIGHT);
         paint.setTextSize(50.0f);
+//        List<Rect> keyListLastIndex = null;
+//        List<Rect> keyListBeginIndex = null;
+        List<Rect> keyListCurrentIndex = null;
 
         for (int i = beginIndex; i < endIndex + 1; i++)
         {
-            List<Rect> keyListCurrentIndex = null;
+
             if(i == endIndex)
             {
+//                keyListLastIndex = new ArrayList<>(connections[i-1].values());
                 keyListCurrentIndex = new ArrayList<>(connections[i-1].values());
             }
+//            else if(i == beginIndex)
             else
             {
+//                keyListBeginIndex = new ArrayList<>(connections[i].keySet());
                 keyListCurrentIndex = new ArrayList<>(connections[i].keySet());
             }
 
             for(int j = 0; j < keyListCurrentIndex.size(); j++)
             {
-                int xBegin   = keyListCurrentIndex.get(j).left;
-                int xEnd  = keyListCurrentIndex.get(j).right;
-                int yBegin    = keyListCurrentIndex.get(j).top;
-                int yEnd = keyListCurrentIndex.get(j).bottom;
-                Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
+                /**** the following code is for debugging  ****/
+//                int xBegin   = keyListCurrentIndex.get(j).left;
+//                int xEnd  = keyListCurrentIndex.get(j).right;
+//                int yBegin    = keyListCurrentIndex.get(j).top;
+//                int yEnd = keyListCurrentIndex.get(j).bottom;
+//                Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
+//                FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/rect_" + i + "_" + j + ".jpg");
+//                bitmap.recycle();
+                /**********************************************/
                 canvas.drawBitmap(mFullBillProcessedImageForCreateNewBill, keyListCurrentIndex.get(j), keyListCurrentIndex.get(j), paint);
-                bitmap.recycle();
             }
         }
+//        int size = keyListLastIndex.size();
+//        int x0   = keyListBeginIndex.get(0).left;
+//        int y0    = keyListBeginIndex.get(0).top;
+//        int xn   = keyListLastIndex.get(size - 1).right;
+//        int yn    = keyListLastIndex.get(size - 1).bottom;
+//        Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, x0, y0, xn-x0, yn-y0);
+//        FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/rect_tot.jpg");
+//        bitmap.recycle();
+//        canvas.drawBitmap(mFullBillProcessedImageForCreateNewBill, keyListCurrentIndex.get(j), keyListCurrentIndex.get(j), paint);
         return newBill;
+//        newBill.recycle();
+//        return bitmap;
     }
 }

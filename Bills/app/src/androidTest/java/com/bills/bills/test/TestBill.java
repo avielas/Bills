@@ -10,6 +10,7 @@ import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
+import com.bills.billslib.Utilities.FilesHandler;
 
 import org.beyka.tiffbitmapfactory.TiffBitmapFactory;
 import org.beyka.tiffbitmapfactory.TiffSaver;
@@ -69,16 +70,16 @@ public class TestBill extends Thread{
             Bitmap bill = TifToBitmap(currBill);
             Bitmap warped = CropAndWarpPerspective(bill, currBill);
             Bitmap processedBill = ImageProcessingLib.PreprocessingForTemplateMatcher(warped);
-            File file = new File(currBill);
-            String pathToSave = file.getParent();
-            SaveToJPGFile(processedBill, pathToSave + "/processedTM.jpg");
+//            File file = new File(currBill);
+//            String pathToSave = file.getParent();
+//            FilesHandler.SaveToJPGFile(processedBill, pathToSave + "/processedTM.jpg");
             Bitmap processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTM(warped);
-            SaveToJPGFile(processedBillForCreateNewBill, pathToSave + "/processedPars.jpg");
+//            FilesHandler.SaveToJPGFile(processedBillForCreateNewBill, pathToSave + "/processedPars.jpg");
             templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillForCreateNewBill, processedBill);
             Bitmap itemsArea = templateMatcher.MatchWhichReturnCroppedItemsArea();
-            SaveToJPGFile(itemsArea, pathToSave + "/itemsArea.jpg");
+//            FilesHandler.SaveToJPGFile(itemsArea, pathToSave + "/itemsArea.jpg");
             Bitmap processedItemsArea = ImageProcessingLib.PreprocessingForParsing(itemsArea);
-            SaveToJPGFile(processedItemsArea, pathToSave + "/processedItemsArea.jpg");
+//            FilesHandler.SaveToJPGFile(processedItemsArea, pathToSave + "/processedItemsArea.jpg");
             int numOfItems = templateMatcher.priceAndQuantity.size();
             templateMatcher = new TemplateMatcher(tesseractOCREngine, processedItemsArea);
             templateMatcher.ParsingItemsArea(numOfItems);
@@ -95,39 +96,6 @@ public class TestBill extends Thread{
 
             synchronized (System.out) {
                 System.out.println(_results);
-            }
-        }
-    }
-
-    /**
-     * Save bitmap to jpg file
-     * @param bmp bitmap to save
-     * @param path path to save to
-     * @return
-     */
-    private boolean SaveToJPGFile(Bitmap bmp, String path){
-        FileOutputStream out = null;
-        try {
-            File file = new File(path);
-            if(file.exists()){
-                file.delete();
-            }
-            out = new FileOutputStream(path);
-
-            // bmp is your Bitmap instance, PNG is a lossless format, the compression factor (100) is ignored
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
             }
         }
     }
@@ -229,10 +197,9 @@ public class TestBill extends Thread{
             return null;
         }
 
-        File file = new File(billFullName);
-        String warpPathToSave = file.getParent();
-        SaveToJPGFile(warpedBitmap, warpPathToSave + "/warped.jpg");
-        SaveToTIFFile(warpedBitmap, warpPathToSave + "/warped.tif");
+//        File file = new File(billFullName);
+//        String warpPathToSave = file.getParent();
+//        FilesHandler.SaveToJPGFile(warpedBitmap, warpPathToSave + "/warped.jpg");
         resizedBitmap.recycle();
         return warpedBitmap;
     }
@@ -256,20 +223,6 @@ public class TestBill extends Thread{
 
 //        _testsCount++;
 //        _testsAccuracyPercentSum += accuracyPercent;
-    }
-
-    /**
-     * Save bitmap to tif file
-     * @param bmp bitmap to save
-     * @param path path to save to
-     * @return
-     */
-    private boolean SaveToTIFFile(Bitmap bmp, String path) {
-        TiffSaver.SaveOptions options = new TiffSaver.SaveOptions();
-        options.author = "aviel";
-        options.copyright = "aviel copyright";
-        boolean saved = TiffSaver.saveBitmap(path, bmp, options);
-        return saved;
     }
 
     /**
