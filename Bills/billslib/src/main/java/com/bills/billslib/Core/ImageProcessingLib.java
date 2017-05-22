@@ -148,6 +148,15 @@ public class ImageProcessingLib {
         return processed;
     }
 
+    public static Mat PreprocessingForTemplateMatcherMAT(Mat rgba) {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+        AdaptiveThreshold(rgba, 60, 45.0);
+        Erode(rgba, 1, 4, StructureElement.VERTICAL_LINE.toString());
+        return rgba;
+    }
+
     public static Bitmap PreprocessingForParsingBeforeTM(Bitmap image) {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
@@ -160,6 +169,14 @@ public class ImageProcessingLib {
         Utils.matToBitmap(rgba, processed);
         rgba.release();
         return processed;
+    }
+
+    public static Mat PreprocessingForParsingBeforeTMMAT(Mat rgba) {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+        AdaptiveThreshold(rgba, 100, 33.0);
+        return rgba;
     }
 
     public static Bitmap PreprocessingForParsing(Bitmap image) {
@@ -178,6 +195,18 @@ public class ImageProcessingLib {
         Utils.matToBitmap(rgba, processed);
         rgba.release();
         return processed;
+    }
+
+    public static Mat PreprocessingForParsingMAT(Mat rgba) {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        return rgba;
     }
 
     public static void AdaptiveThreshold(Mat rgba, int blockSize, double C){

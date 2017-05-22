@@ -3,6 +3,7 @@ package com.bills.bills.test;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
@@ -14,6 +15,8 @@ import com.bills.billslib.Utilities.FilesHandler;
 
 import org.beyka.tiffbitmapfactory.TiffBitmapFactory;
 import org.beyka.tiffbitmapfactory.TiffSaver;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
 import java.io.BufferedReader;
@@ -69,29 +72,47 @@ public class TestBill extends Thread{
             _results.append("Test of " + currBill + System.getProperty("line.separator"));
             Bitmap bill = TifToBitmap(currBill);
             Bitmap warped = CropAndWarpPerspective(bill, currBill);
-            Bitmap processedBill = ImageProcessingLib.PreprocessingForTemplateMatcher(warped);
+            Mat warpedMat = new Mat();
+            Mat warpedMatCopy = new Mat();
+            Utils.bitmapToMat(warped, warpedMat);
+            Utils.bitmapToMat(warped, warpedMatCopy);
+            Bitmap processedBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
+            Mat processedBillMat = ImageProcessingLib.PreprocessingForTemplateMatcherMAT(warpedMat);
 //            File file = new File(currBill);
 //            String pathToSave = file.getParent();
 //            FilesHandler.SaveToJPGFile(processedBill, pathToSave + "/processedTM.jpg");
-            Bitmap processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTM(warped);
+            Mat processedBillForCreateNewBillMat = ImageProcessingLib.PreprocessingForParsingBeforeTMMAT(warpedMatCopy);
 //            FilesHandler.SaveToJPGFile(processedBillForCreateNewBill, pathToSave + "/processedPars.jpg");
-            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillForCreateNewBill, processedBill);
-            Bitmap itemsArea = templateMatcher.MatchWhichReturnCroppedItemsArea();
-//            FilesHandler.SaveToJPGFile(itemsArea, pathToSave + "/itemsArea.jpg");
-            Bitmap processedItemsArea = ImageProcessingLib.PreprocessingForParsing(itemsArea);
+            Utils.matToBitmap(processedBillMat, processedBill);
+            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBill);
+            templateMatcher.MatchWhichReturnCroppedItemsAreaRects();
+//            FilesHandler.SaveToJPGFile(processedBillForCreateNewBill, pathToSave + "/processedBillForCreateNewBill.jpg");
+            Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsingMAT(processedBillForCreateNewBillMat);
 //            FilesHandler.SaveToJPGFile(processedItemsArea, pathToSave + "/processedItemsArea.jpg");
             int numOfItems = templateMatcher.priceAndQuantity.size();
-            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedItemsArea);
-            templateMatcher.ParsingItemsArea(numOfItems);
+            LinkedHashMap<Rect, Rect>[] connectionsItemsArea = templateMatcher.connectionsItemsArea;
+            ArrayList<ArrayList<Rect>> locationsItemsArea = templateMatcher.locationsItemsArea;
+            ArrayList<Rect> itemLocationsRect = templateMatcher.itemLocationsRect;
+            ArrayList<Bitmap> itemLocationsByteArray = templateMatcher.itemLocationsByteArray;
+
+            Utils.matToBitmap(processedItemsAreaMat, processedBill);
+            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBill);
+            templateMatcher.connectionsItemsArea = connectionsItemsArea;
+            templateMatcher.locationsItemsArea = locationsItemsArea;
+            templateMatcher.itemLocationsRect = itemLocationsRect;
+            templateMatcher.itemLocationsByteArray = itemLocationsByteArray;
+            templateMatcher.ParsingItemsAreaWithRects(numOfItems);
             LinkedHashMap ocrResultCroppedBill = GetOcrResults(templateMatcher);
             CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);
 
             bill.recycle();
             warped.recycle();
             processedBill.recycle();
-            processedBillForCreateNewBill.recycle();
-            itemsArea.recycle();
-            processedItemsArea.recycle();
+            warpedMat.release();
+            warpedMatCopy.release();
+            processedBillMat.release();
+            processedBillForCreateNewBillMat.release();
+            processedItemsAreaMat.release();
             tesseractOCREngine.End();
 
             synchronized (System.out) {
