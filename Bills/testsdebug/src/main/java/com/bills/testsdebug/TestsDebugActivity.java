@@ -426,7 +426,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                     templateMatcher.locationsItemsArea = locationsItemsArea;
                     templateMatcher.itemLocationsRect = itemLocationsRect;
                     templateMatcher.itemLocationsByteArray = itemLocationsByteArray;
-                    templateMatcher.ParsingItemsAreaWithRects(numOfItems);
+                    templateMatcher.Parsing(numOfItems);
                     //ValidateOcrBillResult("Original", _bill);
                     ValidateOcrBillResult("Processed", _processedBill);
                     OpenUserInputDialog();

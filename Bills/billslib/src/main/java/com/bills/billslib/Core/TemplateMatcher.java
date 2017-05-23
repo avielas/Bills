@@ -106,7 +106,7 @@ public class TemplateMatcher  {
         CreatingRects(startEndOfAreasList, connections, locations);
     }
 
-    public void ParsingItemsAreaWithRects(int numOfItems) {
+    public void Parsing(int numOfItems) {
         ArrayList<ArrayList<Rect>> locations = locationsItemsArea; //GetWordLocations(mFullBillProcessedImage);
 
         LinkedHashMap<Rect, Rect>[] connections = connectionsItemsArea; //new LinkedHashMap[locations.size() - 1];

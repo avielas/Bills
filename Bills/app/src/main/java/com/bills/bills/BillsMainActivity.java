@@ -368,7 +368,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         templateMatcher.locationsItemsArea = locationsItemsArea;
         templateMatcher.itemLocationsRect = itemLocationsRect;
         templateMatcher.itemLocationsByteArray = itemLocationsByteArray;
-        templateMatcher.ParsingItemsAreaWithRects(numOfItems);
+        templateMatcher.Parsing(numOfItems);
 
         warpedBitmap.recycle();
         processedBillBitmap.recycle();

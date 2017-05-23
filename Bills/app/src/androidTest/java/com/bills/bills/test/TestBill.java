@@ -94,7 +94,7 @@ public class TestBill extends Thread{
             templateMatcher.locationsItemsArea = locationsItemsArea;
             templateMatcher.itemLocationsRect = itemLocationsRect;
             templateMatcher.itemLocationsByteArray = itemLocationsByteArray;
-            templateMatcher.ParsingItemsAreaWithRects(numOfItems);
+            templateMatcher.Parsing(numOfItems);
             LinkedHashMap ocrResultCroppedBill = GetOcrResults(templateMatcher);
             CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);
 
