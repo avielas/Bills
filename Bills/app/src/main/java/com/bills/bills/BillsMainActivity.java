@@ -38,10 +38,12 @@ import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.ItemView;
 import com.bills.billslib.CustomViews.NameView;
+import com.bills.billslib.Utilities.FilesHandler;
 
 
 import org.opencv.core.Point;
 
+import java.io.File;
 import java.util.HashMap;
 
 import static android.view.View.GONE;
@@ -336,8 +338,8 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
 //        _billsMainView.addView(imageView);
 //        return;
 
-        Bitmap processedWarpedBill =  ImageProcessingLib.PreprocessingForTemplateMatcherBitmap(bitmap);
-        Bitmap processedWarpedBillForCreateNewBill =  ImageProcessingLib.PreprocessingForParsingBitmap(bitmap);
+        Bitmap processedWarpedBill =  ImageProcessingLib.PreprocessingForTemplateMatcherBitmap(warpedBitmap);
+        Bitmap processedWarpedBillForCreateNewBill =  ImageProcessingLib.PreprocessingForParsingBitmap(warpedBitmap);
         TemplateMatcher templateMatcher = new TemplateMatcher(_ocrEngine, processedWarpedBillForCreateNewBill, processedWarpedBill);
 
         Bitmap itemsArea = templateMatcher.MatchWhichReturnCroppedItemsArea();
@@ -352,6 +354,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         bitmap.recycle();
         itemsArea.recycle();
         processedItemsArea.recycle();
+        warpedBitmap.recycle();
 
         int i = 0;
         int[] colors = {Color.RED, Color.BLUE, Color.GREEN};
