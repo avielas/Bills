@@ -207,6 +207,8 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         Mat warpedMat = new Mat();
         Utils.bitmapToMat(_bill, warpedMat);
         Mat processedBillMat = ImageProcessingLib.PreprocessingForTM(warpedMat);
+        _processedBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
+        _processedBillForCreateNewBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(processedBillMat, _processedBill);
         _processedImageView.setImageBitmap(_processedBill);
         Utils.matToBitmap(warpedMat, _processedBillForCreateNewBill);
@@ -442,7 +444,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View arg0) {
                 try {
-                    PreprocessingForTM();
+//                    PreprocessingForTM();
                     templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBill);
                     templateMatcher.Match();
                     _bill.recycle();
