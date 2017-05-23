@@ -172,12 +172,12 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         _rgba = new Mat();
         _gray = new Mat();
         try {
-            _bill = GetLastCapturedBillAfterCropAndWarp();
+            _bill = GetLastWarpedBill();
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            _billWithPrintedRedLines = GetLastCapturedBillAfterCropAndWarp();
+            _billWithPrintedRedLines = GetLastWarpedBill();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -206,11 +206,22 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void PreprocessingForTemplateMatcher() {
-        _processedBill = ImageProcessingLib.PreprocessingForTemplateMatcherBitmap(_bill);
+        Mat warpedMat = new Mat();
+        Mat warpedMatCopy = new Mat();
+        Utils.bitmapToMat(_bill, warpedMat);
+        Utils.bitmapToMat(_bill, warpedMatCopy);
+        Mat processedBillMat = ImageProcessingLib.PreprocessingForTemplateMatcherMAT(warpedMat);
+        Utils.matToBitmap(processedBillMat, _processedBill);
         _processedImageView.setImageBitmap(_processedBill);
+        Mat processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTMMAT(warpedMatCopy);
+        Utils.matToBitmap(processedBillForCreateNewBill, _processedBillForCreateNewBill);
         _processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTMBitmap(_bill);
         _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedForCreateNewBillImageView);
+        warpedMat.release();
+        warpedMatCopy.release();
+        processedBillMat.release();
+        processedBillForCreateNewBill.release();
     }
 
     private void PreprocessingForParsing() {
@@ -251,15 +262,13 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void AdaptiveThreshold(Mat rgba, int blockSize, double C){
-//        Utils.bitmapToMat(_bill, _rgba);
         ImageProcessingLib.AdaptiveThreshold(rgba, blockSize, C);
-//        Utils.matToBitmap(_rgba, _processedBill);
         _algorithmsTracing.append("AdaptiveThreshold: block size " + blockSize + ", constant subtracted " + C);
         _algorithmsTracing.append(System.getProperty("line.separator"));
     }
 
     private void ValidateOcrBillResult(String imageStatus, Bitmap billBitmap) throws Exception{
-        List<String> expectedBillTextLines = ReadTxtFile(_brandAndModelPath + "/" +_restaurantName + "/" + _expectedTxtFileName);
+        List<String> expectedBillTextLines = FilesHandler.ReadTxtFile(_brandAndModelPath + "/" +_restaurantName + "/" + _expectedTxtFileName);
         _results.append("Test of " + imageStatus + " " + _restaurantName);
         _results.append(System.getProperty("line.separator"));
         LinkedHashMap ocrResultCroppedBill = GetOcrResults();
@@ -278,25 +287,6 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             i++;
         }
         return imageLinesLinkedHashMap;
-    }
-
-    /**
-     *
-     * @param fileFullName txt file full name on device
-     * @return list of string with file lines
-     * @throws IOException
-     */
-    private static List<String> ReadTxtFile(String fileFullName) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(fileFullName));
-        // do reading, usually loop until end of file reading
-        List<String> lines = new ArrayList<>();
-        String line = bufferedReader.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = bufferedReader.readLine();
-        }
-        bufferedReader.close();
-        return lines;
     }
 
     /**
@@ -452,7 +442,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             public void onClick(View arg0) {
                 try {
                     PreprocessingForTemplateMatcher();
-                    templateMatcher = new TemplateMatcher(tesseractOCREngine,_processedBillForCreateNewBill, _processedBill);
+                    templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBillForCreateNewBill, _processedBill);
                     Bitmap matched = templateMatcher.MatchWhichReturnCroppedItemsArea();
                     _bill.recycle();
                     _processedBill.recycle();
@@ -577,7 +567,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         System.setOut(printStreamToFile);
     }
 
-    private Bitmap GetLastCapturedBillAfterCropAndWarp() throws IOException {
+    private Bitmap GetLastWarpedBill() throws IOException {
         Bitmap bitmap = GetLastCapturedBill();
         BillAreaDetector areaDetector = new BillAreaDetector();
         if (!areaDetector.GetBillCorners(bitmap , _topLeft, _topRight, _buttomRight, _buttomLeft)) {
@@ -617,7 +607,6 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         bitmap = FilesHandler.Rotating(bitmap);
         return bitmap;
     }
-
 
     public Bitmap PrintWordsRects(Bitmap bitmap, Bitmap _processedBill){
         List<Rect> words;
