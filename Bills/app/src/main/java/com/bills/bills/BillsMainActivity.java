@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -24,9 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,14 +42,9 @@ import com.bills.billslib.CustomViews.NameView;
 
 import org.opencv.core.Point;
 
-import java.io.File;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
-import static android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL;
 import static android.view.View.GONE;
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 public class BillsMainActivity extends AppCompatActivity implements IOnCameraFinished, View.OnClickListener {
     private String Tag = this.getClass().getSimpleName();
@@ -344,12 +336,12 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
 //        _billsMainView.addView(imageView);
 //        return;
 
-        Bitmap processedWarpedBill =  ImageProcessingLib.PreprocessingForTemplateMatcher(bitmap);
-        Bitmap processedWarpedBillForCreateNewBill =  ImageProcessingLib.PreprocessingForParsing(bitmap);
+        Bitmap processedWarpedBill =  ImageProcessingLib.PreprocessingForTemplateMatcherBitmap(bitmap);
+        Bitmap processedWarpedBillForCreateNewBill =  ImageProcessingLib.PreprocessingForParsingBitmap(bitmap);
         TemplateMatcher templateMatcher = new TemplateMatcher(_ocrEngine, processedWarpedBillForCreateNewBill, processedWarpedBill);
 
         Bitmap itemsArea = templateMatcher.MatchWhichReturnCroppedItemsArea();
-        Bitmap processedItemsArea =   ImageProcessingLib.PreprocessingForParsing(itemsArea);
+        Bitmap processedItemsArea =   ImageProcessingLib.PreprocessingForParsingBitmap(itemsArea);
 
         int numOfItems = templateMatcher.priceAndQuantity.size();
         templateMatcher = new TemplateMatcher(_ocrEngine, processedItemsArea);

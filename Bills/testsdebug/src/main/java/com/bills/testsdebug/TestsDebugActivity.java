@@ -3,7 +3,6 @@ package com.bills.testsdebug;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -207,9 +206,9 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void PreprocessingForTemplateMatcher() {
-        _processedBill = ImageProcessingLib.PreprocessingForTemplateMatcher(_bill);
+        _processedBill = ImageProcessingLib.PreprocessingForTemplateMatcherBitmap(_bill);
         _processedImageView.setImageBitmap(_processedBill);
-        _processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTM(_bill);
+        _processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTMBitmap(_bill);
         _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedForCreateNewBillImageView);
     }

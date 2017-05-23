@@ -196,7 +196,7 @@ public class TemplateMatcher  {
         return CreatingImageFromRects(startEndOfAreasList, connections);
     }
 
-    public void MatchWhichReturnCroppedItemsAreaRects() {
+    public void MatchWhichCreateItemsAreaRects() {
         boolean success;
         ArrayList<ArrayList<Rect>> locations = GetWordLocations(mFullBillProcessedImage);
         int lineIndex = 0;

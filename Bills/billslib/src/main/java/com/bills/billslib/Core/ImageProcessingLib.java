@@ -134,7 +134,7 @@ public class ImageProcessingLib {
         return result.Get();
     }
 
-    public static Bitmap PreprocessingForTemplateMatcher(Bitmap image) {
+    public static Bitmap PreprocessingForTemplateMatcherBitmap(Bitmap image) {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
@@ -157,7 +157,7 @@ public class ImageProcessingLib {
         return rgba;
     }
 
-    public static Bitmap PreprocessingForParsingBeforeTM(Bitmap image) {
+    public static Bitmap PreprocessingForParsingBeforeTMBitmap(Bitmap image) {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
@@ -179,7 +179,7 @@ public class ImageProcessingLib {
         return rgba;
     }
 
-    public static Bitmap PreprocessingForParsing(Bitmap image) {
+    public static Bitmap PreprocessingForParsingBitmap(Bitmap image) {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }

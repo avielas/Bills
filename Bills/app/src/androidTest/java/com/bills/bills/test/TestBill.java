@@ -11,17 +11,14 @@ import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
-import com.bills.billslib.Utilities.FilesHandler;
 
 import org.beyka.tiffbitmapfactory.TiffBitmapFactory;
-import org.beyka.tiffbitmapfactory.TiffSaver;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,32 +68,30 @@ public class TestBill extends Thread{
 
             _results.append("Test of " + currBill + System.getProperty("line.separator"));
             Bitmap bill = TifToBitmap(currBill);
-            Bitmap warped = CropAndWarpPerspective(bill, currBill);
+            Bitmap warpedBitmap = WarpPerspective(bill, currBill);
             Mat warpedMat = new Mat();
             Mat warpedMatCopy = new Mat();
-            Utils.bitmapToMat(warped, warpedMat);
-            Utils.bitmapToMat(warped, warpedMatCopy);
-            Bitmap processedBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
+            Utils.bitmapToMat(warpedBitmap, warpedMat);
+            Utils.bitmapToMat(warpedBitmap, warpedMatCopy);
+            Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
             Mat processedBillMat = ImageProcessingLib.PreprocessingForTemplateMatcherMAT(warpedMat);
 //            File file = new File(currBill);
 //            String pathToSave = file.getParent();
-//            FilesHandler.SaveToJPGFile(processedBill, pathToSave + "/processedTM.jpg");
-            Mat processedBillForCreateNewBillMat = ImageProcessingLib.PreprocessingForParsingBeforeTMMAT(warpedMatCopy);
-//            FilesHandler.SaveToJPGFile(processedBillForCreateNewBill, pathToSave + "/processedPars.jpg");
-            Utils.matToBitmap(processedBillMat, processedBill);
-            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBill);
-            templateMatcher.MatchWhichReturnCroppedItemsAreaRects();
-//            FilesHandler.SaveToJPGFile(processedBillForCreateNewBill, pathToSave + "/processedBillForCreateNewBill.jpg");
-            Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsingMAT(processedBillForCreateNewBillMat);
-//            FilesHandler.SaveToJPGFile(processedItemsArea, pathToSave + "/processedItemsArea.jpg");
+//            FilesHandler.SaveToJPGFile(processedBillMat, pathToSave + "/processedBillMat.jpg");
+            Utils.matToBitmap(processedBillMat, processedBillBitmap);
+            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
+            templateMatcher.MatchWhichCreateItemsAreaRects();
+            Mat processedBillForParsingMat = ImageProcessingLib.PreprocessingForParsingBeforeTMMAT(warpedMatCopy);
+            Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsingMAT(processedBillForParsingMat);
             int numOfItems = templateMatcher.priceAndQuantity.size();
             LinkedHashMap<Rect, Rect>[] connectionsItemsArea = templateMatcher.connectionsItemsArea;
             ArrayList<ArrayList<Rect>> locationsItemsArea = templateMatcher.locationsItemsArea;
             ArrayList<Rect> itemLocationsRect = templateMatcher.itemLocationsRect;
             ArrayList<Bitmap> itemLocationsByteArray = templateMatcher.itemLocationsByteArray;
-
-            Utils.matToBitmap(processedItemsAreaMat, processedBill);
-            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBill);
+            /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
+            /***** Out Of Memory when running 4 threads parallel                                      *****/
+            Utils.matToBitmap(processedItemsAreaMat, processedBillBitmap);
+            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
             templateMatcher.connectionsItemsArea = connectionsItemsArea;
             templateMatcher.locationsItemsArea = locationsItemsArea;
             templateMatcher.itemLocationsRect = itemLocationsRect;
@@ -106,12 +101,12 @@ public class TestBill extends Thread{
             CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);
 
             bill.recycle();
-            warped.recycle();
-            processedBill.recycle();
+            warpedBitmap.recycle();
+            processedBillBitmap.recycle();
             warpedMat.release();
             warpedMatCopy.release();
             processedBillMat.release();
-            processedBillForCreateNewBillMat.release();
+            processedBillForParsingMat.release();
             processedItemsAreaMat.release();
             tesseractOCREngine.End();
 
@@ -188,7 +183,7 @@ public class TestBill extends Thread{
      * @param billFullName bill full name
      * @return warped bill
      */
-    private Bitmap CropAndWarpPerspective(Bitmap bill, String billFullName) {
+    private Bitmap WarpPerspective(Bitmap bill, String billFullName) {
         Point mTopLeft = new Point();
         Point mTopRight = new Point();
         Point mButtomLeft = new Point();
