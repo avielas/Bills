@@ -215,7 +215,6 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         _processedImageView.setImageBitmap(_processedBill);
         Mat processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTMMAT(warpedMatCopy);
         Utils.matToBitmap(processedBillForCreateNewBill, _processedBillForCreateNewBill);
-        _processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTMBitmap(_bill);
         _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedForCreateNewBillImageView);
         warpedMat.release();
@@ -225,9 +224,10 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void PreprocessingForParsing() {
-//        Utils.bitmapToMat(_bill, _rgba);
-//        AdaptiveThreshold(_rgba, 100, 33.0);
-//        Utils.matToBitmap(_rgba, _processedBill);
+        Mat processedBillForParsingMat = new Mat();
+        Utils.bitmapToMat(_processedBillForCreateNewBill, processedBillForParsingMat);
+        Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsingMAT(processedBillForParsingMat);
+        Utils.matToBitmap(processedItemsAreaMat, _processedBill);
         _originalImageView.setImageBitmap(_bill);
         _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
         _processedImageView.setImageBitmap(_processedBill);
@@ -423,9 +423,17 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 try {
                     _results.setLength(0);
                     int numOfItems = templateMatcher.priceAndQuantity.size();
+                    LinkedHashMap<Rect, Rect>[] connectionsItemsArea = templateMatcher.connectionsItemsArea;
+                    ArrayList<ArrayList<Rect>> locationsItemsArea = templateMatcher.locationsItemsArea;
+                    ArrayList<Rect> itemLocationsRect = templateMatcher.itemLocationsRect;
+                    ArrayList<Bitmap> itemLocationsByteArray = templateMatcher.itemLocationsByteArray;
                     templateMatcher = null;
                     templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBill);
-                    templateMatcher.ParsingItemsArea(numOfItems);
+                    templateMatcher.connectionsItemsArea = connectionsItemsArea;
+                    templateMatcher.locationsItemsArea = locationsItemsArea;
+                    templateMatcher.itemLocationsRect = itemLocationsRect;
+                    templateMatcher.itemLocationsByteArray = itemLocationsByteArray;
+                    templateMatcher.ParsingItemsAreaWithRects(numOfItems);
                     //ValidateOcrBillResult("Original", _bill);
                     ValidateOcrBillResult("Processed", _processedBill);
                     OpenUserInputDialog();
@@ -442,12 +450,11 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             public void onClick(View arg0) {
                 try {
                     PreprocessingForTemplateMatcher();
-                    templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBillForCreateNewBill, _processedBill);
-                    Bitmap matched = templateMatcher.MatchWhichReturnCroppedItemsArea();
+                    templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBill);
+                    templateMatcher.MatchWhichCreateItemsAreaRects();
                     _bill.recycle();
                     _processedBill.recycle();
-                    _bill = matched.copy(matched.getConfig(), true);
-                    matched.recycle();
+                    _bill = CreateItemsAreaBitmapFromTMRects(templateMatcher.connectionsItemsArea);
                     _processedBill = _bill.copy(_bill.getConfig(), true);
                     PreprocessingForParsing();
                 } catch (Exception e) {
@@ -455,6 +462,47 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 }
             }
         });
+    }
+
+    private Bitmap CreateItemsAreaBitmapFromTMRects(LinkedHashMap<Rect, Rect>[] connections) {
+        final Bitmap newBill = Bitmap.createBitmap(_processedBill.getWidth(), _processedBill.getHeight(), Bitmap.Config.ARGB_8888);
+        final Paint paint = new Paint();
+        final Canvas canvas = new Canvas(newBill);
+
+        canvas.drawColor(Color.WHITE);
+        paint.setColor(Color.BLACK);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setAntiAlias(true);
+        paint.setTextAlign(Paint.Align.RIGHT);
+        paint.setTextSize(50.0f);
+        List<Rect> keyListCurrentIndex = null;
+
+        for (int i = 0; i < connections.length; i++)
+        {
+            if(i == connections.length-1)
+            {
+                keyListCurrentIndex = new ArrayList<>(connections[i-1].values());
+            }
+            else
+            {
+                keyListCurrentIndex = new ArrayList<>(connections[i].keySet());
+            }
+
+            for(int j = 0; j < keyListCurrentIndex.size(); j++)
+            {
+                /**** the following code is for debugging  ****/
+//                int xBegin   = keyListCurrentIndex.get(j).left;
+//                int xEnd  = keyListCurrentIndex.get(j).right;
+//                int yBegin    = keyListCurrentIndex.get(j).top;
+//                int yEnd = keyListCurrentIndex.get(j).bottom;
+//                Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
+//                FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/rect_" + i + "_" + j + ".jpg");
+//                bitmap.recycle();
+                /**********************************************/
+                canvas.drawBitmap(_processedBillForCreateNewBill, keyListCurrentIndex.get(j), keyListCurrentIndex.get(j), paint);
+            }
+        }
+        return newBill;
     }
 
     public void AddListenerPrintWordsLocationButton() {
