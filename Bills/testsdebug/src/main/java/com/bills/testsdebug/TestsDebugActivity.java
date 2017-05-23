@@ -612,7 +612,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
     }
 
     private Bitmap GetLastCapturedBill() throws IOException {
-        byte[] bytes = FilesHandler.ReadFromTXTFile(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
+        byte[] bytes = FilesHandler.ImageTxtFile2ByteArray(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
         Bitmap bitmap = FilesHandler.ByteArrayToBitmap(bytes);
         bitmap = FilesHandler.Rotating(bitmap);
         return bitmap;

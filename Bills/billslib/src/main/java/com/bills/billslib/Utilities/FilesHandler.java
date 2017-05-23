@@ -6,11 +6,15 @@ import android.graphics.Matrix;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by avielavr on 5/8/2017.
@@ -88,7 +92,7 @@ public class FilesHandler {
         return bitmap;
     }
 
-    public static byte[] ReadFromTXTFile(String path) throws IOException {
+    public static byte[] ImageTxtFile2ByteArray(String path) throws IOException {
         File file = new File(path);
         int size = (int) file.length();
         byte[] image = new byte[size];
@@ -107,6 +111,24 @@ public class FilesHandler {
         return rotated;
     }
 
+    /**
+     *
+     * @param fileFullName txt file full name on device
+     * @return list of string with file lines
+     * @throws IOException
+     */
+    public static List<String> ReadTxtFile(String fileFullName) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(fileFullName));
+        // do reading, usually loop until end of file reading
+        List<String> lines = new ArrayList<>();
+        String line = bufferedReader.readLine();
+        while (line != null) {
+            lines.add(line);
+            line = bufferedReader.readLine();
+        }
+        bufferedReader.close();
+        return lines;
+    }
 //    public static Bitmap GetBitmapFromUri(Uri uri) {
 //        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 //        Bitmap bitmap = null;

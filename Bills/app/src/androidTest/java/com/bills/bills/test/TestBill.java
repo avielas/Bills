@@ -11,6 +11,7 @@ import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
+import com.bills.billslib.Utilities.FilesHandler;
 
 import org.beyka.tiffbitmapfactory.TiffBitmapFactory;
 import org.opencv.android.Utils;
@@ -55,20 +56,19 @@ public class TestBill extends Thread{
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            String currRestaurant = _restaurant;
-            String currBill = _bill;
+
             String expectedTxtFileName = _restaurant.toString() + ".txt";
             List<String> expectedBillTextLines = null;
 
             try {
-                expectedBillTextLines = ReadTxtFile(_rootBrandModelDirectory + currRestaurant + "/" + expectedTxtFileName);
+                expectedBillTextLines = FilesHandler.ReadTxtFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            _results.append("Test of " + currBill + System.getProperty("line.separator"));
-            Bitmap bill = TifToBitmap(currBill);
-            Bitmap warpedBitmap = WarpPerspective(bill, currBill);
+            _results.append("Test of " + _bill + System.getProperty("line.separator"));
+            Bitmap billBitmap = TifToBitmap(_bill);
+            Bitmap warpedBitmap = WarpPerspective(billBitmap, _bill);
             Mat warpedMat = new Mat();
             Mat warpedMatCopy = new Mat();
             Utils.bitmapToMat(warpedBitmap, warpedMat);
@@ -100,7 +100,7 @@ public class TestBill extends Thread{
             LinkedHashMap ocrResultCroppedBill = GetOcrResults(templateMatcher);
             CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);
 
-            bill.recycle();
+            billBitmap.recycle();
             warpedBitmap.recycle();
             processedBillBitmap.recycle();
             warpedMat.release();
@@ -114,25 +114,6 @@ public class TestBill extends Thread{
                 System.out.println(_results);
             }
         }
-    }
-
-    /**
-     *
-     * @param fileFullName txt file full name on device
-     * @return list of string with file lines
-     * @throws IOException
-     */
-    private static List<String> ReadTxtFile(String fileFullName) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(fileFullName));
-        // do reading, usually loop until end of file reading
-        List<String> lines = new ArrayList<>();
-        String line = bufferedReader.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = bufferedReader.readLine();
-        }
-        bufferedReader.close();
-        return lines;
     }
 
     /**
