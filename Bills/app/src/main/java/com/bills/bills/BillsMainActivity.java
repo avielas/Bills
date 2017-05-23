@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -38,13 +39,15 @@ import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.ItemView;
 import com.bills.billslib.CustomViews.NameView;
-import com.bills.billslib.Utilities.FilesHandler;
 
 
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
-import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import static android.view.View.GONE;
 
@@ -338,23 +341,41 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
 //        _billsMainView.addView(imageView);
 //        return;
 
-        Bitmap processedWarpedBill =  ImageProcessingLib.PreprocessingForTemplateMatcherBitmap(warpedBitmap);
-        Bitmap processedWarpedBillForCreateNewBill =  ImageProcessingLib.PreprocessingForParsingBitmap(warpedBitmap);
-        TemplateMatcher templateMatcher = new TemplateMatcher(_ocrEngine, processedWarpedBillForCreateNewBill, processedWarpedBill);
+        Mat warpedMat = new Mat();
+        Mat warpedMatCopy = new Mat();
+        Utils.bitmapToMat(warpedBitmap, warpedMat);
+        Utils.bitmapToMat(warpedBitmap, warpedMatCopy);
 
-        Bitmap itemsArea = templateMatcher.MatchWhichReturnCroppedItemsArea();
-        Bitmap processedItemsArea =   ImageProcessingLib.PreprocessingForParsingBitmap(itemsArea);
+        Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
+        Mat processedWarpedBill = ImageProcessingLib.PreprocessingForTM(warpedMat);
+        Utils.matToBitmap(processedWarpedBill, processedBillBitmap);
 
+        TemplateMatcher templateMatcher = new TemplateMatcher(_ocrEngine, processedBillBitmap);
+        templateMatcher.Match();
+
+        Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
         int numOfItems = templateMatcher.priceAndQuantity.size();
-        templateMatcher = new TemplateMatcher(_ocrEngine, processedItemsArea);
-        templateMatcher.ParsingItemsArea(numOfItems);
+        LinkedHashMap<Rect, Rect>[] connectionsItemsArea = templateMatcher.connectionsItemsArea;
+        ArrayList<ArrayList<Rect>> locationsItemsArea = templateMatcher.locationsItemsArea;
+        ArrayList<Rect> itemLocationsRect = templateMatcher.itemLocationsRect;
+        ArrayList<Bitmap> itemLocationsByteArray = templateMatcher.itemLocationsByteArray;
 
-        processedWarpedBill.recycle();
-        processedWarpedBillForCreateNewBill.recycle();
-        bitmap.recycle();
-        itemsArea.recycle();
-        processedItemsArea.recycle();
+        /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
+        /***** Out Of Memory when running 4 threads parallel                                      *****/
+        Utils.matToBitmap(processedItemsAreaMat, processedBillBitmap);
+        templateMatcher = new TemplateMatcher(_ocrEngine, processedBillBitmap);
+        templateMatcher.connectionsItemsArea = connectionsItemsArea;
+        templateMatcher.locationsItemsArea = locationsItemsArea;
+        templateMatcher.itemLocationsRect = itemLocationsRect;
+        templateMatcher.itemLocationsByteArray = itemLocationsByteArray;
+        templateMatcher.ParsingItemsAreaWithRects(numOfItems);
+
         warpedBitmap.recycle();
+        processedBillBitmap.recycle();
+        warpedMat.release();
+        warpedMatCopy.release();
+        processedItemsAreaMat.release();
+        processedWarpedBill.release();
 
         int i = 0;
         int[] colors = {Color.RED, Color.BLUE, Color.GREEN};

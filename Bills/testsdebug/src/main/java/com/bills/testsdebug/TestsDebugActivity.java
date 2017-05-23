@@ -41,10 +41,8 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
@@ -188,7 +186,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         _originalImageView.setImageBitmap(_bill);
         _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
 
-        PreprocessingForTemplateMatcher();
+        PreprocessingForTM();
         AddListenerOcrOnPreprocessedButton();
         AddListenerSaveProccessedButton();
         AddListenerGenerateBillButton();
@@ -205,28 +203,23 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void PreprocessingForTemplateMatcher() {
+    private void PreprocessingForTM() {
         Mat warpedMat = new Mat();
-        Mat warpedMatCopy = new Mat();
         Utils.bitmapToMat(_bill, warpedMat);
-        Utils.bitmapToMat(_bill, warpedMatCopy);
-        Mat processedBillMat = ImageProcessingLib.PreprocessingForTemplateMatcherMAT(warpedMat);
+        Mat processedBillMat = ImageProcessingLib.PreprocessingForTM(warpedMat);
         Utils.matToBitmap(processedBillMat, _processedBill);
         _processedImageView.setImageBitmap(_processedBill);
-        Mat processedBillForCreateNewBill = ImageProcessingLib.PreprocessingForParsingBeforeTMMAT(warpedMatCopy);
-        Utils.matToBitmap(processedBillForCreateNewBill, _processedBillForCreateNewBill);
+        Utils.matToBitmap(warpedMat, _processedBillForCreateNewBill);
         _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedForCreateNewBillImageView);
         warpedMat.release();
-        warpedMatCopy.release();
         processedBillMat.release();
-        processedBillForCreateNewBill.release();
     }
 
     private void PreprocessingForParsing() {
         Mat processedBillForParsingMat = new Mat();
         Utils.bitmapToMat(_processedBillForCreateNewBill, processedBillForParsingMat);
-        Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsingMAT(processedBillForParsingMat);
+        Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsing(processedBillForParsingMat);
         Utils.matToBitmap(processedItemsAreaMat, _processedBill);
         _originalImageView.setImageBitmap(_bill);
         _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
@@ -449,9 +442,9 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View arg0) {
                 try {
-                    PreprocessingForTemplateMatcher();
+                    PreprocessingForTM();
                     templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBill);
-                    templateMatcher.MatchWhichCreateItemsAreaRects();
+                    templateMatcher.Match();
                     _bill.recycle();
                     _processedBill.recycle();
                     _bill = CreateItemsAreaBitmapFromTMRects(templateMatcher.connectionsItemsArea);
@@ -806,7 +799,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             _testsDebugView.setVisibility(View.VISIBLE);
             _originalImageView.setImageBitmap(_bill);
             warpedBitmap.recycle();
-            PreprocessingForTemplateMatcher();
+            PreprocessingForTM();
         }
     }
 }

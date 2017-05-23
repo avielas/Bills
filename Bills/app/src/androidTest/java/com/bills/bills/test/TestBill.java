@@ -18,9 +18,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,15 +72,15 @@ public class TestBill extends Thread{
             Utils.bitmapToMat(warpedBitmap, warpedMat);
             Utils.bitmapToMat(warpedBitmap, warpedMatCopy);
             Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-            Mat processedBillMat = ImageProcessingLib.PreprocessingForTemplateMatcherMAT(warpedMat);
+            Mat processedBillMat = ImageProcessingLib.PreprocessingForTM(warpedMat);
+            Utils.matToBitmap(processedBillMat, processedBillBitmap);
 //            File file = new File(currBill);
 //            String pathToSave = file.getParent();
 //            FilesHandler.SaveToJPGFile(processedBillMat, pathToSave + "/processedBillMat.jpg");
-            Utils.matToBitmap(processedBillMat, processedBillBitmap);
             templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
-            templateMatcher.MatchWhichCreateItemsAreaRects();
-            Mat processedBillForParsingMat = ImageProcessingLib.PreprocessingForParsingBeforeTMMAT(warpedMatCopy);
-            Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsingMAT(processedBillForParsingMat);
+            templateMatcher.Match();
+
+            Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
             int numOfItems = templateMatcher.priceAndQuantity.size();
             LinkedHashMap<Rect, Rect>[] connectionsItemsArea = templateMatcher.connectionsItemsArea;
             ArrayList<ArrayList<Rect>> locationsItemsArea = templateMatcher.locationsItemsArea;
@@ -106,7 +104,6 @@ public class TestBill extends Thread{
             warpedMat.release();
             warpedMatCopy.release();
             processedBillMat.release();
-            processedBillForParsingMat.release();
             processedItemsAreaMat.release();
             tesseractOCREngine.End();
 

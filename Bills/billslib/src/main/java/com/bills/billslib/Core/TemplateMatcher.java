@@ -31,14 +31,12 @@ import java.util.logging.FileHandler;
 public class TemplateMatcher  {
     private IOcrEngine mOCREngine;
     private Bitmap mFullBillProcessedImage;
-    private Bitmap mFullBillProcessedImageForCreateNewBill;
     private int itemColumn;
     public final ArrayList<Double[]> priceAndQuantity = new ArrayList<>();
     public ArrayList<Rect> itemLocationsRect = new ArrayList<>();
     public ArrayList<Bitmap> itemLocationsByteArray = new ArrayList<>();
     Boolean secondColumnIsConnected;
     Boolean oneBeforeLastColumnConnected;
-
 
     /******* Global vars for parsing ********/
     public ArrayList<ArrayList<Rect>> locationsItemsArea;
@@ -59,144 +57,7 @@ public class TemplateMatcher  {
         oneBeforeLastColumnConnected = false;
     }
 
-    public TemplateMatcher(IOcrEngine ocrEngine, Bitmap fullBillPreprocessedImageForCreateNewBill,
-                           Bitmap fullBillPreprocessedImage) {
-        if (!ocrEngine.Initialized()) {
-            throw new IllegalArgumentException("OCREngine must be initialized.");
-        }
-        mOCREngine = ocrEngine;
-        mFullBillProcessedImage = fullBillPreprocessedImage;
-        mFullBillProcessedImageForCreateNewBill = fullBillPreprocessedImageForCreateNewBill;
-        secondColumnIsConnected = false;
-        oneBeforeLastColumnConnected = false;
-    }
-
-    public boolean Match() {
-        boolean success;
-        ArrayList<ArrayList<Rect>> locations = GetWordLocations(mFullBillProcessedImage);
-        int lineIndex = 0;
-        //print all word locations to Log
-        for (ArrayList<Rect> line : locations) {
-            String str = "";
-
-            for (Rect word : line) {
-                if(word == null){
-                    continue;
-                }
-                str += word.right + "--> ";
-            }
-            Log.d(this.getClass().getSimpleName(), "Line " + lineIndex++ + ": " + str);
-        }
-
-        LinkedHashMap<Rect, Rect>[] connections = new LinkedHashMap[locations.size() - 1];
-
-        SetConnections(locations, connections);
-
-        int start = -1;
-        List<Map.Entry<Integer, Integer>> startEndOfAreasList = new ArrayList<>();
-        //find largest "connected" area. Two lines are connected if there are at least two words in "similar" location which connected
-        IdentifyOptionalConnectedAreas(locations, connections, start, startEndOfAreasList);
-
-        int maxSizeIndex = Integer.MIN_VALUE;
-        for(int i = 0, maxSize = Integer.MIN_VALUE; i < startEndOfAreasList.size(); i++){
-            if(maxSize < Math.abs(startEndOfAreasList.get(i).getValue() - startEndOfAreasList.get(i).getKey())){
-                maxSize = Math.abs(startEndOfAreasList.get(i).getValue() - startEndOfAreasList.get(i).getKey());
-                maxSizeIndex = i;
-            }
-        }
-
-        int itemsAreaStart = startEndOfAreasList.get(maxSizeIndex).getKey();
-        int itemsAreaEnd = startEndOfAreasList.get(maxSizeIndex).getValue();
-
-        try {
-            GetPriceAndQuantity(itemsAreaStart, itemsAreaEnd, connections, locations);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        SetItemsLocations(itemsAreaStart, itemsAreaEnd, connections, locations);
-        success = true;
-
-        return success;
-    }
-
-    private boolean SaveToFile(Bitmap bmp, String path){
-        FileOutputStream out = null;
-        try {
-            File file = new File(path);
-            if(file.exists()){
-                file.delete();
-            }
-            out = new FileOutputStream(path);
-
-            // bmp is your Bitmap instance, PNG is a lossless format, the compression factor (100) is ignored
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
-    public Bitmap MatchWhichReturnCroppedItemsArea() {
-        boolean success;
-        ArrayList<ArrayList<Rect>> locations = GetWordLocations(mFullBillProcessedImage);
-        int lineIndex = 0;
-        //print all word locations to Log
-        for (ArrayList<Rect> line : locations) {
-            String str = "";
-
-            for (Rect word : line) {
-                if(word == null){
-                    continue;
-                }
-                str += word.right + "--> ";
-            }
-            Log.d(this.getClass().getSimpleName(), "Line " + lineIndex++ + ": " + str);
-        }
-
-        LinkedHashMap<Rect, Rect>[] connections = new LinkedHashMap[locations.size() - 1];
-
-        SetConnections(locations, connections);
-
-        int start = -1;
-        List<Map.Entry<Integer, Integer>> startEndOfAreasList = new ArrayList<>();
-        //find largest "connected" area. Two lines are connected if there are at least two words in "similar" location which are connected
-        IdentifyOptionalConnectedAreas(locations, connections, start, startEndOfAreasList);
-
-        int maxSizeIndex = Integer.MIN_VALUE;
-        for(int i = 0, maxSize = Integer.MIN_VALUE; i < startEndOfAreasList.size(); i++){
-            if(maxSize < Math.abs(startEndOfAreasList.get(i).getValue() - startEndOfAreasList.get(i).getKey())){
-                maxSize = Math.abs(startEndOfAreasList.get(i).getValue() - startEndOfAreasList.get(i).getKey());
-                maxSizeIndex = i;
-            }
-        }
-
-        int itemsAreaStart = startEndOfAreasList.get(maxSizeIndex).getKey();
-        int itemsAreaEnd = startEndOfAreasList.get(maxSizeIndex).getValue();
-
-        try {
-            GetPriceAndQuantity(itemsAreaStart, itemsAreaEnd, connections, locations);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        SetItemsLocations(itemsAreaStart, itemsAreaEnd, connections, locations);
-        success = true;
-
-        return CreatingImageFromRects(startEndOfAreasList, connections);
-    }
-
-    public void MatchWhichCreateItemsAreaRects() {
+    public void Match() {
         boolean success;
         ArrayList<ArrayList<Rect>> locations = GetWordLocations(mFullBillProcessedImage);
         int lineIndex = 0;
@@ -243,25 +104,6 @@ public class TemplateMatcher  {
         success = true;
 
         CreatingRects(startEndOfAreasList, connections, locations);
-    }
-
-    public void ParsingItemsArea(int numOfItems) {
-        ArrayList<ArrayList<Rect>> locations = GetWordLocations(mFullBillProcessedImage);
-
-        LinkedHashMap<Rect, Rect>[] connections = new LinkedHashMap[locations.size() - 1];
-
-        SetConnections(locations, connections);
-
-        int itemsAreaStart = 0;
-        int itemsAreaEnd = numOfItems - 1;
-
-        try {
-            GetPriceAndQuantity(itemsAreaStart, itemsAreaEnd, connections, locations);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        SetItemsLocations(itemsAreaStart, itemsAreaEnd, connections, locations);
     }
 
     public void ParsingItemsAreaWithRects(int numOfItems) {
@@ -792,23 +634,6 @@ public class TemplateMatcher  {
         return mapper;
     }
 
-    private Bitmap CreatingImageFromRects(List<Map.Entry<Integer, Integer>> startEndOfAreasList, LinkedHashMap<Rect, Rect>[] connections) {
-        Log.d(this.getClass().getSimpleName(), "");
-        int max = 0, beginIndex = 0, endIndex = 0;
-        for (Map.Entry<Integer, Integer> entry : startEndOfAreasList) {
-            int startLine = entry.getKey();
-            int endLine = entry.getValue();
-            int numberOfLines = endLine - startLine;
-            if(numberOfLines > max)
-            {
-                max = numberOfLines;
-                beginIndex = startLine;
-                endIndex = endLine;
-            }
-        }
-        return CreateImage(connections, beginIndex, endIndex);
-    }
-
     private void CreatingRects(List<Map.Entry<Integer, Integer>> startEndOfAreasList, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {
         Log.d(this.getClass().getSimpleName(), "");
         int max = 0, beginIndex = 0, endIndex = 0;
@@ -824,62 +649,6 @@ public class TemplateMatcher  {
             }
         }
         CreateRects(connections, locations, beginIndex, endIndex);
-    }
-
-    private Bitmap CreateImage(LinkedHashMap<Rect, Rect>[] connections, int beginIndex, int endIndex) {
-        final Bitmap newBill = Bitmap.createBitmap(mFullBillProcessedImage.getWidth(), mFullBillProcessedImage.getHeight(), Bitmap.Config.ARGB_8888);
-        final Paint paint = new Paint();
-        final Canvas canvas = new Canvas(newBill);
-
-        canvas.drawColor(Color.WHITE);
-        paint.setColor(Color.BLACK);
-        paint.setStyle(Paint.Style.FILL);
-        paint.setAntiAlias(true);
-        paint.setTextAlign(Paint.Align.RIGHT);
-        paint.setTextSize(50.0f);
-//        List<Rect> keyListLastIndex = null;
-//        List<Rect> keyListBeginIndex = null;
-        List<Rect> keyListCurrentIndex = null;
-
-        for (int i = beginIndex; i < endIndex + 1; i++)
-        {
-
-            if(i == endIndex)
-            {
-//                keyListLastIndex = new ArrayList<>(connections[i-1].values());
-                keyListCurrentIndex = new ArrayList<>(connections[i-1].values());
-            }
-//            else if(i == beginIndex)
-            else
-            {
-//                keyListBeginIndex = new ArrayList<>(connections[i].keySet());
-                keyListCurrentIndex = new ArrayList<>(connections[i].keySet());
-            }
-
-            for(int j = 0; j < keyListCurrentIndex.size(); j++)
-            {
-                /**** the following code is for debugging  ****/
-//                int xBegin   = keyListCurrentIndex.get(j).left;
-//                int xEnd  = keyListCurrentIndex.get(j).right;
-//                int yBegin    = keyListCurrentIndex.get(j).top;
-//                int yEnd = keyListCurrentIndex.get(j).bottom;
-//                Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
-//                FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/rect_" + i + "_" + j + ".jpg");
-//                bitmap.recycle();
-                /**********************************************/
-                canvas.drawBitmap(mFullBillProcessedImageForCreateNewBill, keyListCurrentIndex.get(j), keyListCurrentIndex.get(j), paint);
-            }
-        }
-//        int size = keyListLastIndex.size();
-//        int x0   = keyListBeginIndex.get(0).left;
-//        int y0    = keyListBeginIndex.get(0).top;
-//        int xn   = keyListLastIndex.get(size - 1).right;
-//        int yn    = keyListLastIndex.get(size - 1).bottom;
-//        Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, x0, y0, xn-x0, yn-y0);
-//        FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/rect_tot.jpg");
-//        bitmap.recycle();
-//        canvas.drawBitmap(mFullBillProcessedImageForCreateNewBill, keyListCurrentIndex.get(j), keyListCurrentIndex.get(j), paint);
-        return newBill;
     }
 
     private void CreateRects(LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations, int beginIndex, int endIndex) {

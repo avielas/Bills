@@ -134,21 +134,7 @@ public class ImageProcessingLib {
         return result.Get();
     }
 
-    public static Bitmap PreprocessingForTemplateMatcherBitmap(Bitmap image) {
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
-        Mat rgba = new Mat();
-        Bitmap processed = Bitmap.createBitmap(image);
-        Utils.bitmapToMat(processed, rgba);
-        AdaptiveThreshold(rgba, 60, 45.0);
-        Erode(rgba, 1, 4, StructureElement.VERTICAL_LINE.toString());
-        Utils.matToBitmap(rgba, processed);
-        rgba.release();
-        return processed;
-    }
-
-    public static Mat PreprocessingForTemplateMatcherMAT(Mat rgba) {
+    public static Mat PreprocessingForTM(Mat rgba) {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
@@ -157,50 +143,11 @@ public class ImageProcessingLib {
         return rgba;
     }
 
-    public static Bitmap PreprocessingForParsingBeforeTMBitmap(Bitmap image) {
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
-        Mat rgba = new Mat();
-        Bitmap processed = Bitmap.createBitmap(image);
-        Utils.bitmapToMat(processed, rgba);
-        AdaptiveThreshold(rgba, 100, 33.0);
-//        Erode(rgba, 1, 4, StructureElement.VERTICAL_LINE.toString());
-        Utils.matToBitmap(rgba, processed);
-        rgba.release();
-        return processed;
-    }
-
-    public static Mat PreprocessingForParsingBeforeTMMAT(Mat rgba) {
+    public static Mat PreprocessingForParsing(Mat rgba) {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
         AdaptiveThreshold(rgba, 100, 33.0);
-        return rgba;
-    }
-
-    public static Bitmap PreprocessingForParsingBitmap(Bitmap image) {
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
-        Mat rgba = new Mat();
-        Bitmap processed = Bitmap.createBitmap(image);
-        Utils.bitmapToMat(processed, rgba);
-//        AdaptiveThreshold(rgba, 100, 33.0);
-        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
-        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
-        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
-        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
-        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
-        Utils.matToBitmap(rgba, processed);
-        rgba.release();
-        return processed;
-    }
-
-    public static Mat PreprocessingForParsingMAT(Mat rgba) {
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
         Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
         Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
         Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
