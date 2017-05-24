@@ -618,27 +618,14 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             return bitmap;
         }
         /** Preparing Warp Perspective Dimensions **/
-        int newWidth = (int) Math.max(_buttomRight.x - _buttomLeft.x, _topRight.x - _topLeft.x);
-        int newHeight = (int) Math.max(_buttomRight.y - _topRight.y, _buttomLeft.y - _topLeft.y);
-        int xBegin = (int) Math.min(_topLeft.x, _buttomLeft.x);
-        int yBegin = (int) Math.min(_topLeft.y, _topRight.y);
-        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, xBegin, yBegin, newWidth, newHeight);
-        Bitmap warpedBitmap = Bitmap.createBitmap(newWidth , newHeight, bitmap.getConfig());
-        _topLeft.x = _topLeft.x - xBegin;
-        _topLeft.y = _topLeft.y - yBegin;
-        _topRight.x = _topRight.x - xBegin;
-        _topRight.y = _topRight.y - yBegin;
-        _buttomRight.x = _buttomRight.x - xBegin;
-        _buttomRight.y = _buttomRight.y - yBegin;
-        _buttomLeft.x = _buttomLeft.x - xBegin;
-        _buttomLeft.y = _buttomLeft.y - yBegin;
-        if(!ImageProcessingLib.WarpPerspective(resizedBitmap, warpedBitmap, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
+        Bitmap warpedBitmap = null;
+        try{
+            warpedBitmap = ImageProcessingLib.WarpPerspective(bitmap, _topLeft, _topRight, _buttomRight, _buttomLeft);
+        }
+        catch (Exception ex){
             Log.d(this.getClass().getSimpleName(), "Failed to warp perspective");
-            resizedBitmap.recycle();
-            warpedBitmap.recycle();
             return bitmap;
         }
-        resizedBitmap.recycle();
         bitmap.recycle();
         FilesHandler.SaveToJPGFile(warpedBitmap, Constants.WARPED_JPG_PHOTO_PATH);
         return warpedBitmap;
@@ -765,28 +752,14 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             _buttomRight = new Point(x,y);
 
             /** Preparing Warp Perspective Dimensions **/
-            int newWidth = (int) Math.max(_buttomRight.x - _buttomLeft.x, _topRight.x - _topLeft.x);
-            int newHeight = (int) Math.max(_buttomRight.y - _topRight.y, _buttomLeft.y - _topLeft.y);
-            int xBegin = (int) Math.min(_topLeft.x, _buttomLeft.x);
-            int yBegin = (int) Math.min(_topLeft.y, _topRight.y);
-            Bitmap resizedBitmap = Bitmap.createBitmap(_bill, xBegin, yBegin, newWidth, newHeight);
-            Bitmap warpedBitmap = Bitmap.createBitmap(newWidth , newHeight, _bill.getConfig());
-            _topLeft.x = _topLeft.x - xBegin;
-            _topLeft.y = _topLeft.y - yBegin;
-            _topRight.x = _topRight.x - xBegin;
-            _topRight.y = _topRight.y - yBegin;
-            _buttomRight.x = _buttomRight.x - xBegin;
-            _buttomRight.y = _buttomRight.y - yBegin;
-            _buttomLeft.x = _buttomLeft.x - xBegin;
-            _buttomLeft.y = _buttomLeft.y - yBegin;
-
-            if(!ImageProcessingLib.WarpPerspective(resizedBitmap, warpedBitmap, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
+            Bitmap warpedBitmap = null;
+            try{
+                warpedBitmap = ImageProcessingLib.WarpPerspective(_bill, _topLeft, _topRight, _buttomRight, _buttomLeft);
+            }
+            catch (Exception ex){
                 Log.d(this.getClass().getSimpleName(), "Failed to warp perspective");
-                resizedBitmap.recycle();
-                warpedBitmap.recycle();
                 return;
             }
-            resizedBitmap.recycle();
             FilesHandler.SaveToJPGFile(warpedBitmap, Constants.WARPED_JPG_PHOTO_PATH);
             _billWithPrintedRedLines.recycle();
             _processedBill.recycle();
