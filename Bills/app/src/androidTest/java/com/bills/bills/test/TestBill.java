@@ -169,32 +169,19 @@ public class TestBill extends Thread{
         BillAreaDetector.GetBillCorners(bill , mTopLeft, mTopRight, mButtomRight, mButtomLeft);
 
         /** Preparing Warp Perspective Dimensions **/
-        int newWidth = (int) Math.max(mButtomRight.x - mButtomLeft.x, mTopRight.x - mTopLeft.x);
-        int newHeight = (int) Math.max(mButtomRight.y - mTopRight.y, mButtomLeft.y - mTopLeft.y);
-        int xBegin = (int) Math.min(mTopLeft.x, mButtomLeft.x);
-        int yBegin = (int) Math.min(mTopLeft.y, mTopRight.y);
-        Bitmap resizedBitmap = Bitmap.createBitmap(bill, xBegin, yBegin, newWidth, newHeight);
-        Bitmap warpedBitmap = Bitmap.createBitmap(newWidth , newHeight, bill.getConfig());
-        mTopLeft.x = mTopLeft.x - xBegin;
-        mTopLeft.y = mTopLeft.y - yBegin;
-        mTopRight.x = mTopRight.x - xBegin;
-        mTopRight.y = mTopRight.y - yBegin;
-        mButtomRight.x = mButtomRight.x - xBegin;
-        mButtomRight.y = mButtomRight.y - yBegin;
-        mButtomLeft.x = mButtomLeft.x - xBegin;
-        mButtomLeft.y = mButtomLeft.y - yBegin;
 
-        if(!ImageProcessingLib.WarpPerspective(resizedBitmap, warpedBitmap, mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+        Bitmap warpedBitmap = null;
+        try{
+            warpedBitmap = ImageProcessingLib.WarpPerspective(bill, mTopLeft,mTopRight, mButtomRight, mButtomLeft);
+        }
+        catch (Exception ex){
             _results.append("Failed to warp perspective " + billFullName + System.getProperty("line.separator"));
-            warpedBitmap.recycle();
-            resizedBitmap.recycle();
             return null;
         }
 
 //        File file = new File(billFullName);
 //        String warpPathToSave = file.getParent();
 //        FilesHandler.SaveToJPGFile(warpedBitmap, warpPathToSave + "/warped.jpg");
-        resizedBitmap.recycle();
         return warpedBitmap;
     }
 
