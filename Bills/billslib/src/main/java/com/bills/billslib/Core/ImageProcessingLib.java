@@ -50,8 +50,24 @@ public class ImageProcessingLib {
         CROSS_SHAPED
     }
 
-    public static boolean WarpPerspective(final Bitmap inputImage, final Bitmap outputImage,
-                                          final Point topLeft, final Point topRight, final Point buttomRight, final Point buttomLeft) {
+    public static Bitmap WarpPerspective(final Bitmap inputImage, final Point topLeft, final Point topRight,
+                                          final Point buttomRight, final Point buttomLeft) throws Exception {
+
+        int newWidth = (int) Math.max(buttomRight.x - buttomLeft.x, topRight.x - topLeft.x);
+        int newHeight = (int) Math.max(buttomRight.y - topRight.y, buttomLeft.y - topLeft.y);
+        int xBegin = (int) Math.min(topLeft.x, buttomLeft.x);
+        int yBegin = (int) Math.min(topLeft.y, topRight.y);
+        final Bitmap resizedBitmap = Bitmap.createBitmap(inputImage, xBegin, yBegin, newWidth, newHeight);
+        final Bitmap warpedBitmap = Bitmap.createBitmap(newWidth , newHeight, inputImage.getConfig());
+        topLeft.x = topLeft.x - xBegin;
+        topLeft.y = topLeft.y - yBegin;
+        topRight.x = topRight.x - xBegin;
+        topRight.y = topRight.y - yBegin;
+        buttomRight.x = buttomRight.x - xBegin;
+        buttomRight.y = buttomRight.y - yBegin;
+        buttomLeft.x = buttomLeft.x - xBegin;
+        buttomLeft.y = buttomLeft.y - yBegin;
+
         final MutableBoolean result = new MutableBoolean(false);
         final Double outputImageWidth = Math.max(Math.abs(topLeft.x - topRight.x), Math.abs(buttomLeft.x - buttomRight.x));
         final Double outputImageHeight = Math.max(Math.abs(topLeft.y - buttomLeft.y), Math.abs(topRight.y - buttomRight.y));
@@ -71,11 +87,11 @@ public class ImageProcessingLib {
                         // Handle initialization error
                     }
 
-                    int inputImageWidth = inputImage.getWidth();
-                    int inputImageHeight = inputImage.getHeight();
+                    int inputImageWidth = resizedBitmap.getWidth();
+                    int inputImageHeight = resizedBitmap.getHeight();
 
                     inputMat = new Mat(inputImageHeight, inputImageWidth, CvType.CV_8UC4);
-                    Utils.bitmapToMat(inputImage, inputMat);
+                    Utils.bitmapToMat(resizedBitmap, inputMat);
 
 
                     List<Point> source = InitializePerspectiveTransformPoints(
@@ -100,7 +116,7 @@ public class ImageProcessingLib {
                     int param = Imgproc.INTER_AREA;
                     Imgproc.warpPerspective(inputMat, outputMat, perspectiveTransform, new Size(inputImageWidth, inputImageHeight), param);
 
-                    Utils.matToBitmap(outputMat, outputImage);
+                    Utils.matToBitmap(outputMat, warpedBitmap);
                     result.Set(true);
                 }
                 catch (Exception ex){
@@ -122,6 +138,9 @@ public class ImageProcessingLib {
                     if (perspectiveTransform != null) {
                         perspectiveTransform.release();
                     }
+                    if(resizedBitmap != null && !resizedBitmap.isRecycled()){
+                        resizedBitmap.recycle();
+                    }
                 }
             }
         });
@@ -131,7 +150,10 @@ public class ImageProcessingLib {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return result.Get();
+        if(result.Get()) {
+            return warpedBitmap;
+        }
+        throw new Exception("Failed to warp perspective");
     }
 
     public static Mat PreprocessingForTM(Mat rgba) {
