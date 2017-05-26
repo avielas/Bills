@@ -315,13 +315,15 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
             return;
         }
 
-        Bitmap warpedBitmap = Bitmap.createBitmap(bitmap);
-        if(!ImageProcessingLib.WarpPerspective(bitmap, warpedBitmap, topLeft,topRight, buttomRight, buttomLeft)){
+        Bitmap warpedBitmap = null;
+        try {
+            warpedBitmap = ImageProcessingLib.WarpPerspective(bitmap, topLeft,topRight, buttomRight, buttomLeft);
+        } catch (Exception e) {
+            e.printStackTrace();
             //TODO: decide what to do. Retake the picture? crash the app?
             TextView textView = new TextView(this);
             textView.setText("Failed to warp perspective on the image.");
             _billSummarizerContainerView.addView(textView);
-
         }
 
 //        Paint paint = new Paint();
