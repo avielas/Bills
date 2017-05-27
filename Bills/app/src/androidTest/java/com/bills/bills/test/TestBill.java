@@ -1,8 +1,6 @@
 package com.bills.bills.test;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.graphics.Rect;
 
 import com.bills.billslib.Contracts.Constants;
@@ -13,12 +11,10 @@ import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.Utilities.FilesHandler;
 
-import org.beyka.tiffbitmapfactory.TiffBitmapFactory;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,16 +53,22 @@ public class TestBill extends Thread{
 
             String expectedTxtFileName = _restaurant.toString() + ".txt";
             List<String> expectedBillTextLines = null;
+            byte[] billBytes = null;
 
             try {
                 expectedBillTextLines = FilesHandler.ReadTxtFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
+                billBytes = FilesHandler.ImageTxtFile2ByteArray(_bill);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
             _results.append("Test of " + _bill + System.getProperty("line.separator"));
-            Bitmap billBitmap = TifToBitmap(_bill);
+//            File file = new File(_bill);
+//            String pathToSave = file.getParent();
+            Bitmap billBitmap = FilesHandler.Rotating(FilesHandler.ByteArrayToBitmap(billBytes));
+//            FilesHandler.SaveToJPGFile(billBitmap, pathToSave + "/billBitmap.jpg");
             Bitmap warpedBitmap = WarpPerspective(billBitmap, _bill);
+//            FilesHandler.SaveToJPGFile(warpedBitmap, pathToSave + "/warpedBitmap.jpg");
             Mat warpedMat = new Mat();
             Mat warpedMatCopy = new Mat();
             Utils.bitmapToMat(warpedBitmap, warpedMat);
@@ -74,9 +76,6 @@ public class TestBill extends Thread{
             Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
             Mat processedBillMat = ImageProcessingLib.PreprocessingForTM(warpedMat);
             Utils.matToBitmap(processedBillMat, processedBillBitmap);
-//            File file = new File(currBill);
-//            String pathToSave = file.getParent();
-//            FilesHandler.SaveToJPGFile(processedBillMat, pathToSave + "/processedBillMat.jpg");
             templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
             templateMatcher.Match();
 
@@ -111,29 +110,6 @@ public class TestBill extends Thread{
                 System.out.println(_results);
             }
         }
-    }
-
-    /**
-     *
-     * @param tifFilePath path of tif file
-     * @return rotated bitmap
-     */
-    private Bitmap TifToBitmap(String tifFilePath) {
-        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-        Bitmap bitmap = null;
-        bitmapOptions.inMutable = true;
-        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        TiffBitmapFactory.Options options = new TiffBitmapFactory.Options();
-        options.inAvailableMemory = 1024 * 1024 * 10 * 3; //30 mb
-        File file = new File(tifFilePath);
-        bitmap = TiffBitmapFactory.decodeFile(file, options);
-
-        Matrix matrix = new Matrix();
-        matrix.postRotate(90);
-        Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-        bitmap.recycle();
-
-        return rotated;
     }
 
     /**

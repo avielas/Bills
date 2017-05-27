@@ -1,34 +1,18 @@
 package com.bills.bills.test;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.os.Build;
 
 import com.bills.billslib.Contracts.Constants;
-import com.bills.billslib.Contracts.Enums.Language;
-import com.bills.billslib.Core.BillAreaDetector;
-import com.bills.billslib.Core.ImageProcessingLib;
-import com.bills.billslib.Core.TemplateMatcher;
-import com.bills.billslib.Core.TesseractOCREngine;
 
-import org.beyka.tiffbitmapfactory.TiffBitmapFactory;
-import org.beyka.tiffbitmapfactory.TiffSaver;
 import org.junit.Test;
-import org.opencv.core.Point;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -92,7 +76,7 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList( "mina", "dovrin1", "pastaMarket3", "pastaMarket2" /*, "pastaMarket1", "dovrin2", "shanan1" , "shanan2"*/);
+                _restaurantsNamesTestFilter = Arrays.asList( "mina1", "dovrin1", "pastaMarket1"/*, "pastaMarket2" */);
                 _billsTestFilter = Arrays.asList(/* "12112016_1355_croppedCenter.jpg" */);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);
@@ -212,8 +196,8 @@ public class TestBench {
             if (file.isDirectory()) {
                 files.addAll(GetBills(file, restaurantName));
             } else {
-                if(file.getName().endsWith(".tif") &&
-                        file.getName().contains("ocr") &&
+                if(file.getName().endsWith(".txt") &&
+                        file.getName().contains("ocrBytes") &&
                         IsFileNameContainAnyRestaurants(file.getPath(), restaurantName))
                     files.add(file);
             }
