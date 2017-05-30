@@ -1,7 +1,6 @@
 package com.bills.bills.test;
 
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
@@ -13,7 +12,6 @@ import com.bills.billslib.Utilities.FilesHandler;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,6 +60,7 @@ public class TestBill extends Thread{
             Mat warpedMatCopy = new Mat();
             Utils.bitmapToMat(billBitmap, warpedMat);
             Utils.bitmapToMat(billBitmap, warpedMatCopy);
+
             Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
             ImageProcessingLib.PreprocessingForTM(warpedMat);
             Utils.matToBitmap(warpedMat, processedBillBitmap);
@@ -70,18 +69,10 @@ public class TestBill extends Thread{
 
             ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
             int numOfItems = templateMatcher.priceAndQuantity.size();
-            LinkedHashMap<Rect, Rect>[] connectionsItemsArea = templateMatcher.connectionsItemsArea;
-            ArrayList<ArrayList<Rect>> locationsItemsArea = templateMatcher.locationsItemsArea;
-            ArrayList<Rect> itemLocationsRect = templateMatcher.itemLocationsRect;
-            ArrayList<Bitmap> itemLocationsByteArray = templateMatcher.itemLocationsByteArray;
             /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
             /***** Out Of Memory when running 4 threads parallel                                      *****/
             Utils.matToBitmap(warpedMatCopy, processedBillBitmap);
-            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
-            templateMatcher.connectionsItemsArea = connectionsItemsArea;
-            templateMatcher.locationsItemsArea = locationsItemsArea;
-            templateMatcher.itemLocationsRect = itemLocationsRect;
-            templateMatcher.itemLocationsByteArray = itemLocationsByteArray;
+            templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
             templateMatcher.Parsing(numOfItems);
             LinkedHashMap ocrResultCroppedBill = GetOcrResults(templateMatcher);
             CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);

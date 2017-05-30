@@ -30,11 +30,11 @@ import java.util.logging.FileHandler;
 
 public class TemplateMatcher  {
     private IOcrEngine mOCREngine;
-    private Bitmap mFullBillProcessedImage;
     private int itemColumn;
     public final ArrayList<Double[]> priceAndQuantity = new ArrayList<>();
     public ArrayList<Rect> itemLocationsRect = new ArrayList<>();
     public ArrayList<Bitmap> itemLocationsByteArray = new ArrayList<>();
+    public Bitmap mFullBillProcessedImage;
     Boolean secondColumnIsConnected;
     Boolean oneBeforeLastColumnConnected;
 
@@ -55,6 +55,16 @@ public class TemplateMatcher  {
         mFullBillProcessedImage = fullBillPreprocessedImage;
         secondColumnIsConnected = false;
         oneBeforeLastColumnConnected = false;
+    }
+
+    public void InitializeBeforeSecondUse(Bitmap fullBillPreprocessedImage){
+        if (!mOCREngine.Initialized()) {
+            throw new IllegalArgumentException("OCREngine must be initialized.");
+        }
+        mFullBillProcessedImage = fullBillPreprocessedImage;
+        secondColumnIsConnected = false;
+        oneBeforeLastColumnConnected = false;
+        priceAndQuantity.clear();
     }
 
     public void Match() {
@@ -107,11 +117,9 @@ public class TemplateMatcher  {
     }
 
     public void Parsing(int numOfItems) {
-        ArrayList<ArrayList<Rect>> locations = locationsItemsArea; //GetWordLocations(mFullBillProcessedImage);
+        ArrayList<ArrayList<Rect>> locations = locationsItemsArea;
 
-        LinkedHashMap<Rect, Rect>[] connections = connectionsItemsArea; //new LinkedHashMap[locations.size() - 1];
-
-//        SetConnections(locations, connections);
+        LinkedHashMap<Rect, Rect>[] connections = connectionsItemsArea;
 
         int itemsAreaStart = 0;
         int itemsAreaEnd = numOfItems - 1;
@@ -121,8 +129,6 @@ public class TemplateMatcher  {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        SetItemsLocations(itemsAreaStart, itemsAreaEnd, connections, locations);
     }
 
     private void SetConnections(ArrayList<ArrayList<Rect>> locations, LinkedHashMap<Rect, Rect>[] connections) {

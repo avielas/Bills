@@ -408,16 +408,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 try {
                     _results.setLength(0);
                     int numOfItems = templateMatcher.priceAndQuantity.size();
-                    LinkedHashMap<Rect, Rect>[] connectionsItemsArea = templateMatcher.connectionsItemsArea;
-                    ArrayList<ArrayList<Rect>> locationsItemsArea = templateMatcher.locationsItemsArea;
-                    ArrayList<Rect> itemLocationsRect = templateMatcher.itemLocationsRect;
-                    ArrayList<Bitmap> itemLocationsByteArray = templateMatcher.itemLocationsByteArray;
-                    templateMatcher = null;
-                    templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBill);
-                    templateMatcher.connectionsItemsArea = connectionsItemsArea;
-                    templateMatcher.locationsItemsArea = locationsItemsArea;
-                    templateMatcher.itemLocationsRect = itemLocationsRect;
-                    templateMatcher.itemLocationsByteArray = itemLocationsByteArray;
+                    templateMatcher.InitializeBeforeSecondUse(_processedBill);
                     templateMatcher.Parsing(numOfItems);
                     //ValidateOcrBillResult("Original", _warpedBill);
                     ValidateOcrBillResult("Processed", _processedBill);
