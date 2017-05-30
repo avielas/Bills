@@ -182,7 +182,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         _originalImageView.setImageBitmap(_warpedBill);
         _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
 
-        PreprocessingForTM();
+        Preprocessing();
         AddListenerOcrOnPreprocessedButton();
         AddListenerSaveProccessedButton();
         AddListenerGenerateBillButton();
@@ -199,36 +199,23 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void PreprocessingForTM() {
+    private void Preprocessing() {
         Mat warpedMat = new Mat();
         Mat warpedMatCopy = new Mat();
         Utils.bitmapToMat(_warpedBill, warpedMat);
         Utils.bitmapToMat(_warpedBill, warpedMatCopy);
-        Mat processedBillForTMMat = ImageProcessingLib.PreprocessingForTM(warpedMat);
-        Mat processedBillForParsingMat = ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
+        ImageProcessingLib.PreprocessingForTM(warpedMat);
+        ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
         _processedBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
         _processedBillForCreateNewBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(processedBillForTMMat, _processedBill);
+        Utils.matToBitmap(warpedMat, _processedBill);
         _processedImageView.setImageBitmap(_processedBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
-        Utils.matToBitmap(processedBillForParsingMat, _processedBillForCreateNewBill);
+        Utils.matToBitmap(warpedMatCopy, _processedBillForCreateNewBill);
         _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedForCreateNewBillImageView);
         warpedMat.release();
         warpedMatCopy.release();
-        processedBillForTMMat.release();
-        processedBillForParsingMat.release();
-    }
-
-    private void PreprocessingForParsing() {
-//        Mat processedBillForParsingMat = new Mat();
-//        Utils.bitmapToMat(_processedBillForCreateNewBill, processedBillForParsingMat);
-//        Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsing(processedBillForParsingMat);
-//        Utils.matToBitmap(processedItemsAreaMat, _processedBill);
-        _originalImageView.setImageBitmap(_warpedBill);
-        _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
-        _processedImageView.setImageBitmap(_processedBill);
-        _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
     }
 
     public void AddListenerAdaptiveThresholdButton() {
@@ -453,7 +440,10 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                     _processedBill.recycle();
                     _warpedBill = CreateItemsAreaBitmapFromTMRects(templateMatcher.connectionsItemsArea);
                     _processedBill = _warpedBill.copy(_warpedBill.getConfig(), true);
-                    PreprocessingForParsing();
+                    _originalImageView.setImageBitmap(_warpedBill);
+                    _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
+                    _processedImageView.setImageBitmap(_processedBill);
+                    _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -503,10 +493,6 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 canvas.drawBitmap(_processedBillForCreateNewBill, keyListCurrentIndex.get(j), keyListCurrentIndex.get(j), paint);
             }
         }
-        String pathToSave = Constants.IMAGES_PATH;
-        FilesHandler.SaveToJPGFile(_processedBillForCreateNewBill, pathToSave + "/processedBillForCreateNewBill.jpg");
-        FilesHandler.SaveToJPGFile(newBill, pathToSave + "/newBill.jpg");
-
         return newBill;
     }
 
@@ -779,7 +765,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             _testsDebugView.setVisibility(View.VISIBLE);
             _originalImageView.setImageBitmap(_warpedBill);
             warpedBitmap.recycle();
-            PreprocessingForTM();
+            Preprocessing();
         }
     }
 }
