@@ -177,14 +177,14 @@ public class FilesHandler {
 //        }
 //        Mat mat = new Mat();
 //        Utils.bitmapToMat(bitmap, mat);
-//        if (!areaDetector.GetBillCornersMat(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+//        if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
 //            Log.d("Error", "Failed ot get bounding rectangle automatically.");
 //            return bitmap;
 //        }
 //        /** Preparing Warp Perspective Dimensions **/
 //        Bitmap warpedBitmap = null;
 //        try{
-//            Mat warpedBitmapReturned = ImageProcessingLib.WarpPerspectiveMat(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+//            Mat warpedBitmapReturned = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
 //            warpedBitmap = Bitmap.createBitmap(warpedBitmapReturned.width(), warpedBitmapReturned.height(), Bitmap.Config.ARGB_8888);
 //            Utils.matToBitmap(warpedBitmapReturned, warpedBitmap);
 ////            FilesHandler.SaveToJPGFile(warpedBitmap, Constants.PREPROCESSED_CAPTURED_PHOTO_PATH);
@@ -210,14 +210,14 @@ public class FilesHandler {
         }
         Mat mat = new Mat();
         Utils.bitmapToMat(bitmap, mat);
-        if (!areaDetector.GetBillCornersMat(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+        if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
             Log.d("Error", "Failed ot get bounding rectangle automatically.");
             return mat;
         }
         /** Preparing Warp Perspective Dimensions **/
         Mat warpedBitmapReturned;
         try{
-            warpedBitmapReturned = ImageProcessingLib.WarpPerspectiveMat(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+            warpedBitmapReturned = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
 //            warpedBitmap = Bitmap.createBitmap(warpedBitmapReturned.width(), warpedBitmapReturned.height(), Bitmap.Config.ARGB_8888);
 //            Utils.matToBitmap(warpedBitmapReturned, warpedBitmap);
 //            FilesHandler.SaveToJPGFile(warpedBitmap, Constants.PREPROCESSED_CAPTURED_PHOTO_PATH);

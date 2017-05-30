@@ -653,7 +653,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 Mat warpedBillMat = new Mat();
                 Utils.bitmapToMat(_warpedBill, warpedBillMat);
 
-                if (!areaDetector.GetBillCornersMat(warpedBillMat, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
+                if (!areaDetector.GetBillCorners(warpedBillMat, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
                     Log.d(this.getClass().getSimpleName(), "Failed ot get bounding rectangle automatically.");
                     _dragRectView.TopLeft = null;
                     _dragRectView.TopRight = null;
@@ -725,7 +725,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             Mat returnedWarpedMat;
             Utils.bitmapToMat(_warpedBill, warpedMat);
             try{
-                returnedWarpedMat = ImageProcessingLib.WarpPerspectiveMat(warpedMat, _topLeft, _topRight, _buttomRight, _buttomLeft);
+                returnedWarpedMat = ImageProcessingLib.WarpPerspective(warpedMat, _topLeft, _topRight, _buttomRight, _buttomLeft);
                 warpedBitmap = Bitmap.createBitmap(returnedWarpedMat.width(), returnedWarpedMat.height(), Bitmap.Config.ARGB_8888);
                 Utils.matToBitmap(returnedWarpedMat, warpedBitmap);
                 returnedWarpedMat.release();

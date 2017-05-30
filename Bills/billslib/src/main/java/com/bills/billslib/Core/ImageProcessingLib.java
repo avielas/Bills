@@ -50,8 +50,8 @@ public class ImageProcessingLib {
         CROSS_SHAPED
     }
 
-    public static Mat WarpPerspectiveMat(final Mat inputMat, final Point topLeft, final Point topRight,
-                                         final Point buttomRight, final Point buttomLeft) throws Exception {
+    public static Mat WarpPerspective(final Mat inputMat, final Point topLeft, final Point topRight,
+                                      final Point buttomRight, final Point buttomLeft) throws Exception {
         final Mat[] outputMatToReturn = {null};
         int newWidth = (int) Math.max(buttomRight.x - buttomLeft.x, topRight.x - topLeft.x);
         int newHeight = (int) Math.max(buttomRight.y - topRight.y, buttomLeft.y - topLeft.y);

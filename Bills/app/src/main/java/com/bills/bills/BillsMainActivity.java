@@ -8,7 +8,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -46,9 +45,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 import static android.view.View.GONE;
 
@@ -314,7 +311,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         Mat mat = new Mat();
         Utils.bitmapToMat(bitmap, mat);
 
-        if(!areaDetector.GetBillCornersMat(mat, topLeft,topRight, buttomRight, buttomLeft)){
+        if(!areaDetector.GetBillCorners(mat, topLeft,topRight, buttomRight, buttomLeft)){
             //TODO: add drag rect view here
             Log.d(Tag, "Failed\n");
             ImageView imageView = new ImageView(this);
@@ -326,7 +323,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         Mat warpedMat = new Mat();
         Mat warpedMatCopy = new Mat();
         try {
-            warpedMat = ImageProcessingLib.WarpPerspectiveMat(mat, topLeft,topRight, buttomRight, buttomLeft);
+            warpedMat = ImageProcessingLib.WarpPerspective(mat, topLeft,topRight, buttomRight, buttomLeft);
             warpedMatCopy = warpedMat.clone();
         } catch (Exception e) {
             e.printStackTrace();
