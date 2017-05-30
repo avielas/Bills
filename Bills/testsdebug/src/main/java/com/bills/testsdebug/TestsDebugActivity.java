@@ -75,7 +75,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
     EditableSeekBar _erodeKernelSizeSeekBar;
     PhotoViewAttacher _photoViewAttacher;
     Bitmap _billWithPrintedRedLines;
-    Bitmap _bill;
+    Bitmap _warpedBill;
     Bitmap _processedBill;
     Bitmap _processedBillForCreateNewBill;
     Mat _rgba;
@@ -170,20 +170,16 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         _rgba = new Mat();
         _gray = new Mat();
         try {
-            _bill = GetLastWarpedBill();
+            _warpedBill = GetLastWarpedBill();
+            _billWithPrintedRedLines = _warpedBill.copy(_warpedBill.getConfig(), true);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try {
-            _billWithPrintedRedLines = GetLastWarpedBill();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        _processedBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
-        _processedBillForCreateNewBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
+        _processedBill = Bitmap.createBitmap(_warpedBill.getWidth(), _warpedBill.getHeight(), Bitmap.Config.ARGB_8888);
+        _processedBillForCreateNewBill = Bitmap.createBitmap(_warpedBill.getWidth(), _warpedBill.getHeight(), Bitmap.Config.ARGB_8888);
 
         //Show original image on ImageView
-        _originalImageView.setImageBitmap(_bill);
+        _originalImageView.setImageBitmap(_warpedBill);
         _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
 
         PreprocessingForTM();
@@ -205,25 +201,31 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
 
     private void PreprocessingForTM() {
         Mat warpedMat = new Mat();
-        Utils.bitmapToMat(_bill, warpedMat);
-        Mat processedBillMat = ImageProcessingLib.PreprocessingForTM(warpedMat);
+        Mat warpedMatCopy = new Mat();
+        Utils.bitmapToMat(_warpedBill, warpedMat);
+        Utils.bitmapToMat(_warpedBill, warpedMatCopy);
+        Mat processedBillForTMMat = ImageProcessingLib.PreprocessingForTM(warpedMat);
+        Mat processedBillForParsingMat = ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
         _processedBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
         _processedBillForCreateNewBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(processedBillMat, _processedBill);
+        Utils.matToBitmap(processedBillForTMMat, _processedBill);
         _processedImageView.setImageBitmap(_processedBill);
-        Utils.matToBitmap(warpedMat, _processedBillForCreateNewBill);
+        _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
+        Utils.matToBitmap(processedBillForParsingMat, _processedBillForCreateNewBill);
         _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedForCreateNewBillImageView);
         warpedMat.release();
-        processedBillMat.release();
+        warpedMatCopy.release();
+        processedBillForTMMat.release();
+        processedBillForParsingMat.release();
     }
 
     private void PreprocessingForParsing() {
-        Mat processedBillForParsingMat = new Mat();
-        Utils.bitmapToMat(_processedBillForCreateNewBill, processedBillForParsingMat);
-        Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsing(processedBillForParsingMat);
-        Utils.matToBitmap(processedItemsAreaMat, _processedBill);
-        _originalImageView.setImageBitmap(_bill);
+//        Mat processedBillForParsingMat = new Mat();
+//        Utils.bitmapToMat(_processedBillForCreateNewBill, processedBillForParsingMat);
+//        Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsing(processedBillForParsingMat);
+//        Utils.matToBitmap(processedItemsAreaMat, _processedBill);
+        _originalImageView.setImageBitmap(_warpedBill);
         _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
         _processedImageView.setImageBitmap(_processedBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
@@ -244,7 +246,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                     /****************/
                     _rgba.release();
                     _rgba = new Mat();
-                    Utils.bitmapToMat(_bill, _rgba);
+                    Utils.bitmapToMat(_warpedBill, _rgba);
                     AdaptiveThreshold(_rgba, blockSizeToOddNumber, constantSubtracted);
                     Utils.matToBitmap(_rgba, _processedBill);
                     _processedImageView.setImageBitmap(_processedBill);
@@ -430,7 +432,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                     templateMatcher.itemLocationsRect = itemLocationsRect;
                     templateMatcher.itemLocationsByteArray = itemLocationsByteArray;
                     templateMatcher.Parsing(numOfItems);
-                    //ValidateOcrBillResult("Original", _bill);
+                    //ValidateOcrBillResult("Original", _warpedBill);
                     ValidateOcrBillResult("Processed", _processedBill);
                     OpenUserInputDialog();
                 } catch (Exception e) {
@@ -445,13 +447,12 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View arg0) {
                 try {
-//                    PreprocessingForTM();
                     templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBill);
                     templateMatcher.Match();
-                    _bill.recycle();
+                    _warpedBill.recycle();
                     _processedBill.recycle();
-                    _bill = CreateItemsAreaBitmapFromTMRects(templateMatcher.connectionsItemsArea);
-                    _processedBill = _bill.copy(_bill.getConfig(), true);
+                    _warpedBill = CreateItemsAreaBitmapFromTMRects(templateMatcher.connectionsItemsArea);
+                    _processedBill = _warpedBill.copy(_warpedBill.getConfig(), true);
                     PreprocessingForParsing();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -489,15 +490,23 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 /**** the following code is for debugging  ****/
 //                int xBegin   = keyListCurrentIndex.get(j).left;
 //                int xEnd  = keyListCurrentIndex.get(j).right;
-//                int yBegin    = keyListCurrentIndex.get(j).top;
+//                int yBegin    = keyListCurrentIndex.get(j).top ;
 //                int yEnd = keyListCurrentIndex.get(j).bottom;
 //                Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
 //                FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/rect_" + i + "_" + j + ".jpg");
 //                bitmap.recycle();
                 /**********************************************/
+                keyListCurrentIndex.get(j).left -= 3;
+                keyListCurrentIndex.get(j).right += 3;
+                keyListCurrentIndex.get(j).top -= 3;
+                keyListCurrentIndex.get(j).bottom += 3;
                 canvas.drawBitmap(_processedBillForCreateNewBill, keyListCurrentIndex.get(j), keyListCurrentIndex.get(j), paint);
             }
         }
+        String pathToSave = Constants.IMAGES_PATH;
+        FilesHandler.SaveToJPGFile(_processedBillForCreateNewBill, pathToSave + "/processedBillForCreateNewBill.jpg");
+        FilesHandler.SaveToJPGFile(newBill, pathToSave + "/newBill.jpg");
+
         return newBill;
     }
 
@@ -508,8 +517,8 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 try {
                     _billWithPrintedRedLines.recycle();
 //                    String pathToSave = Constants.IMAGES_PATH;
-//                    FilesHandler.SaveToJPGFile(_bill, pathToSave + "/bill.jpg");
-                    _billWithPrintedRedLines = PrintWordsRects(_bill, _processedBill);
+//                    FilesHandler.SaveToJPGFile(_warpedBill, pathToSave + "/bill.jpg");
+                    _billWithPrintedRedLines = PrintWordsRects(_warpedBill, _processedBill);
                     _originalImageView.setImageBitmap(_billWithPrintedRedLines);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -526,7 +535,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
 //                    String imagePathToSave = _brandAndModelPath + _restaurantName
 //                                            + "nili_24_2_17";
 //
-//                    WriteCroppedImageToTIFFile(_bill, imagePathToSave);
+//                    WriteCroppedImageToTIFFile(_warpedBill, imagePathToSave);
                     String processedImagePathToSave = _brandAndModelPath + _restaurantName
                             + "processed_nili_24_2_17";
 
@@ -673,9 +682,9 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         switch (resultCode) {
             case RESULT_OK:
-                _bill.recycle();
+                _warpedBill.recycle();
                 try {
-                    _bill = GetLastCapturedBill();
+                    _warpedBill = GetLastCapturedBill();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -685,7 +694,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 _dragRectView = new DragRectView(this);
                 BillAreaDetector areaDetector = new BillAreaDetector();
 
-                if (!areaDetector.GetBillCorners(_bill , _topLeft, _topRight, _buttomRight, _buttomLeft)) {
+                if (!areaDetector.GetBillCorners(_warpedBill, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
                     Log.d(this.getClass().getSimpleName(), "Failed ot get bounding rectangle automatically.");
                     _dragRectView.TopLeft = null;
                     _dragRectView.TopRight = null;
@@ -693,24 +702,24 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                     _dragRectView.ButtomRight = null;
                 }
                 else {
-                    int x = (int) Math.round((720.0/_bill.getWidth())* _topLeft.x);
-                    int y = (int) Math.round((1118.0/_bill.getHeight())* _topLeft.y);
+                    int x = (int) Math.round((720.0/ _warpedBill.getWidth())* _topLeft.x);
+                    int y = (int) Math.round((1118.0/ _warpedBill.getHeight())* _topLeft.y);
                     _dragRectView.TopLeft = new android.graphics.Point(x, y);
 
-                    x = (int) Math.round((720.0/_bill.getWidth())* _topRight.x);
-                    y = (int) Math.round((1118.0/_bill.getHeight())* _topRight.y);
+                    x = (int) Math.round((720.0/ _warpedBill.getWidth())* _topRight.x);
+                    y = (int) Math.round((1118.0/ _warpedBill.getHeight())* _topRight.y);
                     _dragRectView.TopRight = new android.graphics.Point(x, y);
 
-                    x = (int) Math.round((720.0/_bill.getWidth())* _buttomRight.x);
-                    y = (int) Math.round((1118.0/_bill.getHeight())* _buttomRight.y);
+                    x = (int) Math.round((720.0/ _warpedBill.getWidth())* _buttomRight.x);
+                    y = (int) Math.round((1118.0/ _warpedBill.getHeight())* _buttomRight.y);
                     _dragRectView.ButtomRight = new android.graphics.Point(x, y);
 
-                    x = (int) Math.round((720.0/_bill.getWidth())* _buttomLeft.x);
-                    y = (int) Math.round((1118.0/_bill.getHeight())* _buttomLeft.y);
+                    x = (int) Math.round((720.0/ _warpedBill.getWidth())* _buttomLeft.x);
+                    y = (int) Math.round((1118.0/ _warpedBill.getHeight())* _buttomLeft.y);
                     _dragRectView.ButtomLeft = new android.graphics.Point(x, y);
                 }
 
-                BitmapDrawable bitmapDrawable = new BitmapDrawable(_bill);
+                BitmapDrawable bitmapDrawable = new BitmapDrawable(_warpedBill);
                 _dragRectView.setBackground(bitmapDrawable);
                 _dragRectView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -731,8 +740,8 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
     public void onClick(View v) {
 
         if(v == _userCropFinished){
-            double stretchFactorX = (1.0 * _bill.getWidth()) / _dragRectView.getBackground().getBounds().width();
-            double stretchFactorY = (1.0 * _bill.getHeight()) / _dragRectView.getBackground().getBounds().height();
+            double stretchFactorX = (1.0 * _warpedBill.getWidth()) / _dragRectView.getBackground().getBounds().width();
+            double stretchFactorY = (1.0 * _warpedBill.getHeight()) / _dragRectView.getBackground().getBounds().height();
 
             double x = _dragRectView.TopLeft.x * stretchFactorX;
             double y = _dragRectView.TopLeft.y * stretchFactorY ;
@@ -753,7 +762,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             /** Preparing Warp Perspective Dimensions **/
             Bitmap warpedBitmap = null;
             try{
-                warpedBitmap = ImageProcessingLib.WarpPerspective(_bill, _topLeft, _topRight, _buttomRight, _buttomLeft);
+                warpedBitmap = ImageProcessingLib.WarpPerspective(_warpedBill, _topLeft, _topRight, _buttomRight, _buttomLeft);
             }
             catch (Exception ex){
                 Log.d(this.getClass().getSimpleName(), "Failed to warp perspective");
@@ -762,13 +771,13 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             _billWithPrintedRedLines.recycle();
             _processedBill.recycle();
             _processedBillForCreateNewBill.recycle();
-            _bill = warpedBitmap.copy(warpedBitmap.getConfig(), true);
-            _billWithPrintedRedLines = _bill.copy(_bill.getConfig(), true);
+            _warpedBill = warpedBitmap.copy(warpedBitmap.getConfig(), true);
+            _billWithPrintedRedLines = _warpedBill.copy(_warpedBill.getConfig(), true);
             _emptyRelativeLayoutView.removeView(_dragRectView);
             _emptyRelativeLayoutView.removeView(_userCropFinished);
             _emptyRelativeLayoutView.setVisibility(GONE);
             _testsDebugView.setVisibility(View.VISIBLE);
-            _originalImageView.setImageBitmap(_bill);
+            _originalImageView.setImageBitmap(_warpedBill);
             warpedBitmap.recycle();
             PreprocessingForTM();
         }
