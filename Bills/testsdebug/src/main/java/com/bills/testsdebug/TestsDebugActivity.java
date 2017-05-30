@@ -123,7 +123,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
 //            PreparingEnvironmentUtil.PrepareImagesForTests(this);
 //        }
         _billName = "29112016_2246_croppedCenter.jpg";
-        _restaurantName = "mina";
+        _restaurantName = "mina1";
         _brandAndModelPath = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL;
         //extract date from bill, for creating expected txt file name
         _expectedTxtFileName = _restaurantName + ".txt";
@@ -290,17 +290,17 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
      * @param expectedBillTextLines expected bill lines from txt file
      */
     private void CompareExpectedToOcrResult(LinkedHashMap ocrResultCroppedBill, List<String> expectedBillTextLines) {
-        _results.append("Validating Ocr Result:");
-        _results.append(System.getProperty("line.separator"));
-        Double accuracyPercent = Compare(ocrResultCroppedBill, expectedBillTextLines);
-        _results.append(System.getProperty("line.separator"));
-        if(ocrResultCroppedBill.size() != expectedBillTextLines.size())
-        {
-            _results.append("ocrResultCroppedBill contains "+ ocrResultCroppedBill.size() + " lines, but" +
-                    " expectedBillTextLines contains "+ expectedBillTextLines.size()+" lines");
-        }
-//        PrintParsedNumbers(ocrResultCroppedBill);
-        _results.append("Accuracy is "+ accuracyPercent+"%");
+//        _results.append("Validating Ocr Result:");
+//        _results.append(System.getProperty("line.separator"));
+//        Double accuracyPercent = Compare(ocrResultCroppedBill, expectedBillTextLines);
+//        _results.append(System.getProperty("line.separator"));
+//        if(ocrResultCroppedBill.size() != expectedBillTextLines.size())
+//        {
+//            _results.append("ocrResultCroppedBill contains "+ ocrResultCroppedBill.size() + " lines, but" +
+//                    " expectedBillTextLines contains "+ expectedBillTextLines.size()+" lines");
+//        }
+        PrintParsedNumbers(ocrResultCroppedBill);
+//        _results.append("Accuracy is "+ accuracyPercent+"%");
         _results.append(System.getProperty("line.separator"));
         _results.append(System.getProperty("line.separator"));
     }
@@ -353,7 +353,8 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
 
     private void PrintParsedNumbers(LinkedHashMap ocrResult) {
         int lineNumber = 0;
-
+        _results.append("Validating Ocr Result:");
+        _results.append(System.getProperty("line.separator"));
         for (int i=0; i < ocrResult.size(); i++)
         {
             HashMap ocrResultLine = (HashMap)ocrResult.get(lineNumber);
@@ -506,9 +507,8 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             public void onClick(View arg0) {
                 try {
                     _billWithPrintedRedLines.recycle();
-                    String pathToSave = Constants.IMAGES_PATH;
-                    FilesHandler.SaveToJPGFile(_bill, pathToSave + "/bill.jpg");
-                    FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/processedBill.jpg");
+//                    String pathToSave = Constants.IMAGES_PATH;
+//                    FilesHandler.SaveToJPGFile(_bill, pathToSave + "/bill.jpg");
                     _billWithPrintedRedLines = PrintWordsRects(_bill, _processedBill);
                     _originalImageView.setImageBitmap(_billWithPrintedRedLines);
                 } catch (Exception e) {
@@ -627,7 +627,6 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             return bitmap;
         }
         bitmap.recycle();
-        FilesHandler.SaveToJPGFile(warpedBitmap, Constants.WARPED_JPG_PHOTO_PATH);
         return warpedBitmap;
     }
 
@@ -760,14 +759,11 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 Log.d(this.getClass().getSimpleName(), "Failed to warp perspective");
                 return;
             }
-            FilesHandler.SaveToJPGFile(warpedBitmap, Constants.WARPED_JPG_PHOTO_PATH);
             _billWithPrintedRedLines.recycle();
             _processedBill.recycle();
             _processedBillForCreateNewBill.recycle();
             _bill = warpedBitmap.copy(warpedBitmap.getConfig(), true);
             _billWithPrintedRedLines = _bill.copy(_bill.getConfig(), true);
-//                _processedBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888);
-//                _processedBillForCreateNewBill = Bitmap.createBitmap(_bill.getWidth(), _bill.getHeight(), Bitmap.Config.ARGB_8888)
             _emptyRelativeLayoutView.removeView(_dragRectView);
             _emptyRelativeLayoutView.removeView(_userCropFinished);
             _emptyRelativeLayoutView.setVisibility(GONE);
