@@ -3,6 +3,17 @@ package com.bills.billslib.Utilities;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.util.Log;
+
+import com.bills.billslib.Core.BillAreaDetector;
+import com.bills.billslib.Core.ImageProcessingLib;
+
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.Point;
+import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -15,6 +26,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Created by avielavr on 5/8/2017.
@@ -111,6 +123,13 @@ public class FilesHandler {
         return rotated;
     }
 
+    public static Mat BytesToMat(byte[] bytes) {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+        return Imgcodecs.imdecode(new MatOfByte(bytes), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+    }
+
     /**
      *
      * @param fileFullName txt file full name on device
@@ -129,34 +148,42 @@ public class FilesHandler {
         bufferedReader.close();
         return lines;
     }
-//    public static Bitmap GetBitmapFromUri(Uri uri) {
-//        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-//        Bitmap bitmap = null;
-//        bitmapOptions.inMutable = true;
-//        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-//        TiffBitmapFactory.Options options = new TiffBitmapFactory.Options();
-//        options.inAvailableMemory = 1024 * 1024 * 10 * 3; //30 mb
-//        File file = new File(uri.getPath());
-//        bitmap = TiffBitmapFactory.decodeFile(file, options);
-//        return bitmap;
-//    }
-//    public static Bitmap GetBitmapFromTifFile() {
-//        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-//        Bitmap bitmap = null;
-//        bitmapOptions.inMutable = true;
-//        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-//        File pictureFile = new File(Constants.CAMERA_CAPTURED_PHOTO_PATH);
-//
-//        TiffBitmapFactory.Options options = new TiffBitmapFactory.Options();
-//        options.inAvailableMemory = 1024 * 1024 * 10 * 3; //30 mb
-//        bitmap = TiffBitmapFactory.decodeFile(pictureFile, options);
-//        return FilesHandler.Rotating(bitmap);
-//    }
-//    public static boolean SaveToTIFFile(Bitmap bmp, String path) {
-//        TiffSaver.SaveOptions options = new TiffSaver.SaveOptions();
-//        options.author = "bills";
-//        options.copyright = "bills copyright";
-//        boolean saved = TiffSaver.saveBitmap(path, bmp, options);
-//        return saved;
-//    }
+
+    public static void RotateClockwise90(Mat src, Mat dest) {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+        Core.flip(src.t(), dest, 1);
+    }
+
+    public static Bitmap GetRotatedBill(String billFullName) throws IOException {
+        byte[] bytes = ImageTxtFile2ByteArray(billFullName);
+        Bitmap bitmap = ByteArrayToBitmap(bytes);
+        bitmap = FilesHandler.Rotating(bitmap);
+        return bitmap;
+    }
+
+    public static Bitmap GetWarpedBill(String billFullName) throws IOException {
+        Bitmap bitmap = GetRotatedBill(billFullName);
+        BillAreaDetector areaDetector = new BillAreaDetector();
+        Point mTopLeft = new Point();
+        Point mTopRight = new Point();
+        Point mButtomLeft = new Point();
+        Point mButtomRight = new Point();
+        if (!areaDetector.GetBillCorners(bitmap , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+            Log.d("Error", "Failed ot get bounding rectangle automatically.");
+            return bitmap;
+        }
+        /** Preparing Warp Perspective Dimensions **/
+        Bitmap warpedBitmap = null;
+        try{
+            warpedBitmap = ImageProcessingLib.WarpPerspective(bitmap, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+        }
+        catch (Exception ex){
+            Log.d("Error", "Failed to warp perspective");
+            return bitmap;
+        }
+        bitmap.recycle();
+        return warpedBitmap;
+    }
 }

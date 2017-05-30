@@ -5,7 +5,6 @@ import android.graphics.Rect;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
-import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
@@ -13,9 +12,7 @@ import com.bills.billslib.Utilities.FilesHandler;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -28,14 +25,14 @@ import java.util.List;
 public class TestBill extends Thread{
     String _rootBrandModelDirectory;
     String _restaurant;
-    String _bill;
+    String _billFullName;
     StringBuilder _results;
 
     public TestBill(String rootBrandModelDirectory, String restaurant, String bill)
     {
         _rootBrandModelDirectory = rootBrandModelDirectory;
         _restaurant = restaurant;
-        _bill = bill;
+        _billFullName = bill;
         _results = new StringBuilder();
     }
 
@@ -45,41 +42,33 @@ public class TestBill extends Thread{
             TemplateMatcher templateMatcher;
             TesseractOCREngine tesseractOCREngine;
             tesseractOCREngine = new TesseractOCREngine();
+            String expectedTxtFileName = _restaurant.toString() + ".txt";
+            List<String> expectedBillTextLines = null;
+            Bitmap billBitmap = null;
+
             try {
+                _results.append("Test of " + _billFullName + System.getProperty("line.separator"));
                 tesseractOCREngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
+                expectedBillTextLines = FilesHandler.ReadTxtFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
+                billBitmap = FilesHandler.GetWarpedBill(_billFullName);
+//                File file = new File(_billFullName);
+//                String pathToSave = file.getParent();
+//                FilesHandler.SaveToJPGFile(billBitmap, pathToSave + "/billBitmap.jpg");
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            String expectedTxtFileName = _restaurant.toString() + ".txt";
-            List<String> expectedBillTextLines = null;
-            byte[] billBytes = null;
-
-            try {
-                expectedBillTextLines = FilesHandler.ReadTxtFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
-                billBytes = FilesHandler.ImageTxtFile2ByteArray(_bill);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            _results.append("Test of " + _bill + System.getProperty("line.separator"));
-//            File file = new File(_bill);
-//            String pathToSave = file.getParent();
-            Bitmap billBitmap = FilesHandler.Rotating(FilesHandler.ByteArrayToBitmap(billBytes));
-//            FilesHandler.SaveToJPGFile(billBitmap, pathToSave + "/billBitmap.jpg");
-            Bitmap warpedBitmap = WarpPerspective(billBitmap, _bill);
-//            FilesHandler.SaveToJPGFile(warpedBitmap, pathToSave + "/warpedBitmap.jpg");
             Mat warpedMat = new Mat();
             Mat warpedMatCopy = new Mat();
-            Utils.bitmapToMat(warpedBitmap, warpedMat);
-            Utils.bitmapToMat(warpedBitmap, warpedMatCopy);
+            Utils.bitmapToMat(billBitmap, warpedMat);
+            Utils.bitmapToMat(billBitmap, warpedMatCopy);
             Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-            Mat processedBillMat = ImageProcessingLib.PreprocessingForTM(warpedMat);
-            Utils.matToBitmap(processedBillMat, processedBillBitmap);
+            ImageProcessingLib.PreprocessingForTM(warpedMat);
+            Utils.matToBitmap(warpedMat, processedBillBitmap);
             templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
             templateMatcher.Match();
 
-            Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
+            ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
             int numOfItems = templateMatcher.priceAndQuantity.size();
             LinkedHashMap<Rect, Rect>[] connectionsItemsArea = templateMatcher.connectionsItemsArea;
             ArrayList<ArrayList<Rect>> locationsItemsArea = templateMatcher.locationsItemsArea;
@@ -87,7 +76,7 @@ public class TestBill extends Thread{
             ArrayList<Bitmap> itemLocationsByteArray = templateMatcher.itemLocationsByteArray;
             /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
             /***** Out Of Memory when running 4 threads parallel                                      *****/
-            Utils.matToBitmap(processedItemsAreaMat, processedBillBitmap);
+            Utils.matToBitmap(warpedMatCopy, processedBillBitmap);
             templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
             templateMatcher.connectionsItemsArea = connectionsItemsArea;
             templateMatcher.locationsItemsArea = locationsItemsArea;
@@ -98,12 +87,9 @@ public class TestBill extends Thread{
             CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);
 
             billBitmap.recycle();
-            warpedBitmap.recycle();
             processedBillBitmap.recycle();
             warpedMat.release();
             warpedMatCopy.release();
-            processedBillMat.release();
-            processedItemsAreaMat.release();
             tesseractOCREngine.End();
 
             synchronized (System.out) {
@@ -129,36 +115,6 @@ public class TestBill extends Thread{
             i++;
         }
         return imageLinesLinkedHashMap;
-    }
-
-    /**
-     * Crop the bill from original capture and warp it
-     * @param bill original capture of bill
-     * @param billFullName bill full name
-     * @return warped bill
-     */
-    private Bitmap WarpPerspective(Bitmap bill, String billFullName) {
-        Point mTopLeft = new Point();
-        Point mTopRight = new Point();
-        Point mButtomLeft = new Point();
-        Point mButtomRight = new Point();
-        BillAreaDetector.GetBillCorners(bill , mTopLeft, mTopRight, mButtomRight, mButtomLeft);
-
-        /** Preparing Warp Perspective Dimensions **/
-
-        Bitmap warpedBitmap = null;
-        try{
-            warpedBitmap = ImageProcessingLib.WarpPerspective(bill, mTopLeft,mTopRight, mButtomRight, mButtomLeft);
-        }
-        catch (Exception ex){
-            _results.append("Failed to warp perspective " + billFullName + System.getProperty("line.separator"));
-            return null;
-        }
-
-//        File file = new File(billFullName);
-//        String warpPathToSave = file.getParent();
-//        FilesHandler.SaveToJPGFile(warpedBitmap, warpPathToSave + "/warped.jpg");
-        return warpedBitmap;
     }
 
     /**

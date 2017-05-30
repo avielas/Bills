@@ -170,7 +170,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         _rgba = new Mat();
         _gray = new Mat();
         try {
-            _warpedBill = GetLastWarpedBill();
+            _warpedBill = FilesHandler.GetWarpedBill(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
             _billWithPrintedRedLines = _warpedBill.copy(_warpedBill.getConfig(), true);
         } catch (IOException e) {
             e.printStackTrace();
@@ -279,17 +279,17 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
      * @param expectedBillTextLines expected bill lines from txt file
      */
     private void CompareExpectedToOcrResult(LinkedHashMap ocrResultCroppedBill, List<String> expectedBillTextLines) {
-//        _results.append("Validating Ocr Result:");
-//        _results.append(System.getProperty("line.separator"));
-//        Double accuracyPercent = Compare(ocrResultCroppedBill, expectedBillTextLines);
-//        _results.append(System.getProperty("line.separator"));
-//        if(ocrResultCroppedBill.size() != expectedBillTextLines.size())
-//        {
-//            _results.append("ocrResultCroppedBill contains "+ ocrResultCroppedBill.size() + " lines, but" +
-//                    " expectedBillTextLines contains "+ expectedBillTextLines.size()+" lines");
-//        }
-        PrintParsedNumbers(ocrResultCroppedBill);
-//        _results.append("Accuracy is "+ accuracyPercent+"%");
+        _results.append("Validating Ocr Result:");
+        _results.append(System.getProperty("line.separator"));
+        Double accuracyPercent = Compare(ocrResultCroppedBill, expectedBillTextLines);
+        _results.append(System.getProperty("line.separator"));
+        if(ocrResultCroppedBill.size() != expectedBillTextLines.size())
+        {
+            _results.append("ocrResultCroppedBill contains "+ ocrResultCroppedBill.size() + " lines, but" +
+                    " expectedBillTextLines contains "+ expectedBillTextLines.size()+" lines");
+        }
+//        PrintParsedNumbers(ocrResultCroppedBill);
+        _results.append("Accuracy is "+ accuracyPercent+"%");
         _results.append(System.getProperty("line.separator"));
         _results.append(System.getProperty("line.separator"));
     }
@@ -605,33 +605,6 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         System.setOut(printStreamToFile);
     }
 
-    private Bitmap GetLastWarpedBill() throws IOException {
-        Bitmap bitmap = GetLastCapturedBill();
-        BillAreaDetector areaDetector = new BillAreaDetector();
-        if (!areaDetector.GetBillCorners(bitmap , _topLeft, _topRight, _buttomRight, _buttomLeft)) {
-            Log.d(this.getClass().getSimpleName(), "Failed ot get bounding rectangle automatically.");
-            return bitmap;
-        }
-        /** Preparing Warp Perspective Dimensions **/
-        Bitmap warpedBitmap = null;
-        try{
-            warpedBitmap = ImageProcessingLib.WarpPerspective(bitmap, _topLeft, _topRight, _buttomRight, _buttomLeft);
-        }
-        catch (Exception ex){
-            Log.d(this.getClass().getSimpleName(), "Failed to warp perspective");
-            return bitmap;
-        }
-        bitmap.recycle();
-        return warpedBitmap;
-    }
-
-    private Bitmap GetLastCapturedBill() throws IOException {
-        byte[] bytes = FilesHandler.ImageTxtFile2ByteArray(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
-        Bitmap bitmap = FilesHandler.ByteArrayToBitmap(bytes);
-        bitmap = FilesHandler.Rotating(bitmap);
-        return bitmap;
-    }
-
     public Bitmap PrintWordsRects(Bitmap bitmap, Bitmap _processedBill){
         List<Rect> words;
         Bitmap printedBitmap = Bitmap.createBitmap(bitmap);
@@ -670,7 +643,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             case RESULT_OK:
                 _warpedBill.recycle();
                 try {
-                    _warpedBill = GetLastCapturedBill();
+                    _warpedBill = FilesHandler.GetRotatedBill(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
