@@ -1,6 +1,7 @@
 package com.bills.bills.test;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
@@ -9,6 +10,7 @@ import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.Utilities.FilesHandler;
 
+import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
@@ -42,24 +44,26 @@ public class TestBill extends Thread{
             tesseractOCREngine = new TesseractOCREngine();
             String expectedTxtFileName = _restaurant.toString() + ".txt";
             List<String> expectedBillTextLines = null;
-            Bitmap billBitmap = null;
+
+            if (!OpenCVLoader.initDebug()) {
+//                Log.d(Tag, "Failed to initialize OpenCV.");
+//                return false;
+            }
+            Mat warpedMat = new Mat();
+            Mat warpedMatCopy = new Mat();
 
             try {
                 _results.append("Test of " + _billFullName + System.getProperty("line.separator"));
                 tesseractOCREngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
                 expectedBillTextLines = FilesHandler.ReadTxtFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
-                billBitmap = FilesHandler.GetWarpedBill(_billFullName);
+                warpedMat = FilesHandler.GetWarpedBillMat(_billFullName);
+                warpedMatCopy = warpedMat.clone();
 //                File file = new File(_billFullName);
 //                String pathToSave = file.getParent();
 //                FilesHandler.SaveToJPGFile(billBitmap, pathToSave + "/billBitmap.jpg");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            Mat warpedMat = new Mat();
-            Mat warpedMatCopy = new Mat();
-            Utils.bitmapToMat(billBitmap, warpedMat);
-            Utils.bitmapToMat(billBitmap, warpedMatCopy);
 
             Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
             ImageProcessingLib.PreprocessingForTM(warpedMat);
@@ -77,7 +81,6 @@ public class TestBill extends Thread{
             LinkedHashMap ocrResultCroppedBill = GetOcrResults(templateMatcher);
             CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);
 
-            billBitmap.recycle();
             processedBillBitmap.recycle();
             warpedMat.release();
             warpedMatCopy.release();

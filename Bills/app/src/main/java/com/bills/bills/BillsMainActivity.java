@@ -41,6 +41,7 @@ import com.bills.billslib.CustomViews.ItemView;
 import com.bills.billslib.CustomViews.NameView;
 
 
+import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -306,7 +307,14 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         Point topRight = new Point();
         Point buttomRight = new Point();
         Point buttomLeft = new Point();
-        if(!areaDetector.GetBillCorners(bitmap, topLeft,topRight, buttomRight, buttomLeft)){
+        if (!OpenCVLoader.initDebug()) {
+            Log.d("aa", "Failed to initialize OpenCV.");
+        }
+
+        Mat mat = new Mat();
+        Utils.bitmapToMat(bitmap, mat);
+
+        if(!areaDetector.GetBillCornersMat(mat, topLeft,topRight, buttomRight, buttomLeft)){
             //TODO: add drag rect view here
             Log.d(Tag, "Failed\n");
             ImageView imageView = new ImageView(this);
@@ -315,9 +323,11 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
             return;
         }
 
-        Bitmap warpedBitmap = null;
+        Mat warpedMat = new Mat();
+        Mat warpedMatCopy = new Mat();
         try {
-            warpedBitmap = ImageProcessingLib.WarpPerspective(bitmap, topLeft,topRight, buttomRight, buttomLeft);
+            warpedMat = ImageProcessingLib.WarpPerspectiveMat(mat, topLeft,topRight, buttomRight, buttomLeft);
+            warpedMatCopy = warpedMat.clone();
         } catch (Exception e) {
             e.printStackTrace();
             //TODO: decide what to do. Retake the picture? crash the app?
@@ -343,11 +353,6 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
 //        _billsMainView.addView(imageView);
 //        return;
 
-        Mat warpedMat = new Mat();
-        Mat warpedMatCopy = new Mat();
-        Utils.bitmapToMat(warpedBitmap, warpedMat);
-        Utils.bitmapToMat(warpedBitmap, warpedMatCopy);
-
         Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
         Mat processedWarpedBill = ImageProcessingLib.PreprocessingForTM(warpedMat);
         Utils.matToBitmap(processedWarpedBill, processedBillBitmap);
@@ -364,18 +369,18 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
         templateMatcher.Parsing(numOfItems);
 
-        warpedBitmap.recycle();
         processedBillBitmap.recycle();
         warpedMat.release();
         warpedMatCopy.release();
         processedItemsAreaMat.release();
         processedWarpedBill.release();
+        mat.release();
 
         int i = 0;
-        int[] colors = {Color.RED, Color.BLUE, Color.GREEN};
+        int[] colors = {Color.RED/*, Color.BLUE, Color.GREEN, Color.BLACK*/};
         for(Double[] priceQuantity : templateMatcher.priceAndQuantity){
             ItemView itemView = new ItemView(this, priceQuantity[0], templateMatcher.itemLocationsByteArray.get(i));
-            itemView.SetItemBackgroundColor(colors[i]);
+            itemView.SetItemBackgroundColor(colors[0]);
             _billSummarizerItemsLayout.addView(itemView);
             i++;
         }

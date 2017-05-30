@@ -32,8 +32,7 @@ public class BillAreaDetector {
     private static int _histSizeNum = 64;
     private static int _bucketSize = 256 / _histSizeNum;
 
-    public static boolean GetBillCorners(Bitmap source, Point topLeft, Point topRight, Point buttomRight, Point buttomLeft){
-        Mat image = null;
+    public static boolean GetBillCornersMat(Mat source, Point topLeft, Point topRight, Point buttomRight, Point buttomLeft){
         Mat newImage = null;
         Mat contrast = null;
         Mat destinationImage = null;
@@ -55,11 +54,8 @@ public class BillAreaDetector {
                 return false;
             }
 
-            image  = new Mat(source.getWidth(), source.getHeight(), CvType.CV_8UC4);
-            Utils.bitmapToMat(source, image);
-
-            newImage = new Mat(image.rows(), image.cols(), image.type());
-            Imgproc.cvtColor(image, newImage, Imgproc.COLOR_RGBA2GRAY);
+            newImage = new Mat(source.rows(), source.cols(), source.type());
+            Imgproc.cvtColor(source, newImage, Imgproc.COLOR_RGBA2GRAY);
 
             List<Mat> listOfMat = new ArrayList<Mat>();
             listOfMat.add(newImage);
@@ -192,9 +188,6 @@ public class BillAreaDetector {
             Log.d(Tag, "An exception accured while trying to find bill corners. Error: " + ex.getMessage());
         }
         finally {
-            if(image != null) {
-                image.release();
-            }
             if(newImage != null) {
                 newImage.release();
             }

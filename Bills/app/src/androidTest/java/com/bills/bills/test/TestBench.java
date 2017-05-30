@@ -76,7 +76,7 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList( "mina1", "dovrin1", "pastaMarket1"/*, "pastaMarket2" */);
+                _restaurantsNamesTestFilter = Arrays.asList( "mina1", "dovrin1", "pastaMarket1", "pastaMarket2"/* */);
                 _billsTestFilter = Arrays.asList(/* "12112016_1355_croppedCenter.jpg" */);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);

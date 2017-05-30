@@ -9,6 +9,7 @@ import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
 
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -163,27 +164,69 @@ public class FilesHandler {
         return bitmap;
     }
 
-    public static Bitmap GetWarpedBill(String billFullName) throws IOException {
+//    public static Bitmap GetWarpedBill(String billFullName) throws IOException {
+//        Bitmap bitmap = GetRotatedBill(billFullName);
+//        BillAreaDetector areaDetector = new BillAreaDetector();
+//        Point mTopLeft = new Point();
+//        Point mTopRight = new Point();
+//        Point mButtomLeft = new Point();
+//        Point mButtomRight = new Point();
+//        if (!OpenCVLoader.initDebug()) {
+//            Log.d(Tag, "Failed to initialize OpenCV.");
+//            return null;
+//        }
+//        Mat mat = new Mat();
+//        Utils.bitmapToMat(bitmap, mat);
+//        if (!areaDetector.GetBillCornersMat(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+//            Log.d("Error", "Failed ot get bounding rectangle automatically.");
+//            return bitmap;
+//        }
+//        /** Preparing Warp Perspective Dimensions **/
+//        Bitmap warpedBitmap = null;
+//        try{
+//            Mat warpedBitmapReturned = ImageProcessingLib.WarpPerspectiveMat(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+//            warpedBitmap = Bitmap.createBitmap(warpedBitmapReturned.width(), warpedBitmapReturned.height(), Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(warpedBitmapReturned, warpedBitmap);
+////            FilesHandler.SaveToJPGFile(warpedBitmap, Constants.PREPROCESSED_CAPTURED_PHOTO_PATH);
+//        }
+//        catch (Exception ex){
+//            Log.d("Error", "Failed to warp perspective");
+//            return bitmap;
+//        }
+//        bitmap.recycle();
+//        return warpedBitmap;
+//    }
+
+    public static Mat GetWarpedBillMat(String billFullName) throws IOException {
         Bitmap bitmap = GetRotatedBill(billFullName);
         BillAreaDetector areaDetector = new BillAreaDetector();
         Point mTopLeft = new Point();
         Point mTopRight = new Point();
         Point mButtomLeft = new Point();
         Point mButtomRight = new Point();
-        if (!areaDetector.GetBillCorners(bitmap , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(Tag, "Failed to initialize OpenCV.");
+            return null;
+        }
+        Mat mat = new Mat();
+        Utils.bitmapToMat(bitmap, mat);
+        if (!areaDetector.GetBillCornersMat(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
             Log.d("Error", "Failed ot get bounding rectangle automatically.");
-            return bitmap;
+            return mat;
         }
         /** Preparing Warp Perspective Dimensions **/
-        Bitmap warpedBitmap = null;
+        Mat warpedBitmapReturned;
         try{
-            warpedBitmap = ImageProcessingLib.WarpPerspective(bitmap, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+            warpedBitmapReturned = ImageProcessingLib.WarpPerspectiveMat(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+//            warpedBitmap = Bitmap.createBitmap(warpedBitmapReturned.width(), warpedBitmapReturned.height(), Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(warpedBitmapReturned, warpedBitmap);
+//            FilesHandler.SaveToJPGFile(warpedBitmap, Constants.PREPROCESSED_CAPTURED_PHOTO_PATH);
         }
         catch (Exception ex){
             Log.d("Error", "Failed to warp perspective");
-            return bitmap;
+            return mat;
         }
         bitmap.recycle();
-        return warpedBitmap;
+        return warpedBitmapReturned;
     }
 }

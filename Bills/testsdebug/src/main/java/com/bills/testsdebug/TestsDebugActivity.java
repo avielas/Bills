@@ -170,8 +170,11 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
         _rgba = new Mat();
         _gray = new Mat();
         try {
-            _warpedBill = FilesHandler.GetWarpedBill(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
+            Mat warpedBillMat = FilesHandler.GetWarpedBillMat(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
+            _warpedBill =  Bitmap.createBitmap(warpedBillMat.width(), warpedBillMat.height(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(warpedBillMat, _warpedBill);
             _billWithPrintedRedLines = _warpedBill.copy(_warpedBill.getConfig(), true);
+            warpedBillMat.release();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -643,8 +646,14 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 _userCropFinished.setOnClickListener(this);
                 _dragRectView = new DragRectView(this);
                 BillAreaDetector areaDetector = new BillAreaDetector();
+                if (!OpenCVLoader.initDebug()) {
+                    Log.d("aa", "Failed to initialize OpenCV.");
+                }
 
-                if (!areaDetector.GetBillCorners(_warpedBill, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
+                Mat warpedBillMat = new Mat();
+                Utils.bitmapToMat(_warpedBill, warpedBillMat);
+
+                if (!areaDetector.GetBillCornersMat(warpedBillMat, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
                     Log.d(this.getClass().getSimpleName(), "Failed ot get bounding rectangle automatically.");
                     _dragRectView.TopLeft = null;
                     _dragRectView.TopRight = null;
@@ -680,6 +689,7 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 _emptyRelativeLayoutView.setVisibility(View.VISIBLE);
                 _emptyRelativeLayoutView.addView(_dragRectView);
                 _emptyRelativeLayoutView.addView(_userCropFinished);
+                warpedBillMat.release();
                 break;
             default:
                 //mBeginBillSplitFlowButton.setVisibility(View.VISIBLE);
@@ -710,9 +720,15 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
             _buttomRight = new Point(x,y);
 
             /** Preparing Warp Perspective Dimensions **/
-            Bitmap warpedBitmap = null;
+            Bitmap warpedBitmap;
+            Mat warpedMat = new Mat();
+            Mat returnedWarpedMat;
+            Utils.bitmapToMat(_warpedBill, warpedMat);
             try{
-                warpedBitmap = ImageProcessingLib.WarpPerspective(_warpedBill, _topLeft, _topRight, _buttomRight, _buttomLeft);
+                returnedWarpedMat = ImageProcessingLib.WarpPerspectiveMat(warpedMat, _topLeft, _topRight, _buttomRight, _buttomLeft);
+                warpedBitmap = Bitmap.createBitmap(returnedWarpedMat.width(), returnedWarpedMat.height(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(returnedWarpedMat, warpedBitmap);
+                returnedWarpedMat.release();
             }
             catch (Exception ex){
                 Log.d(this.getClass().getSimpleName(), "Failed to warp perspective");
