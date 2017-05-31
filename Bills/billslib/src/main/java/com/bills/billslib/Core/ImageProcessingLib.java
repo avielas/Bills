@@ -146,16 +146,15 @@ public class ImageProcessingLib {
         throw new Exception("Failed to warp perspective");
     }
 
-    public static Mat PreprocessingForTM(Mat rgba) {
+    public static void PreprocessingForTM(Mat rgba) {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
         AdaptiveThreshold(rgba, 60, 45.0);
         Erode(rgba, 1, 4, StructureElement.VERTICAL_LINE.toString());
-        return rgba;
     }
 
-    public static Mat PreprocessingForParsing(Mat rgba) {
+    public static void PreprocessingForParsing(Mat rgba) {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
@@ -165,7 +164,6 @@ public class ImageProcessingLib {
         Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
         Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
         Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
-        return rgba;
     }
 
     public static void AdaptiveThreshold(Mat rgba, int blockSize, double C){

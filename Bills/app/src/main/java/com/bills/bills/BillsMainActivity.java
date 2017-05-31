@@ -351,26 +351,24 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
 //        return;
 
         Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-        Mat processedWarpedBill = ImageProcessingLib.PreprocessingForTM(warpedMat);
-        Utils.matToBitmap(processedWarpedBill, processedBillBitmap);
+        ImageProcessingLib.PreprocessingForTM(warpedMat);
+        Utils.matToBitmap(warpedMat, processedBillBitmap);
 
         TemplateMatcher templateMatcher = new TemplateMatcher(_ocrEngine, processedBillBitmap);
         templateMatcher.Match();
 
-        Mat processedItemsAreaMat = ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
+        ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
         int numOfItems = templateMatcher.priceAndQuantity.size();
 
         /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
         /***** Out Of Memory when running 4 threads parallel                                      *****/
-        Utils.matToBitmap(processedItemsAreaMat, processedBillBitmap);
+        Utils.matToBitmap(warpedMatCopy, processedBillBitmap);
         templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
         templateMatcher.Parsing(numOfItems);
 
         processedBillBitmap.recycle();
         warpedMat.release();
         warpedMatCopy.release();
-        processedItemsAreaMat.release();
-        processedWarpedBill.release();
         mat.release();
 
         int i = 0;
