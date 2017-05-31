@@ -124,13 +124,6 @@ public class FilesHandler {
         return rotated;
     }
 
-    public static Mat BytesToMat(byte[] bytes) {
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
-        return Imgcodecs.imdecode(new MatOfByte(bytes), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
-    }
-
     /**
      *
      * @param fileFullName txt file full name on device
@@ -150,52 +143,12 @@ public class FilesHandler {
         return lines;
     }
 
-    public static void RotateClockwise90(Mat src, Mat dest) {
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
-        Core.flip(src.t(), dest, 1);
-    }
-
     public static Bitmap GetRotatedBill(String billFullName) throws IOException {
         byte[] bytes = ImageTxtFile2ByteArray(billFullName);
         Bitmap bitmap = ByteArrayToBitmap(bytes);
         bitmap = FilesHandler.Rotating(bitmap);
         return bitmap;
     }
-
-//    public static Bitmap GetWarpedBill(String billFullName) throws IOException {
-//        Bitmap bitmap = GetRotatedBill(billFullName);
-//        BillAreaDetector areaDetector = new BillAreaDetector();
-//        Point mTopLeft = new Point();
-//        Point mTopRight = new Point();
-//        Point mButtomLeft = new Point();
-//        Point mButtomRight = new Point();
-//        if (!OpenCVLoader.initDebug()) {
-//            Log.d(Tag, "Failed to initialize OpenCV.");
-//            return null;
-//        }
-//        Mat mat = new Mat();
-//        Utils.bitmapToMat(bitmap, mat);
-//        if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
-//            Log.d("Error", "Failed ot get bounding rectangle automatically.");
-//            return bitmap;
-//        }
-//        /** Preparing Warp Perspective Dimensions **/
-//        Bitmap warpedBitmap = null;
-//        try{
-//            Mat warpedBitmapReturned = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
-//            warpedBitmap = Bitmap.createBitmap(warpedBitmapReturned.width(), warpedBitmapReturned.height(), Bitmap.Config.ARGB_8888);
-//            Utils.matToBitmap(warpedBitmapReturned, warpedBitmap);
-////            FilesHandler.SaveToJPGFile(warpedBitmap, Constants.PREPROCESSED_CAPTURED_PHOTO_PATH);
-//        }
-//        catch (Exception ex){
-//            Log.d("Error", "Failed to warp perspective");
-//            return bitmap;
-//        }
-//        bitmap.recycle();
-//        return warpedBitmap;
-//    }
 
     public static Mat GetWarpedBillMat(String billFullName) throws IOException {
         Bitmap bitmap = GetRotatedBill(billFullName);
@@ -228,5 +181,28 @@ public class FilesHandler {
         }
         bitmap.recycle();
         return warpedBitmapReturned;
+    }
+
+    public static Mat GetRotatedBillMat(String billFullName) throws IOException {
+        byte[] bytes = ImageTxtFile2ByteArray(billFullName);
+        Mat src = BytesToMat(bytes);
+        Mat dst = new Mat(src.height(), src.width(), src.type());
+        RotateClockwise90(src, dst);
+        src.release();
+        return dst;
+    }
+
+    public static Mat BytesToMat(byte[] bytes) {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+        return Imgcodecs.imdecode(new MatOfByte(bytes), Imgcodecs.CV_LOAD_IMAGE_ANYCOLOR);
+    }
+
+    public static void RotateClockwise90(Mat src, Mat dest) {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+        Core.flip(src.t(), dest, 1);
     }
 }
