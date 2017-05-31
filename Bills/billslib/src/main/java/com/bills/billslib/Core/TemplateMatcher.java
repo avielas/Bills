@@ -105,7 +105,7 @@ public class TemplateMatcher  {
         int itemsAreaEnd = startEndOfAreasList.get(maxSizeIndex).getValue();
 
         try {
-            GetPriceAndQuantity(itemsAreaStart, itemsAreaEnd, connections, locations);
+            GetPriceAndQuantity(itemsAreaStart, itemsAreaEnd, connections, locations, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -125,7 +125,7 @@ public class TemplateMatcher  {
         int itemsAreaEnd = numOfItems - 1;
 
         try {
-            GetPriceAndQuantity(itemsAreaStart, itemsAreaEnd, connections, locations);
+            GetPriceAndQuantity(itemsAreaStart, itemsAreaEnd, connections, locations, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -304,14 +304,14 @@ public class TemplateMatcher  {
 
     private void GetPriceAndQuantity(int itemsAreaStart, int itemsAreaEnd,
                                      LinkedHashMap<Rect, Rect>[] connections,
-                                     ArrayList<ArrayList<Rect>> locations) throws Exception {
+                                     ArrayList<ArrayList<Rect>> locations, Boolean isParsing) throws Exception {
         mOCREngine.SetImage(mFullBillProcessedImage);
 
         mOCREngine.SetNumbersOnlyFormat();
 
         double[][] parsedNumbersArray = new double[itemsAreaEnd - itemsAreaStart + 1][connections[itemsAreaStart].size()];
 
-        GetParsedNumbers(itemsAreaStart, itemsAreaEnd, connections, parsedNumbersArray, locations);
+        GetParsedNumbers(itemsAreaStart, itemsAreaEnd, connections, parsedNumbersArray, locations, isParsing);
 
         int[] parsedNumbersArraySizes = new int[connections[itemsAreaStart].size()];
 
@@ -365,7 +365,7 @@ public class TemplateMatcher  {
     private void GetParsedNumbers(int itemsAreaStart, int itemsAreaEnd,
                                   LinkedHashMap<Rect, Rect>[] connections,
                                   double[][] parsedNumbersArray,
-                                  ArrayList<ArrayList<Rect>> locations) throws Exception {
+                                  ArrayList<ArrayList<Rect>> locations, Boolean isParsing) throws Exception {
         int i;
         itemColumn = CalculateIndexOfItemsColumn(itemsAreaStart, itemsAreaEnd, connections, locations);
         for(i = itemsAreaStart; i < itemsAreaEnd; i++) {
@@ -377,6 +377,12 @@ public class TemplateMatcher  {
                     continue;
                 }
                 Double parsedNumber = 0.0;
+                if(isParsing) {
+                    entry.left -= 3;
+                    entry.right += 3;
+                    entry.top -= 3;
+                    entry.bottom += 3;
+                }
                 mOCREngine.SetRectangle(entry);
                 try{
                     String parsedNumberString = mOCREngine.GetUTF8Text();
@@ -399,6 +405,21 @@ public class TemplateMatcher  {
                 continue;
             }
             Double parsedNumber = 0.0;
+            if(isParsing) {
+                entry.setValue(new Rect(entry.getValue().left   - Constants.ENLARGE_RECT_VALUE,
+                                        entry.getValue().top    - Constants.ENLARGE_RECT_VALUE,
+                                        entry.getValue().right  + Constants.ENLARGE_RECT_VALUE,
+                                        entry.getValue().bottom + Constants.ENLARGE_RECT_VALUE));
+                /**** the following code is for debugging  ****/
+//                int xBegin   = entry.getValue().left;
+//                int xEnd  = entry.getValue().right;
+//                int yBegin    = entry.getValue().top ;
+//                int yEnd = entry.getValue().bottom;
+//                Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
+//                FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/rect_test_" + i + "_" + j + ".jpg");
+//                bitmap.recycle();
+                /**********************************************/
+            }
             mOCREngine.SetRectangle(entry.getValue());
             try {
                 String parsedNumberString = mOCREngine.GetUTF8Text();

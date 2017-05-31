@@ -480,10 +480,10 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
 //                FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/rect_" + i + "_" + j + ".jpg");
 //                bitmap.recycle();
                 /**********************************************/
-                keyListCurrentIndex.get(j).left -= 3;
-                keyListCurrentIndex.get(j).right += 3;
-                keyListCurrentIndex.get(j).top -= 3;
-                keyListCurrentIndex.get(j).bottom += 3;
+                keyListCurrentIndex.get(j).left -= Constants.ENLARGE_RECT_VALUE;
+                keyListCurrentIndex.get(j).right += Constants.ENLARGE_RECT_VALUE;
+                keyListCurrentIndex.get(j).top -= Constants.ENLARGE_RECT_VALUE;
+                keyListCurrentIndex.get(j).bottom += Constants.ENLARGE_RECT_VALUE;
                 canvas.drawBitmap(_processedBillForCreateNewBill, keyListCurrentIndex.get(j), keyListCurrentIndex.get(j), paint);
             }
         }

@@ -34,5 +34,6 @@ public final class Constants
     public static final String TESSERACT_SAMPLE_DIRECTORY = STORAGE_DIRECTORY + "/TesseractSample/";
     public static final String TEST_OUTPUT_FILE = TESSERACT_SAMPLE_DIRECTORY + "/TestsOutput.txt";
     public static final String LANGUAGE_TAG = "heb";
+    public static final int ENLARGE_RECT_VALUE = 3;
 }
 
