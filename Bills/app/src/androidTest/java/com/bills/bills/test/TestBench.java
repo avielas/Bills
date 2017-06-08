@@ -32,7 +32,7 @@ public class TestBench {
     private Double _testsAccuracyPercentSum = 0.0;
     private long _timeMs;
 
-    /*********** Tests Configuration ************/
+    /*********** Thread Pool Configuration ************/
     private static int NUMBER_OF_CORES = 4;//Runtime.getRuntime().availableProcessors();
     // Sets the amount of time an idle thread waits before terminating
     private static final int KEEP_ALIVE_TIME = 1000;
