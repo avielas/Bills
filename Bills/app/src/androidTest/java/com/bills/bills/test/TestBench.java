@@ -15,6 +15,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -28,6 +31,14 @@ public class TestBench {
     private Double _testsCount = 0.0;
     private Double _testsAccuracyPercentSum = 0.0;
     private long _timeMs;
+
+    /*********** Tests Configuration ************/
+    private static int NUMBER_OF_CORES = 4;//Runtime.getRuntime().availableProcessors();
+    // Sets the amount of time an idle thread waits before terminating
+    private static final int KEEP_ALIVE_TIME = 1000;
+    // Sets the Time Unit to Milliseconds
+    private static final TimeUnit KEEP_ALIVE_TIME_UNIT = TimeUnit.MILLISECONDS;
+    /***************** End **********************/
 
     /*********** Tests Configuration ************/
     /**
@@ -76,7 +87,7 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList( "mina1", "pastaMarket1", "pastaMarket2", "iza1"/*, "dovrin1", "dovrin2", "nola1", "nola2", "nola3"*/);
+                _restaurantsNamesTestFilter = Arrays.asList( "mina1", "pastaMarket1", "pastaMarket2", "iza1", "dovrin1", "dovrin2", "nola1", "nola2", "nola3"/**/);
                 _billsTestFilter = Arrays.asList(/* "12112016_1355_croppedCenter.jpg" */);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);
@@ -113,27 +124,23 @@ public class TestBench {
         HashMap<String, List<String>> specifyBillsByRestaurants =
                 SpecifyBillsByRestaurants(bills, brandModelRootDirectory);
 
-        List<TestBill> threads = new ArrayList();
+        ThreadPoolExecutor mThreadPoolExecutor = new ThreadPoolExecutor(
+                NUMBER_OF_CORES,   // Initial pool size
+                NUMBER_OF_CORES,   // Max pool size
+                KEEP_ALIVE_TIME,       // Time idle thread waits before terminating
+                KEEP_ALIVE_TIME_UNIT,  // Sets the Time Unit for KEEP_ALIVE_TIME
+                new LinkedBlockingDeque<Runnable>());  // Work Queue
+
         int i=0;
 
         for (Map.Entry<String, List<String>> restaurantBillsPair : specifyBillsByRestaurants.entrySet()) {
             String restaurant = restaurantBillsPair.getKey();
             List<String> bill = restaurantBillsPair.getValue();
-            threads.add(i, new TestBill(rootBrandModelDirectory, restaurant, bill.get(0)));
-
-            _testsCount++;
-
-            threads.get(i).start();
-            ++i;
+            mThreadPoolExecutor.execute(new TestBill(rootBrandModelDirectory, restaurant, bill.get(0)));
         }
 
-        for(int j=0; j<i; ++j) {
-           try {
-               threads.get(j).join();
-           } catch (InterruptedException e) {
-               e.printStackTrace();
-           }
-        }
+        mThreadPoolExecutor.shutdown();
+        mThreadPoolExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
 
         Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (_testsCount*100)) * 100;
         System.out.println("Conclusions:");
