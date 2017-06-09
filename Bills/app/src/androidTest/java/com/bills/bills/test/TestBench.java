@@ -125,13 +125,11 @@ public class TestBench {
                 SpecifyBillsByRestaurants(bills, brandModelRootDirectory);
 
         ThreadPoolExecutor mThreadPoolExecutor = new ThreadPoolExecutor(
-                NUMBER_OF_CORES,   // Initial pool size
-                NUMBER_OF_CORES,   // Max pool size
+                NUMBER_OF_CORES,       // Initial pool size
+                NUMBER_OF_CORES,       // Max pool size
                 KEEP_ALIVE_TIME,       // Time idle thread waits before terminating
                 KEEP_ALIVE_TIME_UNIT,  // Sets the Time Unit for KEEP_ALIVE_TIME
                 new LinkedBlockingDeque<Runnable>());  // Work Queue
-
-        int i=0;
 
         for (Map.Entry<String, List<String>> restaurantBillsPair : specifyBillsByRestaurants.entrySet()) {
             String restaurant = restaurantBillsPair.getKey();

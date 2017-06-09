@@ -151,7 +151,10 @@ public class FilesHandler {
     }
 
     public static Mat GetWarpedBillMat(String billFullName) throws IOException {
-        Bitmap bitmap = GetRotatedBill(billFullName);
+//        Bitmap bitmap = GetRotatedBill(billFullName);
+        Mat mat;// = new Mat();
+//        Utils.bitmapToMat(bitmap, mat);
+        mat = GetRotatedBillMat(billFullName);
         BillAreaDetector areaDetector = new BillAreaDetector();
         Point mTopLeft = new Point();
         Point mTopRight = new Point();
@@ -161,8 +164,10 @@ public class FilesHandler {
             Log.d(Tag, "Failed to initialize OpenCV.");
             return null;
         }
-        Mat mat = new Mat();
-        Utils.bitmapToMat(bitmap, mat);
+
+//        Mat mat = new Mat();
+//        Utils.bitmapToMat(bitmap, mat);
+
         if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
             Log.d("Error", "Failed ot get bounding rectangle automatically.");
             return mat;
@@ -179,7 +184,7 @@ public class FilesHandler {
             Log.d("Error", "Failed to warp perspective");
             return mat;
         }
-        bitmap.recycle();
+//        bitmap.recycle();
         return warpedBitmapReturned;
     }
 
