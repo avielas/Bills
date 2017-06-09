@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -123,24 +125,29 @@ public class TestBench {
         bills = FilterBills(bills, billsTestFilter);
         HashMap<String, List<String>> specifyBillsByRestaurants =
                 SpecifyBillsByRestaurants(bills, brandModelRootDirectory);
+        Queue<Integer> queue = new ConcurrentLinkedQueue<>();
 
         ThreadPoolExecutor mThreadPoolExecutor = new ThreadPoolExecutor(
-                NUMBER_OF_CORES,       // Initial pool size
-                NUMBER_OF_CORES,       // Max pool size
-                KEEP_ALIVE_TIME,       // Time idle thread waits before terminating
+                NUMBER_OF_CORES,  // Initial pool size
+                NUMBER_OF_CORES,  // Max pool size
+                KEEP_ALIVE_TIME,  // Time idle thread waits before terminating
                 KEEP_ALIVE_TIME_UNIT,  // Sets the Time Unit for KEEP_ALIVE_TIME
                 new LinkedBlockingDeque<Runnable>());  // Work Queue
 
         for (Map.Entry<String, List<String>> restaurantBillsPair : specifyBillsByRestaurants.entrySet()) {
             String restaurant = restaurantBillsPair.getKey();
             List<String> bill = restaurantBillsPair.getValue();
-            mThreadPoolExecutor.execute(new TestBill(rootBrandModelDirectory, restaurant, bill.get(0)));
+            mThreadPoolExecutor.execute(new TestBill(rootBrandModelDirectory, restaurant, bill.get(0), queue));
         }
 
         mThreadPoolExecutor.shutdown();
         mThreadPoolExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
 
-        Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (_testsCount*100)) * 100;
+        for(Integer item : queue){
+            _testsAccuracyPercentSum+=item;
+        }
+
+        Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (queue.size()*100)) * 100;
         System.out.println("Conclusions:");
         System.out.println("Accuracy of tests bench is "+ accuracyPercentTestsBench.intValue()+"%");
         _timeMs = System.currentTimeMillis() - _timeMs;

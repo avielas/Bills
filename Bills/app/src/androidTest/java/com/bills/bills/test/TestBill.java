@@ -17,6 +17,7 @@ import org.opencv.core.Mat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Created by avielavr on 5/19/2017.
@@ -27,13 +28,15 @@ public class TestBill extends Thread{
     String _restaurant;
     String _billFullName;
     StringBuilder _results;
+    Queue<Integer> _queue;
 
-    public TestBill(String rootBrandModelDirectory, String restaurant, String bill)
+    public TestBill(String rootBrandModelDirectory, String restaurant, String bill, Queue<Integer> queue)
     {
         _rootBrandModelDirectory = rootBrandModelDirectory;
         _restaurant = restaurant;
         _billFullName = bill;
         _results = new StringBuilder();
+        _queue = queue;
     }
 
     @Override
@@ -127,9 +130,7 @@ public class TestBill extends Thread{
         }
 
         _results.append("Accuracy is " + accuracyPercent + "%" + System.getProperty("line.separator"));
-
-//        _testsCount++;
-//        _testsAccuracyPercentSum += accuracyPercent;
+        _queue.add(accuracyPercent);
     }
 
     /**
