@@ -34,6 +34,7 @@ import com.bills.billslib.Contracts.Enums.Language;
 import com.bills.billslib.Contracts.IOcrEngine;
 import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
+import com.bills.billslib.Core.MainActivityBase;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.ItemView;
@@ -49,7 +50,7 @@ import java.util.HashMap;
 
 import static android.view.View.GONE;
 
-public class BillsMainActivity extends AppCompatActivity implements IOnCameraFinished, View.OnClickListener {
+public class BillsMainActivity extends MainActivityBase implements IOnCameraFinished, View.OnClickListener {
     private String Tag = this.getClass().getSimpleName();
     private static final int REQUEST_CAMERA_PERMISSION = 101;
 
@@ -67,8 +68,6 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
     LinearLayout _billsMainView;
     CameraRenderer _renderer;
 
-
-
     HashMap<Integer, NameView> _billSummarizerColorToViewMapper = new HashMap<>();
     HashMap<ItemView, Integer> _billSummarizerItemToColorMapper = new HashMap<>();
     Double _marked = 0.0;
@@ -84,9 +83,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bills_main);
-
         _billsMainView = (LinearLayout) findViewById(R.id.activity_bills_main);
-
         _billSummarizerTotalSum = (TextView)findViewById(R.id.totalSum);
         _billSummarizerTotalSum.setVisibility(GONE);
         _billSummarizerTip = (EditText)findViewById(R.id.tipTextView);
@@ -113,50 +110,7 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
             }
         }
 
-        //first visit of on create
-        if(savedInstanceState == null){
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-                    Toast.makeText(this, "Camera access is required.", Toast.LENGTH_SHORT).show();
-
-                } else {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
-                            REQUEST_CAMERA_PERMISSION);
-                }
-
-            }else if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
-
-                    // Show an explanation to the user *asynchronously* -- don't block
-                    // this thread waiting for the user's response! After the user
-                    // sees the explanation, try again to request the permission.
-
-                } else {
-
-                    // No explanation needed, we can request the permission.
-
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                            1);
-
-                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                    // app-defined int constant. The callback method gets the
-                    // result of the request.
-                }
-            } else {
-                StartCameraActivity();
-//                StartSummarizerView();
-            }
-        }
+        StartCameraActivity();
     }
 
     private void StartSummarizerView() {
@@ -355,7 +309,12 @@ public class BillsMainActivity extends AppCompatActivity implements IOnCameraFin
         Utils.matToBitmap(warpedMat, processedBillBitmap);
 
         TemplateMatcher templateMatcher = new TemplateMatcher(_ocrEngine, processedBillBitmap);
-        templateMatcher.Match();
+        try{
+            templateMatcher.Match();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
         ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
         int numOfItems = templateMatcher.priceAndQuantity.size();

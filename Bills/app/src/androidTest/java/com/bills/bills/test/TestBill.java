@@ -28,15 +28,22 @@ public class TestBill extends Thread{
     String _restaurant;
     String _billFullName;
     StringBuilder _results;
-    Queue<Integer> _queue;
+    Queue<Integer> _accuracyPercentQueue;
+    Queue<StringBuilder> _passedResultsQueue;
+    Queue<StringBuilder> _failedResultsQueue;
 
-    public TestBill(String rootBrandModelDirectory, String restaurant, String bill, Queue<Integer> queue)
+    public TestBill(String rootBrandModelDirectory, String restaurant, String bill,
+                    Queue<Integer> accuracyPercentQueue,
+                    Queue<StringBuilder> passedResultsQueue,
+                    Queue<StringBuilder> failedResultsQueue)
     {
         _rootBrandModelDirectory = rootBrandModelDirectory;
         _restaurant = restaurant;
         _billFullName = bill;
         _results = new StringBuilder();
-        _queue = queue;
+        _accuracyPercentQueue = accuracyPercentQueue;
+        _passedResultsQueue = passedResultsQueue;
+        _failedResultsQueue = failedResultsQueue;
     }
 
     @Override
@@ -56,7 +63,7 @@ public class TestBill extends Thread{
             Mat warpedMatCopy = new Mat();
 
             try {
-                _results.append("Test of " + _billFullName + System.getProperty("line.separator"));
+                _results.append(System.getProperty("line.separator") + "Test of " + _billFullName + System.getProperty("line.separator"));
                 tesseractOCREngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
                 expectedBillTextLines = FilesHandler.ReadTxtFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
                 warpedMat = FilesHandler.GetWarpedBillMat(_billFullName);
@@ -72,7 +79,14 @@ public class TestBill extends Thread{
             ImageProcessingLib.PreprocessingForTM(warpedMat);
             Utils.matToBitmap(warpedMat, processedBillBitmap);
             templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
-            templateMatcher.Match();
+            try{
+                templateMatcher.Match();
+            }
+            catch (Exception e){
+                _results.append(" " + Log.getStackTraceString(e)+ System.getProperty("line.separator"));
+                _failedResultsQueue.add(_results);
+                return;
+            }
 
             ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
             int numOfItems = templateMatcher.priceAndQuantity.size();
@@ -83,15 +97,11 @@ public class TestBill extends Thread{
             templateMatcher.Parsing(numOfItems);
             LinkedHashMap ocrResultCroppedBill = GetOcrResults(templateMatcher);
             CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);
-
             processedBillBitmap.recycle();
             warpedMat.release();
             warpedMatCopy.release();
             tesseractOCREngine.End();
-
-            synchronized (System.out) {
-                System.out.println(_results);
-            }
+            _passedResultsQueue.add(_results);
         }
     }
 
@@ -130,7 +140,7 @@ public class TestBill extends Thread{
         }
 
         _results.append("Accuracy is " + accuracyPercent + "%" + System.getProperty("line.separator"));
-        _queue.add(accuracyPercent);
+        _accuracyPercentQueue.add(accuracyPercent);
     }
 
     /**

@@ -31,6 +31,7 @@ import com.bills.billslib.Contracts.*;
 import com.bills.billslib.Contracts.Enums.Language;
 import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
+import com.bills.billslib.Core.MainActivityBase;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.DragRectView;
@@ -55,7 +56,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 import static android.view.View.GONE;
 
-public class TestsDebugActivity extends AppCompatActivity implements View.OnClickListener{
+public class TestsDebugActivity extends MainActivityBase implements View.OnClickListener{
     private enum StructureElement {
         NONE,
         HORIZONTAL_LINE,
@@ -567,13 +568,11 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                 .setCancelable(false)
                 .setPositiveButton("Export to file", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialogBox, int id) {
-                        // ToDo get user input here
-                        try {
-                            SetOutputStreamToFile();
+                            // ToDo get user input here
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
+                            String currentDateAndTime = simpleDateFormat.format(new Date());
+                            FilesHandler.SetOutputStream(_brandAndModelPath + _restaurantName + "/preprocessing_results_" + currentDateAndTime +".txt");
                             System.out.println(_results);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
                     }
                 })
                 .setNegativeButton("Cancel",
@@ -584,19 +583,6 @@ public class TestsDebugActivity extends AppCompatActivity implements View.OnClic
                         });
         AlertDialog alertDialogAndroid = alertDialogBuilderUserInput.create();
         alertDialogAndroid.show();
-    }
-
-    /**
-     * Set output stream for 'System.out.println'. The test prints just to file.
-     * Read TEST_README for more info
-     * @throws FileNotFoundException
-     */
-    private void SetOutputStreamToFile() throws FileNotFoundException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
-        String currentDateAndTime = simpleDateFormat.format(new Date());
-        File file = new File(_brandAndModelPath + _restaurantName + "/preprocessing_results_" + currentDateAndTime +".txt");
-        PrintStream printStreamToFile = new PrintStream(file);
-        System.setOut(printStreamToFile);
     }
 
     public Bitmap PrintWordsRects(Bitmap bitmap, Bitmap _processedBill){

@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.util.Log;
 
+import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
 
@@ -21,9 +22,13 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -209,5 +214,21 @@ public class FilesHandler {
             // Handle initialization error
         }
         Core.flip(src.t(), dest, 1);
+    }
+
+    /**
+     * Set output stream for 'System.out.println'. The test prints just to file.
+     * Read TEST_README for more info
+     * @throws FileNotFoundException
+     */
+    public static void SetOutputStream(String filneName){
+        File file = new File(filneName);
+        PrintStream printStreamToFile = null;
+        try {
+            printStreamToFile = new PrintStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        System.setOut(printStreamToFile);
     }
 }

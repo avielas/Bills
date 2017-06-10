@@ -67,7 +67,7 @@ public class TemplateMatcher  {
         priceAndQuantity.clear();
     }
 
-    public void Match() {
+    public void Match() throws Exception {
         boolean success;
         ArrayList<ArrayList<Rect>> locations = GetWordLocations(mFullBillProcessedImage);
         int lineIndex = 0;
@@ -106,14 +106,13 @@ public class TemplateMatcher  {
 
         try {
             GetPriceAndQuantity(itemsAreaStart, itemsAreaEnd, connections, locations, false);
+            SetItemsLocations(itemsAreaStart, itemsAreaEnd, connections, locations);
+            success = true;
+            CreatingRects(startEndOfAreasList, connections, locations);
         } catch (Exception e) {
             e.printStackTrace();
+            throw e;
         }
-
-        SetItemsLocations(itemsAreaStart, itemsAreaEnd, connections, locations);
-        success = true;
-
-        CreatingRects(startEndOfAreasList, connections, locations);
     }
 
     public void Parsing(int numOfItems) {

@@ -4,11 +4,13 @@ import android.content.Context;
 import android.os.Build;
 
 import com.bills.billslib.Contracts.Constants;
+import com.bills.billslib.Utilities.FilesHandler;
 
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +32,6 @@ public class TestBench {
     private static final int TEST_EMULATOR = 1;
     private static final int TEST_PHONE = 3;
     Context _context;
-    private Double _testsCount = 0.0;
     private Double _testsAccuracyPercentSum = 0.0;
     private long _timeMs;
 
@@ -67,7 +68,6 @@ public class TestBench {
     public void begin() throws Exception {
         _context = getInstrumentation().getContext();
         _timeMs = System.currentTimeMillis();
-        SetOutputStream();
         String sourceDirectory;
         //copy images to internal memory
         //if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
@@ -89,8 +89,8 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList( "mina1", "pastaMarket1", "pastaMarket2", "iza1", "dovrin1", "dovrin2", "nola1", "nola2", "nola3"/**/);
-                _billsTestFilter = Arrays.asList(/* "12112016_1355_croppedCenter.jpg" */);
+                _restaurantsNamesTestFilter = Arrays.asList( "mina1", /*"pastaMarket1", "pastaMarket2", "iza1", "dovrin1", "dovrin2",*/ "nola1"/*, "nola2", "nola3"*/);
+                _billsTestFilter = Arrays.asList(/*ocrBytes3.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);
                 break;
@@ -125,7 +125,9 @@ public class TestBench {
         bills = FilterBills(bills, billsTestFilter);
         HashMap<String, List<String>> specifyBillsByRestaurants =
                 SpecifyBillsByRestaurants(bills, brandModelRootDirectory);
-        Queue<Integer> queue = new ConcurrentLinkedQueue<>();
+        Queue<Integer> accuracyPercentQueue = new ConcurrentLinkedQueue<>();
+        Queue<StringBuilder> passedResultsQueue = new ConcurrentLinkedQueue<>();
+        Queue<StringBuilder> failedResultsQueue = new ConcurrentLinkedQueue<>();
 
         ThreadPoolExecutor mThreadPoolExecutor = new ThreadPoolExecutor(
                 NUMBER_OF_CORES,  // Initial pool size
@@ -136,23 +138,48 @@ public class TestBench {
 
         for (Map.Entry<String, List<String>> restaurantBillsPair : specifyBillsByRestaurants.entrySet()) {
             String restaurant = restaurantBillsPair.getKey();
-            List<String> bill = restaurantBillsPair.getValue();
-            mThreadPoolExecutor.execute(new TestBill(rootBrandModelDirectory, restaurant, bill.get(0), queue));
+            List<String> currBills = restaurantBillsPair.getValue();
+            for(int i=0; i < currBills.size(); i++)
+            {
+                mThreadPoolExecutor.execute(
+                        new TestBill(rootBrandModelDirectory, restaurant, currBills.get(i),
+                                accuracyPercentQueue, passedResultsQueue, failedResultsQueue));
+            }
         }
 
         mThreadPoolExecutor.shutdown();
         mThreadPoolExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
 
-        for(Integer item : queue){
+        /**************** Write failed tests output to file ***************/
+        File failedTestsFile = new File(Constants.FAILED_TEST_OUTPUT_FILE);
+        FileOutputStream stream = new FileOutputStream(failedTestsFile);
+        for(StringBuilder sb : failedResultsQueue){
+            stream.write(sb.toString().getBytes());
+        }
+        stream.close();
+        /******************************* END ******************************/
+
+        /**************** Write passed tests output and conclusions to file ***************/
+        File passedTestsFile = new File(Constants.TEST_OUTPUT_FILE);
+        stream = new FileOutputStream(passedTestsFile);
+        for(StringBuilder sb : passedResultsQueue){
+            stream.write(sb.toString().getBytes());
+        }
+
+        for(Integer item : accuracyPercentQueue){
             _testsAccuracyPercentSum+=item;
         }
 
-        Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (queue.size()*100)) * 100;
-        System.out.println("Conclusions:");
-        System.out.println("Accuracy of tests bench is "+ accuracyPercentTestsBench.intValue()+"%");
+        Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (accuracyPercentQueue.size()*100)) * 100;
+        stream.write(("\nConclusions:").getBytes());
+        stream.write(("\nAccuracy of tests bench is "+ accuracyPercentTestsBench.intValue()+"%").getBytes());
+        stream.write(("\nTotally run " + (passedResultsQueue.size() + failedResultsQueue.size()) + " bills").getBytes());
+        stream.write(("\n" + passedResultsQueue.size() + " passed").getBytes());
+        stream.write(("\n" + failedResultsQueue.size() + " failed").getBytes());
         _timeMs = System.currentTimeMillis() - _timeMs;
-        System.out.println("It took " + _timeMs/1000 + " s");
-        System.out.println(System.getProperty("line.separator"));
+        stream.write(("\nIt took " + _timeMs/1000 + " s").getBytes());
+        stream.close();
+        /******************************* END ******************************/
     }
 
     /**
@@ -191,6 +218,7 @@ public class TestBench {
                     filteredBills.add(file);
                 }
             }
+            return filteredBills;
         }
         return croppedBills;
     }
@@ -238,16 +266,5 @@ public class TestBench {
             }
         }
         return false;
-    }
-
-    /**
-     * Set output stream for 'System.out.println'. The test prints just to file.
-     * Read TEST_README for more info
-     * @throws FileNotFoundException
-     */
-    private void SetOutputStream() throws FileNotFoundException {
-        File file = new File(Constants.TEST_OUTPUT_FILE);
-        PrintStream printStreamToFile = new PrintStream(file);
-        System.setOut(printStreamToFile);
     }
 }
