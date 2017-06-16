@@ -114,12 +114,20 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
         Camera.Parameters p = _camera.getParameters();
         /*** set capture to max resolution ***/
         List<Camera.Size> listSize = p.getSupportedPictureSizes();
-        Camera.Size size = listSize.get(listSize.size()-1);
+        Camera.Size size = GetMaxCameraResolution(listSize);
         p.setPictureSize(size.width, size.height);
         /*********** end ***********/
         p.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
         _camera.setParameters(p);
         _renderThread.start();
+    }
+
+    private Camera.Size GetMaxCameraResolution(List<Camera.Size> listSize) {
+        Camera.Size maxSize = listSize.get(listSize.size()-1);;
+        for (Camera.Size size : listSize) {
+            maxSize = size.width*size.height > maxSize.width*maxSize.height ? size : maxSize;
+        }
+        return maxSize;
     }
 
     public void set_selectedFilter(int id)   {
