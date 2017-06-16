@@ -110,9 +110,8 @@ public class TesseractOCREngine implements IOcrEngine {
         Pixa wordsPixa = null;
         try {
             wordsPixa = _tessBaseAPI.getConnectedComponents();
-            Pix pixWithMaxWidth = FindPixWithMaxWidth(wordsPixa);
-            MergeComponentsToWords(pixWithMaxWidth, wordsPixa);
-            pixWithMaxWidth.recycle();
+            int maxPixWidth = GetMaxPixWidth(wordsPixa);
+            MergeComponentsToWords(maxPixWidth, wordsPixa);
 
             List<Rect> wordsRectangles = new ArrayList<>();
 
@@ -277,14 +276,14 @@ public class TesseractOCREngine implements IOcrEngine {
         }
     }
 
-    private Pixa MergeComponentsToWords(Pix pixWithMaxWidth, Pixa pixa) {
+    private Pixa MergeComponentsToWords(int maxPixWidth, Pixa pixa) {
         int i = 0;
         Pix currPix = pixa.getPix(0);
         Pix nextPix = pixa.getPix(1);
         Rect currRect = pixa.getBoxRect(0);
         Rect nextRect = pixa.getBoxRect(1);
         while(null != currPix && null != nextPix) {
-            if(nextRect.left - currRect.right < (pixWithMaxWidth.getWidth() + 1.5*pixWithMaxWidth.getWidth()))
+            if(nextRect.left - currRect.right < (maxPixWidth + 1.5*maxPixWidth))
             {
                 pixa.mergeAndReplacePix(i, i + 1);
             }
@@ -299,21 +298,23 @@ public class TesseractOCREngine implements IOcrEngine {
         return pixa;
     }
 
-    private Pix FindPixWithMaxWidth(Pixa pixa) {
-        Pix pixWithMaxWidth;
+    private int GetMaxPixWidth(Pixa pixa) {
+        int maxPixWidth = Integer.MIN_VALUE;
         int i = 0;
         Pix currPix = pixa.getPix(0);
-        pixWithMaxWidth = currPix;
+        maxPixWidth = currPix.getWidth();
         i++;
         //TODO why it returned null for pastaMarket1 ??
         currPix = pixa.getPix(i);
         while(null != currPix) {
-            pixWithMaxWidth = currPix.getWidth() > pixWithMaxWidth.getWidth() ?
-                    currPix :
-                    pixWithMaxWidth;
+            int currPixWidth = currPix.getWidth();
+            maxPixWidth = currPixWidth > maxPixWidth ?
+                    currPixWidth :
+                    maxPixWidth;
             i++;
+            currPix.recycle();
             currPix = pixa.getPix(i);
         }
-        return pixWithMaxWidth;
+        return maxPixWidth;
     }
 }
