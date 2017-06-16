@@ -500,6 +500,9 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
 //                    String pathToSave = Constants.IMAGES_PATH;
 //                    FilesHandler.SaveToJPGFile(_warpedBill, pathToSave + "/bill.jpg");
                     _billWithPrintedRedLines = PrintWordsRects(_warpedBill, _processedBill);
+//                    String pathToSave = Constants.IMAGES_PATH;
+//                    FilesHandler.SaveToJPGFile(_billWithPrintedRedLines, pathToSave + "/billWithPrintedRedLines.jpg");
+//                    FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/AprocessedBill.jpg");
                     _originalImageView.setImageBitmap(_billWithPrintedRedLines);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -586,6 +589,9 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     }
 
     public Bitmap PrintWordsRects(Bitmap bitmap, Bitmap _processedBill){
+//        String pathToSave = Constants.IMAGES_PATH;
+//        FilesHandler.SaveToJPGFile(bitmap, pathToSave + "/Bbitmap.jpg");
+//        FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/BprocessedBill.jpg");
         List<Rect> words;
         Bitmap printedBitmap = Bitmap.createBitmap(bitmap);
         try{

@@ -305,6 +305,7 @@ public class TesseractOCREngine implements IOcrEngine {
         Pix currPix = pixa.getPix(0);
         pixWithMaxWidth = currPix;
         i++;
+        //TODO why it returned null for pastaMarket1 ??
         currPix = pixa.getPix(i);
         while(null != currPix) {
             pixWithMaxWidth = currPix.getWidth() > pixWithMaxWidth.getWidth() ?
