@@ -500,9 +500,11 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
 //                    String pathToSave = Constants.IMAGES_PATH;
 //                    FilesHandler.SaveToJPGFile(_warpedBill, pathToSave + "/bill.jpg");
                     _billWithPrintedRedLines = PrintWordsRects(_warpedBill, _processedBill);
+                    //TODO
 //                    String pathToSave = Constants.IMAGES_PATH;
-//                    FilesHandler.SaveToJPGFile(_billWithPrintedRedLines, pathToSave + "/billWithPrintedRedLines.jpg");
-//                    FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/AprocessedBill.jpg");
+//                    FilesHandler.SaveToJPGFile(_billWithPrintedRedLines, pathToSave + "/CbillWithPrintedRedLines.jpg");
+//                    FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/CAprocessedBill.jpg");
+
                     _originalImageView.setImageBitmap(_billWithPrintedRedLines);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -589,9 +591,11 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     }
 
     public Bitmap PrintWordsRects(Bitmap bitmap, Bitmap _processedBill){
+        //TODO
 //        String pathToSave = Constants.IMAGES_PATH;
-//        FilesHandler.SaveToJPGFile(bitmap, pathToSave + "/Bbitmap.jpg");
-//        FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/BprocessedBill.jpg");
+//        FilesHandler.SaveToJPGFile(bitmap, pathToSave + "/CBbitmap.jpg");
+//        FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/CBprocessedBill.jpg");
+
         List<Rect> words;
         Bitmap printedBitmap = Bitmap.createBitmap(bitmap);
         try{
@@ -610,10 +614,17 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
 
             for (Rect line: lineRects) {
                 tesseractOCREngine.SetRectangle(line);
-                words = tesseractOCREngine.GetWords();
-                for (Rect rect : words) {
-                    canvas.drawRect(rect, paint);
+                try {
+                    words = tesseractOCREngine.GetWords();
+                    for (Rect rect : words) {
+                        canvas.drawRect(rect, paint);
+                    }
                 }
+                catch(Exception ex){
+                    Log.d(this.getClass().getSimpleName(), "Failed to get words of line. Error: " + ex.getMessage());
+                    canvas.drawRect(line, paint);
+                }
+
             }
         }
         catch(Exception ex){

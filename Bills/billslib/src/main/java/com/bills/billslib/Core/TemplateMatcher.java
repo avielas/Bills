@@ -446,8 +446,7 @@ public class TemplateMatcher  {
         return  parsedNumberString;
     }
 
-    Boolean IsLinesConnected(ArrayList<Rect> line, ArrayList<Rect> nextLine, LinkedHashMap<Rect, Rect> connections)
-    {
+    Boolean IsLinesConnected(ArrayList<Rect> line, ArrayList<Rect> nextLine, LinkedHashMap<Rect, Rect> connections) {
        Boolean isFirstConnectedCofigurationExist;
        Boolean isSecondConnectedCofigurationExist;
 
@@ -493,35 +492,33 @@ public class TemplateMatcher  {
         List<Rect> textlines = null;
         Rect textLine = null;
         List<Rect> textWords = null;
-
         ArrayList<ArrayList<Rect>> locations = new ArrayList<>();
-        try {
-            int lineCount = 0;
-            int wordCount = 0;
-
-            mOCREngine.SetImage(processedBillImage);
-            mOCREngine.SetNumbersOnlyFormat();
-            textlines = mOCREngine.GetTextlines();
-
-
-            // go over each line and find all numbers with their locations.
-            while (lineCount < textlines.size()) {
-                textLine = textlines.get(lineCount++);
-                mOCREngine.SetRectangle(textLine);
+        int lineCount = 0;
+        int validLineCount = 0;
+        int wordCount = 0;
+        
+        mOCREngine.SetImage(processedBillImage);
+        mOCREngine.SetNumbersOnlyFormat();
+        textlines = mOCREngine.GetTextlines();
+        // go over each line and find all numbers with their locations.
+        while (lineCount < textlines.size()) {
+            textLine = textlines.get(lineCount++);
+            mOCREngine.SetRectangle(textLine);
+            try {
                 textWords = mOCREngine.GetWords();
-
-                locations.add(new ArrayList<Rect>());
-                while (wordCount < textWords.size()) {
-                    Rect wordRect = textWords.get(wordCount++);
-                    locations.get(lineCount - 1).add(wordRect);
-                }
-
-                wordCount = 0;
+            } catch (Exception ex) {
+                Log.d(this.getClass().getSimpleName(), "Failed to get words of line. Error: " + ex.getMessage());
+                continue;
             }
-        } catch (Exception ex) {
-            Log.d(this.getClass().getSimpleName(), "Failed to map numbered values to location. Error: " + ex.getMessage());
-            return null;
+            locations.add(new ArrayList<Rect>());
+            validLineCount++;
+            while (wordCount < textWords.size()) {
+                Rect wordRect = textWords.get(wordCount++);
+                locations.get(validLineCount - 1).add(wordRect);
+            }
+            wordCount = 0;
         }
+
         return locations;
     }
 
@@ -592,72 +589,6 @@ public class TemplateMatcher  {
                 }
             }
         }
-    }
-
-    /**
-     *
-     * @return
-     * returns mapping between line number and word index to
-     *      parsed word(to Double) with its location at the Bitmap
-     */
-    private LinkedHashMap<Integer, LinkedHashMap<Integer, Map.Entry<Double, Rect>>> GetMapper() {
-        List<Rect> textlines = null;
-        Rect textLine = null;
-        List<Rect> textWords = null;
-        Rect textWord = null;
-
-        LinkedHashMap<Integer, LinkedHashMap<Integer, Map.Entry<Double, Rect>>> mapper = new LinkedHashMap<>();
-
-        try {
-            int lineCount = 0;
-            int wordCount = 0;
-
-            mOCREngine.SetImage(mFullBillProcessedImage);
-            mOCREngine.SetNumbersOnlyFormat();
-            textlines = mOCREngine.GetTextlines();
-
-
-            // go over each line and find all numbers with their locations.
-            while (lineCount < textlines.size()) {
-                textLine = textlines.get(lineCount++);
-                mOCREngine.SetRectangle(textLine);
-                textWords = mOCREngine.GetWords();
-
-                mapper.put(lineCount, new LinkedHashMap<Integer, Map.Entry<Double, Rect>>());
-                while (wordCount < textWords.size()) {
-                    Rect wordRect = textWords.get(wordCount);
-                    textWord = textWords.get(wordCount++);
-                    mOCREngine.SetRectangle(textWord);
-                    String word = null;
-                    try {
-                        word = mOCREngine.GetUTF8Text();
-                        if (mOCREngine.MeanConfidence() < 70) {
-                            throw new Exception();
-                        }
-                    } catch (Exception ex) {
-                        mapper.get(lineCount).put(wordCount, new AbstractMap.SimpleEntry<Double, Rect>(new Double(0), wordRect));
-
-                        continue;
-                    }
-
-                    double parsedWord;
-                    try {
-                        parsedWord = Double.parseDouble(word);
-                    } catch (Exception ex) {
-                        mapper.get(lineCount).put(wordCount, new AbstractMap.SimpleEntry<Double, Rect>(new Double(-1), wordRect));
-
-                        continue;
-                    }
-                    mapper.get(lineCount).put(wordCount, new AbstractMap.SimpleEntry<Double, Rect>(new Double(parsedWord), wordRect));
-                }
-                wordCount = 0;
-            }
-        } catch (Exception ex) {
-            Log.d(this.getClass().getSimpleName(), "Failed to map numbered values to location. Error: " + ex.getMessage());
-            return null;
-        }
-
-        return mapper;
     }
 
     private void CreatingRects(List<Map.Entry<Integer, Integer>> startEndOfAreasList, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {

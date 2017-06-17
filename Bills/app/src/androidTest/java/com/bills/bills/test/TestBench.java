@@ -162,14 +162,9 @@ public class TestBench {
         /**************** Write passed tests output and conclusions to file ***************/
         File passedTestsFile = new File(Constants.TEST_OUTPUT_FILE);
         stream = new FileOutputStream(passedTestsFile);
-        for(StringBuilder sb : passedResultsQueue){
-            stream.write(sb.toString().getBytes());
-        }
-
         for(Integer item : accuracyPercentQueue){
             _testsAccuracyPercentSum+=item;
         }
-
         Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (accuracyPercentQueue.size()*100)) * 100;
         stream.write(("\nConclusions:").getBytes());
         stream.write(("\nAccuracy of tests bench is "+ accuracyPercentTestsBench.intValue()+"%").getBytes());
@@ -177,7 +172,11 @@ public class TestBench {
         stream.write(("\n" + passedResultsQueue.size() + " passed").getBytes());
         stream.write(("\n" + failedResultsQueue.size() + " failed").getBytes());
         _timeMs = System.currentTimeMillis() - _timeMs;
-        stream.write(("\nIt took " + _timeMs/1000 + " s").getBytes());
+        stream.write(("\nIt took " + _timeMs/1000 + " s\n").getBytes());
+
+        for(StringBuilder sb : passedResultsQueue){
+            stream.write(sb.toString().getBytes());
+        }
         stream.close();
         /******************************* END ******************************/
     }
