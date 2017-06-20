@@ -12,6 +12,7 @@ import com.googlecode.leptonica.android.WriteFile;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -110,8 +111,8 @@ public class TesseractOCREngine implements IOcrEngine {
         Pixa wordsPixa = null;
         try {
             wordsPixa = _tessBaseAPI.getConnectedComponents();
-            int maxPixWidth = GetMaxPixWidth(wordsPixa);
-            MergeComponentsToWords(maxPixWidth, wordsPixa);
+            int medianPixHeight = GetMedianPixHeight(wordsPixa);
+            MergeComponentsToWords(medianPixHeight, wordsPixa);
 
             List<Rect> wordsRectangles = new ArrayList<>();
 
@@ -276,14 +277,14 @@ public class TesseractOCREngine implements IOcrEngine {
         }
     }
 
-    private Pixa MergeComponentsToWords(int maxPixWidth, Pixa pixa) {
+    private Pixa MergeComponentsToWords(int medianPixHeight, Pixa pixa) {
         int i = 0;
         Pix currPix = pixa.getPix(0);
         Pix nextPix = pixa.getPix(1);
         Rect currRect = pixa.getBoxRect(0);
         Rect nextRect = pixa.getBoxRect(1);
         while(null != currPix && null != nextPix) {
-            if(nextRect.left - currRect.right < (maxPixWidth + 1.5*maxPixWidth))
+            if(nextRect.left - currRect.right < medianPixHeight)
             {
                 pixa.mergeAndReplacePix(i, i + 1);
             }
@@ -298,23 +299,38 @@ public class TesseractOCREngine implements IOcrEngine {
         return pixa;
     }
 
-    private int GetMaxPixWidth(Pixa pixa) {
-        int maxPixWidth = Integer.MIN_VALUE;
+    private int GetMedianPixHeight(Pixa pixa) {
+        List<Integer> pixaHeight = new ArrayList<>();
         int i = 0;
         Pix currPix = pixa.getPix(0);
-        maxPixWidth = currPix.getWidth();
+        int currPixHeight = currPix.getHeight();
+        pixaHeight.add(currPixHeight);
         i++;
         //TODO why it returned null for pastaMarket1 ??
         currPix = pixa.getPix(i);
         while(null != currPix) {
-            int currPixWidth = currPix.getWidth();
-            maxPixWidth = currPixWidth > maxPixWidth ?
-                    currPixWidth :
-                    maxPixWidth;
+            currPixHeight = currPix.getHeight();
+            pixaHeight.add(currPixHeight);
             i++;
             currPix.recycle();
             currPix = pixa.getPix(i);
         }
-        return maxPixWidth;
+
+        Collections.sort(pixaHeight);
+
+        int pixaHeightSize = pixaHeight.size();
+
+        if(pixaHeightSize <= 2)
+        {
+            return pixaHeightSize == 0 ? 0 : pixaHeight.get(0);
+        }
+
+        int median;
+        if (pixaHeightSize % 2 == 0)
+            median = (pixaHeight.get(pixaHeightSize/2) + pixaHeight.get(pixaHeightSize/2 - 1))/2;
+        else
+            median = pixaHeight.get(pixaHeightSize/2);
+
+        return median;
     }
 }
