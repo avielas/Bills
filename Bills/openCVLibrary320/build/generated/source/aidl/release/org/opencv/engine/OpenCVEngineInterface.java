@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\src\\main\\aidl\\org\\opencv\\engine\\OpenCVEngineInterface.aidl
+ * Original file: /home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/src/main/aidl/org/opencv/engine/OpenCVEngineInterface.aidl
  */
 package org.opencv.engine;
 /**

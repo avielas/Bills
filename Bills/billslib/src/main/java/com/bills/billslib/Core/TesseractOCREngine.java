@@ -284,7 +284,7 @@ public class TesseractOCREngine implements IOcrEngine {
         Rect currRect = pixa.getBoxRect(0);
         Rect nextRect = pixa.getBoxRect(1);
         while(null != currPix && null != nextPix) {
-            if(nextRect.left - currRect.right < medianPixHeight)
+            if(nextRect.left - currRect.right < 1.4*medianPixHeight)
             {
                 pixa.mergeAndReplacePix(i, i + 1);
             }
@@ -306,8 +306,8 @@ public class TesseractOCREngine implements IOcrEngine {
         int currPixHeight = currPix.getHeight();
         pixaHeight.add(currPixHeight);
         i++;
-        //TODO why it returned null for pastaMarket1 ??
         currPix = pixa.getPix(i);
+
         while(null != currPix) {
             currPixHeight = currPix.getHeight();
             pixaHeight.add(currPixHeight);

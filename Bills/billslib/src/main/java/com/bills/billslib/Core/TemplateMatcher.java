@@ -137,7 +137,7 @@ public class TemplateMatcher  {
                 Rect word = locations.get(i).get(j);
                 for(int k = 0; k < locations.get(i+1).size(); k++){  //compare current line word to all next line words until match
                     Rect nextLineWord = locations.get(i+1).get(k);
-                    if(InRange(word, nextLineWord, 10)){
+                    if(InRange(word, nextLineWord)){
                         connections[i].put(word, nextLineWord);
                         break;
                     }
@@ -483,9 +483,11 @@ public class TemplateMatcher  {
        }
     }
 
-    private boolean InRange(Rect word, Rect nextLineWord, int range) {
-        return  ((word.right >= nextLineWord.right && word.right - range <= nextLineWord.right) ||
+    private boolean InRange(Rect word, Rect nextLineWord) {
+        double range = 0.4*Math.abs(word.bottom - word.top);
+        boolean inRange = ((word.right >= nextLineWord.right && word.right - range <= nextLineWord.right) ||
                 (word.right <= nextLineWord.right && word.right + range >= nextLineWord.right));
+        return inRange;
     }
 
     private ArrayList<ArrayList<Rect>> GetWordLocations(Bitmap processedBillImage) {
