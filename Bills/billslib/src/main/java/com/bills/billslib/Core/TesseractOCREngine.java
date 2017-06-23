@@ -284,7 +284,7 @@ public class TesseractOCREngine implements IOcrEngine {
         Rect currRect = pixa.getBoxRect(0);
         Rect nextRect = pixa.getBoxRect(1);
         while(null != currPix && null != nextPix) {
-            if(nextRect.left - currRect.right < 1.4*medianPixHeight)
+            if(nextRect.left - currRect.right < 1.3*medianPixHeight)
             {
                 pixa.mergeAndReplacePix(i, i + 1);
             }
