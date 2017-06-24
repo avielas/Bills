@@ -14,6 +14,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,12 +29,12 @@ public class TestBill extends Thread{
     String _restaurant;
     String _billFullName;
     StringBuilder _results;
-    Queue<Integer> _accuracyPercentQueue;
+    Queue<Double> _accuracyPercentQueue;
     Queue<StringBuilder> _passedResultsQueue;
     Queue<StringBuilder> _failedResultsQueue;
 
     public TestBill(String rootBrandModelDirectory, String restaurant, String bill,
-                    Queue<Integer> accuracyPercentQueue,
+                    Queue<Double> accuracyPercentQueue,
                     Queue<StringBuilder> passedResultsQueue,
                     Queue<StringBuilder> failedResultsQueue)
     {
@@ -131,7 +132,7 @@ public class TestBill extends Thread{
      */
     private void CompareExpectedToOcrResult(LinkedHashMap ocrResultCroppedBill, List<String> expectedBillTextLines) {
         _results.append("Validating Ocr Result" + System.getProperty("line.separator"));
-        Integer accuracyPercent = Compare(ocrResultCroppedBill, expectedBillTextLines);
+        Double accuracyPercent = Compare(ocrResultCroppedBill, expectedBillTextLines);
 
         if(ocrResultCroppedBill.size() != expectedBillTextLines.size())
         {
@@ -139,7 +140,8 @@ public class TestBill extends Thread{
                     " expectedBillTextLines contains "+ expectedBillTextLines.size()+" lines" + System.getProperty("line.separator"));
         }
 
-        _results.append("Accuracy is " + accuracyPercent + "%" + System.getProperty("line.separator"));
+        String formattedAccuracyPercent = String.format("%.02f", accuracyPercent);
+        _results.append("Accuracy is " + formattedAccuracyPercent + "%" + System.getProperty("line.separator"));
         _accuracyPercentQueue.add(accuracyPercent);
     }
 
@@ -149,7 +151,7 @@ public class TestBill extends Thread{
      * @param expectedBillTextLines expected bill lines from txt file
      * @return true in case of equal results. false if unequal
      */
-    private Integer Compare(LinkedHashMap ocrResult, List<String> expectedBillTextLines) {
+    private Double Compare(LinkedHashMap ocrResult, List<String> expectedBillTextLines) {
         int lineNumber = 0;
         Double countInvalids = 0.0;
         Double accuracyPercent;
@@ -163,6 +165,7 @@ public class TestBill extends Thread{
             if(null == ocrResultLine)
             {
                 _results.append("line "+ lineNumber +" doesn't exist on ocr results" + System.getProperty("line.separator"));
+                countInvalids++;
                 lineNumber++;
                 continue;
             }
@@ -185,7 +188,7 @@ public class TestBill extends Thread{
         }
         //calculate the accuracy percent
         accuracyPercent = ((lineNumber*2 - countInvalids)/(lineNumber*2)) * 100;
-        return accuracyPercent.intValue();
+        return accuracyPercent;
     }
 }
 

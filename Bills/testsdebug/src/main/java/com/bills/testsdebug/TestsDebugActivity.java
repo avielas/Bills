@@ -66,7 +66,6 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         CROSS_SHAPED
     }
     TesseractOCREngine tesseractOCREngine;
-    String _billName;
     String _restaurantName;
     String _brandAndModelPath;
     String _expectedTxtFileName;
@@ -123,7 +122,6 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
 //        {
 //            PreparingEnvironmentUtil.PrepareImagesForTests(this);
 //        }
-        _billName = "29112016_2246_croppedCenter.jpg";
         _restaurantName = "mina1";
         _brandAndModelPath = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL;
         //extract date from bill, for creating expected txt file name

@@ -89,7 +89,7 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList(/**/ "mina1", "pastaMarket1", "pastaMarket2", "iza1", "dovrin1", "dovrin2", "nola1", "nola2", "nola3"/**/);
+                _restaurantsNamesTestFilter = Arrays.asList( "mina1", "pastaMarket1", "pastaMarket2", "iza1", "dovrin1", "dovrin2", "nola1", "nola2", "nola3");
                 _billsTestFilter = Arrays.asList(/*ocrBytes3.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);
@@ -125,7 +125,7 @@ public class TestBench {
         bills = FilterBills(bills, billsTestFilter);
         HashMap<String, List<String>> specifyBillsByRestaurants =
                 SpecifyBillsByRestaurants(bills, brandModelRootDirectory);
-        Queue<Integer> accuracyPercentQueue = new ConcurrentLinkedQueue<>();
+        Queue<Double> accuracyPercentQueue = new ConcurrentLinkedQueue<>();
         Queue<StringBuilder> passedResultsQueue = new ConcurrentLinkedQueue<>();
         Queue<StringBuilder> failedResultsQueue = new ConcurrentLinkedQueue<>();
 
@@ -162,12 +162,13 @@ public class TestBench {
         /**************** Write passed tests output and conclusions to file ***************/
         File passedTestsFile = new File(Constants.TEST_OUTPUT_FILE);
         stream = new FileOutputStream(passedTestsFile);
-        for(Integer item : accuracyPercentQueue){
+        for(Double item : accuracyPercentQueue){
             _testsAccuracyPercentSum+=item;
         }
         Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (accuracyPercentQueue.size()*100)) * 100;
+        String formattedAccuracyPercentTestsBench = String.format("%.02f", accuracyPercentTestsBench);
         stream.write(("\nConclusions:").getBytes());
-        stream.write(("\nAccuracy of tests bench is "+ accuracyPercentTestsBench.intValue()+"%").getBytes());
+        stream.write(("\nAccuracy of tests bench is "+ formattedAccuracyPercentTestsBench +"%").getBytes());
         stream.write(("\nTotally run " + (passedResultsQueue.size() + failedResultsQueue.size()) + " bills").getBytes());
         stream.write(("\n" + passedResultsQueue.size() + " passed").getBytes());
         stream.write(("\n" + failedResultsQueue.size() + " failed").getBytes());
