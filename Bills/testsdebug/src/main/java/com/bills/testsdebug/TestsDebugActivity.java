@@ -122,7 +122,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
 //        {
 //            PreparingEnvironmentUtil.PrepareImagesForTests(this);
 //        }
-        _restaurantName = "mina1";
+        _restaurantName = "nola3";
         _brandAndModelPath = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL;
         //extract date from bill, for creating expected txt file name
         _expectedTxtFileName = _restaurantName + ".txt";
@@ -516,14 +516,9 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             @Override
             public void onClick(View arg0) {
                 try {
-//                    String imagePathToSave = _brandAndModelPath + _restaurantName
-//                                            + "nili_24_2_17";
-//
-//                    WriteCroppedImageToTIFFile(_warpedBill, imagePathToSave);
-                    String processedImagePathToSave = _brandAndModelPath + _restaurantName
-                            + "processed_nili_24_2_17";
-
-//                    WriteCroppedImageToTIFFile(_billWithPrintedRedLines, processedImagePathToSave);
+                    String processedImagePathToSave = _brandAndModelPath +"/" + _restaurantName + "/"
+                            + "bill.jpg";
+                    FilesHandler.SaveToJPGFile(_warpedBill, processedImagePathToSave);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

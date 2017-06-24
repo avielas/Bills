@@ -163,7 +163,7 @@ public class ImageProcessingLib {
         Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
         Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
         Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
-        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+//        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
     }
 
     public static void AdaptiveThreshold(Mat rgba, int blockSize, double C){
