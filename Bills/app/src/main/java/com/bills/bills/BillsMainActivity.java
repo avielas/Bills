@@ -1,6 +1,6 @@
 package com.bills.bills;
 
-import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,9 +9,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.NonNull;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -39,6 +37,9 @@ import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.ItemView;
 import com.bills.billslib.CustomViews.NameView;
+import com.firebase.ui.auth.AuthUI;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 
 import org.opencv.android.OpenCVLoader;
@@ -46,6 +47,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static android.view.View.GONE;
@@ -53,6 +55,11 @@ import static android.view.View.GONE;
 public class BillsMainActivity extends MainActivityBase implements IOnCameraFinished, View.OnClickListener {
     private String Tag = this.getClass().getSimpleName();
     private static final int REQUEST_CAMERA_PERMISSION = 101;
+
+    public static final String ANONYMOUS = "anonymous";
+    private static final int RC_SIGN_IN = 123;
+
+    private String mUsername;
 
 
     RelativeLayout _cameraPreviewLayout = null;
@@ -79,6 +86,11 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
     private int currentColorIndex = -1;
     private NameView curNameView = null;
 
+    //Firebase members
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,7 +113,13 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
         if(_ocrEngine == null){
             try {
                 _ocrEngine = new TesseractOCREngine();
-                _ocrEngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        _ocrEngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
+                    }
+                });
+                t.start();
             }catch (Exception ex){
                 TextView textView = new TextView(this);
                 textView.setText("Failed to initialize " + _ocrEngine.getClass().getSimpleName() + ". Error: " + ex.getMessage());
@@ -110,7 +128,34 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
             }
         }
 
-        StartCameraActivity();
+        //Firebase initialization
+        mUsername = ANONYMOUS;
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if(user != null){
+                    //user is signed in
+                    //onSignedInInitialize(user.getDisplayName());
+                    Toast.makeText(BillsMainActivity.this, "You are now signed in. Welcome to FriendlyChat", Toast.LENGTH_LONG).show();
+                }else{
+                    //user is signed out
+                    //onSignedOutCleanup();
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setIsSmartLockEnabled(false)
+                                    .setAvailableProviders(
+                                            Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
+                                                    new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER).build(),
+                                                    new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
+                                    .build(),
+                            RC_SIGN_IN);
+                }
+            }
+        };
+
     }
 
     private void StartSummarizerView() {
@@ -450,4 +495,34 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
         }
 
     }
+
+    public void onResume(){
+        super.onResume();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        if(mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+        //TODO: clear all displayed data
+    }
+
+    @Override
+    public void onActivityResult(int requesCode, int resultCode, Intent data){
+        super.onActivityResult(requesCode, resultCode, data);
+
+        if(requesCode == RC_SIGN_IN){
+            if(resultCode == RESULT_OK){
+                Toast.makeText(this, "Signed in!!!", Toast.LENGTH_LONG).show();
+                StartCameraActivity();
+            }else if(resultCode == RESULT_CANCELED){
+                Toast.makeText(this, "Sign in cancelled", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+    }
+
 }

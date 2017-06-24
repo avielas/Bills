@@ -25,12 +25,12 @@ android {
     productFlavors {
         // When building a variant that uses this flavor, the following configurations
         // override those in the defaultConfig block.
-        dev {
-            // To avoid using legacy multidex, set minSdkVersion to 21 or higher.
-            minSdkVersion 16
-            versionNameSuffix "-dev"
-            applicationIdSuffix '.dev'
-        }
+//        dev {
+//            // To avoid using legacy multidex, set minSdkVersion to 21 or higher.
+//            minSdkVersion 16
+//            versionNameSuffix "-dev"
+//            applicationIdSuffix '.dev'
+//        }
 
         prod {
             // If you've configured the defaultConfig block for the release version of
@@ -55,4 +55,11 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile project(':openCVLibrary320')
     compile project(path: ':billslib')
+
+    compile 'com.google.firebase:firebase-database:11.0.1'
+    compile 'com.firebaseui:firebase-ui-auth:2.0.1'
+    compile "com.google.android.gms:play-services-auth:11.0.1"
+    compile 'com.google.firebase:firebase-storage:11.0.1'
+    compile 'com.google.firebase:firebase-messaging:11.0.1'
 }
+apply plugin: 'com.google.gms.google-services'
