@@ -29,7 +29,7 @@ import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Camera.IOnCameraFinished;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
-import com.bills.billslib.Contracts.IOcrEngine;
+import com.bills.billslib.Contracts.Interfaces.IOcrEngine;
 import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.MainActivityBase;

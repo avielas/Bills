@@ -1,4 +1,4 @@
-package com.bills.billslib.Contracts;
+package com.bills.billslib.Contracts.Interfaces;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;

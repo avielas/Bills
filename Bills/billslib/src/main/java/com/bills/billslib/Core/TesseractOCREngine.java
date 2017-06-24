@@ -3,7 +3,7 @@ package com.bills.billslib.Core;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 
-import com.bills.billslib.Contracts.IOcrEngine;
+import com.bills.billslib.Contracts.Interfaces.IOcrEngine;
 import com.bills.billslib.Contracts.Enums.Language;
 import com.bills.billslib.Contracts.Enums.PageSegmentation;
 import com.googlecode.leptonica.android.Pix;
@@ -24,8 +24,10 @@ public class TesseractOCREngine implements IOcrEngine {
     private final String EngLanguage = "eng";
     private final String HebLanguage = "heb";
     private final String NumbersOnlyWhiteList = "1234567890.";
+    private static final Double DefinedEdgePercent = 0.02;
 
     private Rect _curRectangle = null;
+    private int _imageWidth;
 
     private boolean _initialized = false;
     private boolean _imageSet = false;
@@ -65,6 +67,7 @@ public class TesseractOCREngine implements IOcrEngine {
         try{
             _tessBaseAPI.setImage(bmp);
             _imageSet = true;
+            _imageWidth = bmp.getWidth();
         }catch(Exception ex){
             throw new RuntimeException(ex.getMessage());
         }
@@ -128,7 +131,12 @@ public class TesseractOCREngine implements IOcrEngine {
                     wordRect.top += offsetY;
                     wordRect.bottom += offsetY;
                 }
-                wordsRectangles.add(wordRect);
+
+                if(wordRect.right < DefinedEdgePercent*_imageWidth ||
+                   wordRect.left  > (1 - DefinedEdgePercent)*_imageWidth)
+                    continue;
+                else
+                    wordsRectangles.add(wordRect);
             }
 
             if(wordsRectangles.size() <= 0){

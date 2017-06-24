@@ -1,31 +1,39 @@
 [
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_primary_text_disable_only_material_dark.xml"
-    },
-    {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_primary_text_disable_only_material_dark.xml",
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_primary_text_disable_only_material_dark.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\switch_thumb_material_light.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_primary_text_material_dark.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_thumb.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_switch_thumb.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_edittext.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_edittext.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_tint_btn_checkable.xml",
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_tint_btn_checkable.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_secondary_text_material_light.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_hint_foreground_material_dark.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\switch_thumb_material_light.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_track.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_switch_track.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_tint_spinner.xml",
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_tint_spinner.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_secondary_text_material_dark.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_tint_edittext.xml",
@@ -36,108 +44,76 @@
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_tint_default.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_primary_text_disable_only_material_dark.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_edittext.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_edittext.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_track.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_switch_track.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_tint_switch_track.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_tint_switch_track.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_primary_text_disable_only_material_light.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_primary_text_material_light.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_btn_checkable.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_btn_checkable.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_primary_text_material_light.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_primary_text_material_dark.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\switch_thumb_material_light.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_primary_text_material_light.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_secondary_text_material_light.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_text_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_btn_colored_text_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_hint_foreground_material_light.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\switch_thumb_material_dark.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_hint_foreground_material_light.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_spinner.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_spinner.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_thumb.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_switch_thumb.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_default.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_default.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_dark.xml",
         "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\switch_thumb_material_dark.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_search_url_text.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_search_url_text.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_tint_switch_track.xml",
+        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_tint_switch_track.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_seek_thumb.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_seek_thumb.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_btn_checkable.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_btn_checkable.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_secondary_text_material_dark.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_secondary_text_material_dark.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_borderless_text_material.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_btn_colored_borderless_text_material.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_seek_thumb.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_seek_thumb.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_hint_foreground_material_light.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_primary_text_material_light.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_primary_text_material_light.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_track.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_switch_track.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_borderless_text_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_btn_colored_borderless_text_material.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_hint_foreground_material_light.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_hint_foreground_material_light.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_hint_foreground_material_light.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_default.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_default.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_primary_text_material_dark.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_secondary_text_material_light.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_text_material.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_btn_colored_text_material.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_btn_checkable.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_btn_checkable.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_secondary_text_material_dark.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_edittext.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_edittext.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_spinner.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_spinner.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\switch_thumb_material_light.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_text_material.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_btn_colored_text_material.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_search_url_text.xml",
@@ -148,16 +124,60 @@
         "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_spinner.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_text_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_btn_colored_text_material.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_primary_text_disable_only_material_dark.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_default.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_default.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_seek_thumb.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_seek_thumb.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_secondary_text_material_dark.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_secondary_text_material_dark.xml",
+        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_secondary_text_material_dark.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_primary_text_material_light.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_primary_text_material_light.xml",
+        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_primary_text_material_light.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_spinner.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_spinner.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_primary_text_material_light.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_hint_foreground_material_light.xml",
+        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_hint_foreground_material_light.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_thumb.xml",
         "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_switch_thumb.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_secondary_text_material_dark.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_hint_foreground_material_dark.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_text_material.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_btn_colored_text_material.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_hint_foreground_material_dark.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_search_url_text.xml",
@@ -168,8 +188,12 @@
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_tint_seek_thumb.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_btn_checkable.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_btn_checkable.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_thumb.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_switch_thumb.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_btn_checkable.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_btn_checkable.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_seek_thumb.xml",
@@ -180,52 +204,28 @@
         "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_search_url_text.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_hint_foreground_material_dark.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/switch_thumb_material_light.xml",
+        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/switch_thumb_material_light.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\switch_thumb_material_light.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\switch_thumb_material_dark.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_thumb.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_switch_thumb.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_track.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_switch_track.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_borderless_text_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_btn_colored_borderless_text_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_edittext.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_edittext.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_secondary_text_material_light.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_light.xml",
         "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_primary_text_disable_only_material_light.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_default.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_default.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_hint_foreground_material_dark.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/switch_thumb_material_light.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/switch_thumb_material_light.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_text_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_btn_colored_text_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_borderless_text_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_btn_colored_borderless_text_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_track.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_switch_track.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_seek_thumb.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_seek_thumb.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_btn_colored_text_material.xml",
@@ -240,72 +240,76 @@
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_btn_colored_borderless_text_material.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_primary_text_material_dark.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\switch_thumb_material_light.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_spinner.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_spinner.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_search_url_text.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_search_url_text.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_primary_text_material_dark.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_primary_text_disable_only_material_dark.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_btn_checkable.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_btn_checkable.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_primary_text_disable_only_material_dark.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_switch_track.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_switch_track.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_primary_text_material_dark.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_primary_text_material_dark.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_secondary_text_material_dark.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_default.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_default.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_dark.xml",
         "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\switch_thumb_material_dark.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_edittext.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_tint_edittext.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_primary_text_material_dark.xml",
+        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_primary_text_material_dark.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_default.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_tint_default.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_secondary_text_material_light.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_light.xml",
         "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_primary_text_disable_only_material_light.xml"
     },
     {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_primary_text_material_dark.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_primary_text_disable_only_material_light.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_primary_text_material_light.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_dark.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_primary_text_disable_only_material_dark.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_light.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_hint_foreground_material_light.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_borderless_text_material.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_btn_colored_borderless_text_material.xml"
+    },
+    {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/switch_thumb_material_dark.xml",
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/switch_thumb_material_dark.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_secondary_text_material_light.xml"
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_tint_edittext.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_tint_edittext.xml"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_btn_colored_borderless_text_material.xml",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_btn_colored_borderless_text_material.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_hint_foreground_material_dark.xml",
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_hint_foreground_material_dark.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\color\\abc_secondary_text_material_dark.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_dark.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\color\\abc_hint_foreground_material_dark.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_primary_text_disable_only_material_light.xml",
@@ -314,9 +318,5 @@
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/color/abc_tint_switch_thumb.xml",
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/color/abc_tint_switch_thumb.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\debug\\color\\abc_hint_foreground_material_light.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\color\\abc_hint_foreground_material_light.xml"
     }
 ]

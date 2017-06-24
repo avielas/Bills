@@ -8,7 +8,7 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import com.bills.billslib.Contracts.Constants;
-import com.bills.billslib.Contracts.IOcrEngine;
+import com.bills.billslib.Contracts.Interfaces.IOcrEngine;
 import com.bills.billslib.Utilities.FilesHandler;
 
 import java.io.ByteArrayOutputStream;
