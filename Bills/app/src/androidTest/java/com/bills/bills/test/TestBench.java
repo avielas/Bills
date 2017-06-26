@@ -2,11 +2,13 @@ package com.bills.bills.test;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Pair;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Utilities.FilesHandler;
 
 import org.junit.Test;
+import org.opencv.core.Point;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,6 +16,8 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,9 +93,9 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList(/**/ "pastaMarket1", "pastaMarket2",
+                _restaurantsNamesTestFilter = Arrays.asList(/* "pastaMarket1", "pastaMarket2",
                                                                  "iza1",
-                                                                 "dovrin1", "dovrin2", "dovrin3",
+                                                                 "dovrin1", "dovrin2", "dovrin3", */
                                                                  "nola1", "nola3", "nola4"/*, "nola5", "nola6"*/);
                 _billsTestFilter = Arrays.asList(/*ocrBytes3.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
@@ -129,8 +133,8 @@ public class TestBench {
         HashMap<String, List<String>> specifyBillsByRestaurants =
                 SpecifyBillsByRestaurants(bills, brandModelRootDirectory);
         Queue<Double> accuracyPercentQueue = new ConcurrentLinkedQueue<>();
-        Queue<StringBuilder> passedResultsQueue = new ConcurrentLinkedQueue<>();
-        Queue<StringBuilder> failedResultsQueue = new ConcurrentLinkedQueue<>();
+        Queue<Pair> passedResultsQueue = new ConcurrentLinkedQueue<>();
+        Queue<Pair> failedResultsQueue = new ConcurrentLinkedQueue<>();
 
         ThreadPoolExecutor mThreadPoolExecutor = new ThreadPoolExecutor(
                 NUMBER_OF_CORES,  // Initial pool size
@@ -156,8 +160,8 @@ public class TestBench {
         /**************** Write failed tests output to file ***************/
         File failedTestsFile = new File(Constants.FAILED_TEST_OUTPUT_FILE);
         FileOutputStream stream = new FileOutputStream(failedTestsFile);
-        for(StringBuilder sb : failedResultsQueue){
-            stream.write(sb.toString().getBytes());
+        for(Pair pair : failedResultsQueue){
+            stream.write(pair.second.toString().getBytes());
         }
         stream.close();
         /******************************* END ******************************/
@@ -178,8 +182,23 @@ public class TestBench {
         _timeMs = System.currentTimeMillis() - _timeMs;
         stream.write(("\nIt took " + _timeMs/1000 + " s\n").getBytes());
 
-        for(StringBuilder sb : passedResultsQueue){
-            stream.write(sb.toString().getBytes());
+        Collections.sort((List<Pair>) passedResultsQueue, new Comparator<Pair>() {
+            @Override
+            public int compare(Pair p1, Pair p2) {
+                return
+                     p1.first.toString().compareTo(p2.first.toString());
+//                if (p1.first.toString() > p2.first.toString()) {
+//                    return 1;
+//                } else if (p1.first.toString().equals(p2.first.toString())) {
+//                    return 0;
+//                } else {
+//                    return -1;
+//                }
+            }
+        });
+
+        for(Pair pair : passedResultsQueue){
+            stream.write(pair.second.toString().getBytes());
         }
         stream.close();
         /******************************* END ******************************/

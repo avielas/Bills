@@ -2,6 +2,7 @@ package com.bills.bills.test;
 
 import android.graphics.Bitmap;
 import android.util.Log;
+import android.util.Pair;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
@@ -30,13 +31,13 @@ public class TestBill extends Thread{
     String _billFullName;
     StringBuilder _results;
     Queue<Double> _accuracyPercentQueue;
-    Queue<StringBuilder> _passedResultsQueue;
-    Queue<StringBuilder> _failedResultsQueue;
+    Queue<Pair> _passedResultsQueue;
+    Queue<Pair> _failedResultsQueue;
 
     public TestBill(String rootBrandModelDirectory, String restaurant, String bill,
                     Queue<Double> accuracyPercentQueue,
-                    Queue<StringBuilder> passedResultsQueue,
-                    Queue<StringBuilder> failedResultsQueue)
+                    Queue<Pair> passedResultsQueue,
+                    Queue<Pair> failedResultsQueue)
     {
         _rootBrandModelDirectory = rootBrandModelDirectory;
         _restaurant = restaurant;
@@ -85,7 +86,7 @@ public class TestBill extends Thread{
             }
             catch (Exception e){
                 _results.append(" " + Log.getStackTraceString(e)+ System.getProperty("line.separator"));
-                _failedResultsQueue.add(_results);
+                _failedResultsQueue.add(new Pair( _restaurant, _results));
                 return;
             }
 
@@ -102,7 +103,7 @@ public class TestBill extends Thread{
             warpedMat.release();
             warpedMatCopy.release();
             tesseractOCREngine.End();
-            _passedResultsQueue.add(_results);
+            _passedResultsQueue.add(new Pair( _restaurant, _results));
         }
     }
 
