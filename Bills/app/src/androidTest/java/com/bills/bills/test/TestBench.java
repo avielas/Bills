@@ -2,6 +2,7 @@ package com.bills.bills.test;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.test.espresso.core.deps.guava.collect.ObjectArrays;
 import android.util.Pair;
 
 import com.bills.billslib.Contracts.Constants;
@@ -93,10 +94,10 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList(/* "pastaMarket1", "pastaMarket2",
-                                                                 "iza1",
-                                                                 "dovrin1", "dovrin2", "dovrin3", */
-                                                                 "nola1", "nola3", "nola4"/*, "nola5", "nola6"*/);
+                _restaurantsNamesTestFilter = Arrays.asList( "pastaMarket1", /*"pastaMarket2",*/
+                                                             "iza1",
+                                                             /*"dovrin1", "dovrin2",*/ "dovrin3",
+                                                             "nola1", "nola3"/*, "nola4", "nola5", "nola6"*/);
                 _billsTestFilter = Arrays.asList(/*ocrBytes3.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);
@@ -181,24 +182,17 @@ public class TestBench {
         stream.write(("\n" + failedResultsQueue.size() + " failed").getBytes());
         _timeMs = System.currentTimeMillis() - _timeMs;
         stream.write(("\nIt took " + _timeMs/1000 + " s\n").getBytes());
+        List<Object> passedResultsList = Arrays.asList(passedResultsQueue.toArray());
 
-        Collections.sort((List<Pair>) passedResultsQueue, new Comparator<Pair>() {
+        Collections.sort(passedResultsList, new Comparator<Object>() {
             @Override
-            public int compare(Pair p1, Pair p2) {
-                return
-                     p1.first.toString().compareTo(p2.first.toString());
-//                if (p1.first.toString() > p2.first.toString()) {
-//                    return 1;
-//                } else if (p1.first.toString().equals(p2.first.toString())) {
-//                    return 0;
-//                } else {
-//                    return -1;
-//                }
+            public int compare(Object p1, Object p2) {
+                return ((Pair)p1).first.toString().compareTo(((Pair)p2).first.toString());
             }
         });
 
-        for(Pair pair : passedResultsQueue){
-            stream.write(pair.second.toString().getBytes());
+        for(Object pair : passedResultsList){
+            stream.write(((Pair)pair).second.toString().getBytes());
         }
         stream.close();
         /******************************* END ******************************/

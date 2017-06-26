@@ -86,7 +86,8 @@ public class TestBill extends Thread{
             }
             catch (Exception e){
                 _results.append(" " + Log.getStackTraceString(e)+ System.getProperty("line.separator"));
-                _failedResultsQueue.add(new Pair( _restaurant, _results));
+                String filename = _billFullName.substring(_billFullName.lastIndexOf("/")+1);
+                _failedResultsQueue.add(new Pair( _restaurant+filename, _results));
                 return;
             }
 
@@ -103,7 +104,8 @@ public class TestBill extends Thread{
             warpedMat.release();
             warpedMatCopy.release();
             tesseractOCREngine.End();
-            _passedResultsQueue.add(new Pair( _restaurant, _results));
+            String filename = _billFullName.substring(_billFullName.lastIndexOf("/")+1);
+            _passedResultsQueue.add(new Pair(_restaurant+filename, _results));
         }
     }
 
