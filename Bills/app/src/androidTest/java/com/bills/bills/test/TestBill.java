@@ -15,7 +15,6 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,13 +28,15 @@ public class TestBill extends Thread{
     String _rootBrandModelDirectory;
     String _restaurant;
     String _billFullName;
+    String _fileName;
+    String _key;
     StringBuilder _results;
-    Queue<Double> _accuracyPercentQueue;
+    Queue<Pair> _accuracyPercentQueue;
     Queue<Pair> _passedResultsQueue;
     Queue<Pair> _failedResultsQueue;
 
     public TestBill(String rootBrandModelDirectory, String restaurant, String bill,
-                    Queue<Double> accuracyPercentQueue,
+                    Queue<Pair> accuracyPercentQueue,
                     Queue<Pair> passedResultsQueue,
                     Queue<Pair> failedResultsQueue)
     {
@@ -46,6 +47,8 @@ public class TestBill extends Thread{
         _accuracyPercentQueue = accuracyPercentQueue;
         _passedResultsQueue = passedResultsQueue;
         _failedResultsQueue = failedResultsQueue;
+        _fileName = _billFullName.substring(_billFullName.lastIndexOf("/")+1);
+        _key = _restaurant + "_" + _fileName;
     }
 
     @Override
@@ -86,8 +89,8 @@ public class TestBill extends Thread{
             }
             catch (Exception e){
                 _results.append(" " + Log.getStackTraceString(e)+ System.getProperty("line.separator"));
-                String filename = _billFullName.substring(_billFullName.lastIndexOf("/")+1);
-                _failedResultsQueue.add(new Pair( _restaurant+filename, _results));
+                _failedResultsQueue.add(new Pair(_key, _results));
+                _accuracyPercentQueue.add(new Pair(_key, 0.0));
                 return;
             }
 
@@ -104,8 +107,7 @@ public class TestBill extends Thread{
             warpedMat.release();
             warpedMatCopy.release();
             tesseractOCREngine.End();
-            String filename = _billFullName.substring(_billFullName.lastIndexOf("/")+1);
-            _passedResultsQueue.add(new Pair(_restaurant+filename, _results));
+            _passedResultsQueue.add(new Pair(_key, _results));
         }
     }
 
@@ -145,7 +147,7 @@ public class TestBill extends Thread{
 
         String formattedAccuracyPercent = String.format("%.02f", accuracyPercent);
         _results.append("Accuracy is " + formattedAccuracyPercent + "%" + System.getProperty("line.separator"));
-        _accuracyPercentQueue.add(accuracyPercent);
+        _accuracyPercentQueue.add(new Pair(_key, accuracyPercent));
     }
 
     /**

@@ -2,6 +2,9 @@ package com.bills.bills.test;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.test.espresso.core.deps.guava.base.Predicate;
+import android.support.test.espresso.core.deps.guava.base.Predicates;
+import android.support.test.espresso.core.deps.guava.collect.Collections2;
 import android.support.test.espresso.core.deps.guava.collect.ObjectArrays;
 import android.util.Pair;
 
@@ -14,9 +17,11 @@ import org.opencv.core.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -27,6 +32,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -94,10 +101,10 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList( "pastaMarket1", /*"pastaMarket2",*/
+                _restaurantsNamesTestFilter = Arrays.asList( /**/"pastaMarket1", "pastaMarket2",
                                                              "iza1",
-                                                             /*"dovrin1", "dovrin2",*/ "dovrin3",
-                                                             "nola1", "nola3"/*, "nola4", "nola5", "nola6"*/);
+                                                             "dovrin1", "dovrin2", "dovrin3",
+                                                              "nola1", "nola3",/**/ "nola4"/*, "nola5", "nola6"*/);
                 _billsTestFilter = Arrays.asList(/*ocrBytes3.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);
@@ -133,7 +140,7 @@ public class TestBench {
         bills = FilterBills(bills, billsTestFilter);
         HashMap<String, List<String>> specifyBillsByRestaurants =
                 SpecifyBillsByRestaurants(bills, brandModelRootDirectory);
-        Queue<Double> accuracyPercentQueue = new ConcurrentLinkedQueue<>();
+        Queue<Pair> accuracyPercentQueue = new ConcurrentLinkedQueue<>();
         Queue<Pair> passedResultsQueue = new ConcurrentLinkedQueue<>();
         Queue<Pair> failedResultsQueue = new ConcurrentLinkedQueue<>();
 
@@ -170,8 +177,8 @@ public class TestBench {
         /**************** Write passed tests output and conclusions to file ***************/
         File passedTestsFile = new File(Constants.TEST_OUTPUT_FILE);
         stream = new FileOutputStream(passedTestsFile);
-        for(Double item : accuracyPercentQueue){
-            _testsAccuracyPercentSum+=item;
+        for(Pair item : accuracyPercentQueue){
+            _testsAccuracyPercentSum += ((Double)item.second);
         }
         Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (accuracyPercentQueue.size()*100)) * 100;
         String formattedAccuracyPercentTestsBench = String.format("%.02f", accuracyPercentTestsBench);
@@ -182,8 +189,8 @@ public class TestBench {
         stream.write(("\n" + failedResultsQueue.size() + " failed").getBytes());
         _timeMs = System.currentTimeMillis() - _timeMs;
         stream.write(("\nIt took " + _timeMs/1000 + " s\n").getBytes());
-        List<Object> passedResultsList = Arrays.asList(passedResultsQueue.toArray());
 
+        List<Object> passedResultsList = Arrays.asList(passedResultsQueue.toArray());
         Collections.sort(passedResultsList, new Comparator<Object>() {
             @Override
             public int compare(Object p1, Object p2) {
@@ -191,11 +198,47 @@ public class TestBench {
             }
         });
 
+        List<Object> accuracyPercentList = Arrays.asList(accuracyPercentQueue.toArray());
+        Collections.sort(accuracyPercentList, new Comparator<Object>() {
+            @Override
+            public int compare(Object p1, Object p2) {
+                return ((Pair)p1).first.toString().compareTo(((Pair)p2).first.toString());
+            }
+        });
+        CalculateAndPrintStatistics(accuracyPercentList, stream);
+
         for(Object pair : passedResultsList){
             stream.write(((Pair)pair).second.toString().getBytes());
         }
         stream.close();
         /******************************* END ******************************/
+    }
+
+    /**
+     *
+     * @param accuracyPercentList - for statistics calculation
+     * @param stream - to print to
+     */
+    private void CalculateAndPrintStatistics(List<Object> accuracyPercentList, FileOutputStream stream) throws IOException {
+        Collections.sort(_restaurantsNamesTestFilter);
+        for(final String restaurantName : _restaurantsNamesTestFilter){
+            Collection<Object> currAccuracies = Collections2.filter(accuracyPercentList, new Predicate<Object>() {
+                @Override
+                public boolean apply(Object pair) {
+                    return ((Pair)pair).first.toString().startsWith(restaurantName);
+                }
+            });
+
+            Double sum = 0.0;
+            for (Object obj : currAccuracies){
+                sum += (Double)(((Pair)obj).second);
+            }
+
+            Double totalAccuracyPercent = sum/currAccuracies.size();
+            String formattedTotalAccuracyPercent = String.format("%.02f", totalAccuracyPercent);
+            stream.write(("\n" + restaurantName + " " + formattedTotalAccuracyPercent + "%").getBytes());
+        }
+        stream.write(("\n").getBytes());
     }
 
     /**
