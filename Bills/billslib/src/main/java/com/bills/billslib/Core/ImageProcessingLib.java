@@ -162,7 +162,7 @@ public class ImageProcessingLib {
         Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
         Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
         Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
-        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+//        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
 //        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
     }
 

@@ -122,7 +122,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
 //        {
 //            PreparingEnvironmentUtil.PrepareImagesForTests(this);
 //        }
-        _restaurantName = "nola3";
+        _restaurantName = "nola4";
         _brandAndModelPath = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL;
         //extract date from bill, for creating expected txt file name
         _expectedTxtFileName = _restaurantName + ".txt";

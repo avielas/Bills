@@ -35,8 +35,8 @@ public class TemplateMatcher  {
     public ArrayList<Rect> itemLocationsRect = new ArrayList<>();
     public ArrayList<Bitmap> itemLocationsByteArray = new ArrayList<>();
     public Bitmap mFullBillProcessedImage;
-    Boolean secondColumnIsConnected;
-    Boolean oneBeforeLastColumnConnected;
+//    Boolean secondColumnIsConnected;
+//    Boolean oneBeforeLastColumnConnected;
 
     /******* Global vars for parsing ********/
     public ArrayList<ArrayList<Rect>> locationsItemsArea;
@@ -53,8 +53,8 @@ public class TemplateMatcher  {
         }
         mOCREngine = ocrEngine;
         mFullBillProcessedImage = fullBillPreprocessedImage;
-        secondColumnIsConnected = false;
-        oneBeforeLastColumnConnected = false;
+//        secondColumnIsConnected = false;
+//        oneBeforeLastColumnConnected = false;
     }
 
     public void InitializeBeforeSecondUse(Bitmap fullBillPreprocessedImage){
@@ -62,8 +62,8 @@ public class TemplateMatcher  {
             throw new IllegalArgumentException("OCREngine must be initialized.");
         }
         mFullBillProcessedImage = fullBillPreprocessedImage;
-        secondColumnIsConnected = false;
-        oneBeforeLastColumnConnected = false;
+//        secondColumnIsConnected = false;
+//        oneBeforeLastColumnConnected = false;
         priceAndQuantity.clear();
     }
 
@@ -88,10 +88,9 @@ public class TemplateMatcher  {
 
         SetConnections(locations, connections);
 
-        int start = -1;
         List<Map.Entry<Integer, Integer>> startEndOfAreasList = new ArrayList<>();
         //find largest "connected" area. Two lines are connected if there are at least two words in "similar" location which are connected
-        IdentifyOptionalConnectedAreas(locations, connections, start, startEndOfAreasList);
+        IdentifyOptionalConnectedAreas(locations, connections, startEndOfAreasList);
 
         int maxSizeIndex = Integer.MIN_VALUE;
         for(int i = 0, maxSize = Integer.MIN_VALUE; i < startEndOfAreasList.size(); i++){
@@ -221,75 +220,160 @@ public class TemplateMatcher  {
         }
     }
 
-    private void IdentifyOptionalConnectedAreas(ArrayList<ArrayList<Rect>> locations, LinkedHashMap<Rect, Rect>[] connections, int start, List<Map.Entry<Integer, Integer>> startEndOfAreasList) {
-        for(int i = 0; i < locations.size() - 1; i++){
-            if(IsLinesConnected(locations.get(i), locations.get(i+1), connections[i])){
+    private void IdentifyOptionalConnectedAreas(ArrayList<ArrayList<Rect>> locations, LinkedHashMap<Rect, Rect>[] connections, List<Map.Entry<Integer, Integer>> startEndOfAreasList) {
+        LinkedHashMap<Rect, Rect> connection = new LinkedHashMap();
+        int connctedRects = 0;
+        int start = -1;
+        for(int i = 0; i < connections.length - 1; i++){
+            if(connections[i].size() >= 3){
                 if(start == -1 ){
                     start = i;
+                    connection.putAll(connections[i]);
+                }
+                else{
+                    for (Map.Entry<Rect, Rect> rectConnection : connection.entrySet()) {
+                        if(connections[i].keySet().contains(rectConnection.getValue()) ){
+                            connctedRects++;
+                        }
+                    }
+                    connection.clear();
+                    if(connctedRects >= 3)
+                    {
+                        connection.putAll(connections[i]);
+
+                    }
+                    else{
+//                        start = ValidatingTitleLineLocation(start, connections, locations);
+                        //TODO - assuming title always in item area
+                        start = start +1;
+                        startEndOfAreasList.add(new AbstractMap.SimpleEntry<>(start, i));
+                        Log.d(this.getClass().getSimpleName(), "Found area: " + start + "-->" + i);
+                        start = -1;
+//                        secondColumnIsConnected = false;
+//                        oneBeforeLastColumnConnected = false;
+                    }
+                    connctedRects = 0;
                 }
             }
             else{
                 if(start >= 0){
-                    start = ValidatingTitleLineLocation(start, connections, locations);
-                    /**** start+1 because title always included at items area ****/
+//                    start = ValidatingTitleLineLocation(start, connections, locations);
+                    //TODO - assuming title always in item area
+                    start = start +1;
                     startEndOfAreasList.add(new AbstractMap.SimpleEntry<>(start, i));
                     Log.d(this.getClass().getSimpleName(), "Found area: " + start + "-->" + i);
                     start = -1;
-                    secondColumnIsConnected = false;
-                    oneBeforeLastColumnConnected = false;
+//                    secondColumnIsConnected = false;
+//                    oneBeforeLastColumnConnected = false;
                 }
             }
         }
+//        for(int i = 0; i < locations.size() - 1; i++){
+//            if(IsLinesConnected(locations.get(i), locations.get(i+1), connections[i])){
+//                if(start == -1 ){
+//                    start = i;
+//                }
+//            }
+//            else{
+//                if(start >= 0){
+//                    start = ValidatingTitleLineLocation(start, connections, locations);
+//                    /**** start+1 because title always included at items area ****/
+//                    startEndOfAreasList.add(new AbstractMap.SimpleEntry<>(start, i));
+//                    Log.d(this.getClass().getSimpleName(), "Found area: " + start + "-->" + i);
+//                    start = -1;
+//                    secondColumnIsConnected = false;
+//                    oneBeforeLastColumnConnected = false;
+//                }
+//            }
+//        }
     }
-
-    private int ValidatingTitleLineLocation(int start, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {
-        Boolean isTitleAtItemsArea;
-
-        isTitleAtItemsArea = IsTitleAtItemsArea(start, connections, locations);
-
-        return isTitleAtItemsArea ? start + 1 : start;
-    }
-
-    private Boolean IsTitleAtItemsArea(int start, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {
-        if(start - 1 < 0)
-        {
-            return true;
-        }
-
-        int numberOfConnections = connections[start].size();
-        if(3 <= numberOfConnections || 7 <= numberOfConnections)
-        {
-            if(IsTitleConnected(locations.get(start), connections[start-1]))
-            {
-                return false;
-            }
-            return true;
-        }
-        return true;
-    }
-
-    private Boolean IsTitleConnected(ArrayList<Rect> firstLineItemsArea, LinkedHashMap<Rect, Rect> titleConnections) {
-
-        if(firstLineItemsArea.size() < 3 || titleConnections.size() < 3)
-        {
-            return false;
-        }
-
-        Boolean isFirstColumnConnected = IsConnected(titleConnections, firstLineItemsArea.get(0));
-        Boolean isLastColumnConnected = IsConnected(titleConnections, firstLineItemsArea.get(firstLineItemsArea.size() - 1));
-        Boolean isSecondOrOneBeforeLastColumnConnected = false;
-
-        if(secondColumnIsConnected)
-        {
-            isSecondOrOneBeforeLastColumnConnected = IsConnected(titleConnections, firstLineItemsArea.get(1));
-        }
-        else if(oneBeforeLastColumnConnected)
-        {
-            isSecondOrOneBeforeLastColumnConnected = IsConnected(titleConnections, firstLineItemsArea.get(firstLineItemsArea.size() - 2));
-        }
-
-        return isFirstColumnConnected && isLastColumnConnected && isSecondOrOneBeforeLastColumnConnected;
-    }
+//
+//    Boolean IsLinesConnected(ArrayList<Rect> line, ArrayList<Rect> nextLine, LinkedHashMap<Rect, Rect> connections) {
+//        Boolean isFirstConnectedCofigurationExist;
+//        Boolean isSecondConnectedCofigurationExist;
+//
+//        if(!secondColumnIsConnected && !oneBeforeLastColumnConnected) {
+//            secondColumnIsConnected = line.size() >= 3 &&
+//                    connections.get(line.get(0)) == nextLine.get(0) &&
+//                    connections.get(line.get(line.size() - 1)) == nextLine.get(nextLine.size() - 1) &&
+//                    connections.get(line.get(1)) == nextLine.get(1);
+//            oneBeforeLastColumnConnected = line.size() >= 3 &&
+//                    connections.get(line.get(0)) == nextLine.get(0) &&
+//                    connections.get(line.get(line.size() - 1)) == nextLine.get(nextLine.size() - 1) &&
+//                    connections.get(line.get(line.size() - 2)) == nextLine.get(nextLine.size() - 2);
+//
+//            if(secondColumnIsConnected && oneBeforeLastColumnConnected)
+//            {
+//                oneBeforeLastColumnConnected = false;
+//            }
+//
+//            return (secondColumnIsConnected && !oneBeforeLastColumnConnected) ||
+//                    (!secondColumnIsConnected && oneBeforeLastColumnConnected);
+//        }
+//        else
+//        {
+//            isFirstConnectedCofigurationExist = line.size() >= 3 &&
+//                    connections.get(line.get(0)) == nextLine.get(0) &&
+//                    connections.get(line.get(line.size() - 1)) == nextLine.get(nextLine.size() - 1) &&
+//                    connections.get(line.get(1)) == nextLine.get(1);
+//            isSecondConnectedCofigurationExist = line.size() >= 3 &&
+//                    connections.get(line.get(0)) == nextLine.get(0) &&
+//                    connections.get(line.get(line.size() - 1)) == nextLine.get(nextLine.size() - 1) &&
+//                    connections.get(line.get(line.size() - 2)) == nextLine.get(nextLine.size() - 2);
+//            return (isFirstConnectedCofigurationExist && secondColumnIsConnected) ||
+//                    (isSecondConnectedCofigurationExist && oneBeforeLastColumnConnected);
+//        }
+//    }
+//
+//
+//    private int ValidatingTitleLineLocation(int start, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {
+//        Boolean isTitleAtItemsArea;
+//
+//        isTitleAtItemsArea = IsTitleAtItemsArea(start, connections, locations);
+//
+//        return isTitleAtItemsArea ? start + 1 : start;
+//    }
+//
+//    private Boolean IsTitleAtItemsArea(int start, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {
+//        if(start - 1 < 0)
+//        {
+//            return true;
+//        }
+//
+//        int numberOfConnections = connections[start].size();
+//        if(3 <= numberOfConnections || 7 <= numberOfConnections)
+//        {
+//            if(IsTitleConnected(locations.get(start), connections[start-1]))
+//            {
+//                return false;
+//            }
+//            return true;
+//        }
+//        return true;
+//    }
+//
+//    private Boolean IsTitleConnected(ArrayList<Rect> firstLineItemsArea, LinkedHashMap<Rect, Rect> titleConnections) {
+//
+//        if(firstLineItemsArea.size() < 3 || titleConnections.size() < 3)
+//        {
+//            return false;
+//        }
+//
+//        Boolean isFirstColumnConnected = IsConnected(titleConnections, firstLineItemsArea.get(0));
+//        Boolean isLastColumnConnected = IsConnected(titleConnections, firstLineItemsArea.get(firstLineItemsArea.size() - 1));
+//        Boolean isSecondOrOneBeforeLastColumnConnected = false;
+//
+//        if(secondColumnIsConnected)
+//        {
+//            isSecondOrOneBeforeLastColumnConnected = IsConnected(titleConnections, firstLineItemsArea.get(1));
+//        }
+//        else if(oneBeforeLastColumnConnected)
+//        {
+//            isSecondOrOneBeforeLastColumnConnected = IsConnected(titleConnections, firstLineItemsArea.get(firstLineItemsArea.size() - 2));
+//        }
+//
+//        return isFirstColumnConnected && isLastColumnConnected && isSecondOrOneBeforeLastColumnConnected;
+//    }
 
     private Boolean IsConnected(LinkedHashMap<Rect, Rect> connections, Rect rect) {
         for (Map.Entry<Rect, Rect> connection : connections.entrySet()) {
@@ -444,43 +528,6 @@ public class TemplateMatcher  {
             parsedNumberString = parsedNumberString.substring(0,parsedNumberString.length()-2);
         }
         return  parsedNumberString;
-    }
-
-    Boolean IsLinesConnected(ArrayList<Rect> line, ArrayList<Rect> nextLine, LinkedHashMap<Rect, Rect> connections) {
-       Boolean isFirstConnectedCofigurationExist;
-       Boolean isSecondConnectedCofigurationExist;
-
-       if(!secondColumnIsConnected && !oneBeforeLastColumnConnected) {
-           secondColumnIsConnected = line.size() >= 3 &&
-                   connections.get(line.get(0)) == nextLine.get(0) &&
-                   connections.get(line.get(line.size() - 1)) == nextLine.get(nextLine.size() - 1) &&
-                   connections.get(line.get(1)) == nextLine.get(1);
-           oneBeforeLastColumnConnected = line.size() >= 3 &&
-                   connections.get(line.get(0)) == nextLine.get(0) &&
-                   connections.get(line.get(line.size() - 1)) == nextLine.get(nextLine.size() - 1) &&
-                   connections.get(line.get(line.size() - 2)) == nextLine.get(nextLine.size() - 2);
-
-           if(secondColumnIsConnected && oneBeforeLastColumnConnected)
-           {
-               oneBeforeLastColumnConnected = false;
-           }
-
-           return (secondColumnIsConnected && !oneBeforeLastColumnConnected) ||
-                 (!secondColumnIsConnected && oneBeforeLastColumnConnected);
-       }
-       else
-       {
-           isFirstConnectedCofigurationExist = line.size() >= 3 &&
-                   connections.get(line.get(0)) == nextLine.get(0) &&
-                   connections.get(line.get(line.size() - 1)) == nextLine.get(nextLine.size() - 1) &&
-                   connections.get(line.get(1)) == nextLine.get(1);
-           isSecondConnectedCofigurationExist = line.size() >= 3 &&
-                   connections.get(line.get(0)) == nextLine.get(0) &&
-                   connections.get(line.get(line.size() - 1)) == nextLine.get(nextLine.size() - 1) &&
-                   connections.get(line.get(line.size() - 2)) == nextLine.get(nextLine.size() - 2);
-           return (isFirstConnectedCofigurationExist && secondColumnIsConnected) ||
-                  (isSecondConnectedCofigurationExist && oneBeforeLastColumnConnected);
-       }
     }
 
     private boolean InRange(Rect word, Rect nextLineWord) {
