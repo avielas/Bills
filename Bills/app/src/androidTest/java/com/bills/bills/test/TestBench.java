@@ -67,6 +67,7 @@ public class TestBench {
      *                                in case it empty: the test validate phone directories
      */
     private int _testToRun = TEST_PHONE;
+    private Boolean _isRunJustTM;
     List<String> _restaurantsNamesTestFilter;
     List<String> _billsTestFilter;
     List<String> _brandModelDirectoriesTestFilter;
@@ -81,6 +82,7 @@ public class TestBench {
         _context = getInstrumentation().getContext();
         _timeMs = System.currentTimeMillis();
         String sourceDirectory;
+        _isRunJustTM = true;
         //copy images to internal memory
         //if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
         //{
@@ -104,7 +106,7 @@ public class TestBench {
                 _restaurantsNamesTestFilter = Arrays.asList("pastaMarket1", "pastaMarket2",
                                                              "iza1",
                                                              "dovrin1", "dovrin2", "dovrin3",
-                                                              "nola1", "nola3", "nola4"/*, "nola5", "nola6"*/);
+                                                              "nola1", "nola3", "nola4"/**//*, "nola5", "nola6"*/);
                 _billsTestFilter = Arrays.asList(/*ocrBytes3.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);
@@ -157,7 +159,7 @@ public class TestBench {
             for(int i=0; i < currBills.size(); i++)
             {
                 mThreadPoolExecutor.execute(
-                        new TestBill(rootBrandModelDirectory, restaurant, currBills.get(i),
+                        new TestBill(rootBrandModelDirectory, restaurant, currBills.get(i), _isRunJustTM,
                                 accuracyPercentQueue, passedResultsQueue, failedResultsQueue));
             }
         }

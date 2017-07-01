@@ -27,25 +27,26 @@ import java.util.Queue;
 
 public class TestBill extends Thread{
     private String Tag = this.getClass().getSimpleName();
-    String _rootBrandModelDirectory;
-    String _restaurant;
-    String _billFullName;
-    String _fileName;
-    String _key;
-    StringBuilder _results;
-    Queue<Pair> _accuracyPercentQueue;
-    Queue<Pair> _passedResultsQueue;
-    Queue<Pair> _failedResultsQueue;
+    private String _rootBrandModelDirectory;
+    private String _restaurant;
+    private String _billFullName;
+    private String _fileName;
+    private String _key;
+    private StringBuilder _results;
+    private Boolean _isRunJustTM;
+    private Queue<Pair> _accuracyPercentQueue;
+    private Queue<Pair> _passedResultsQueue;
+    private Queue<Pair> _failedResultsQueue;
 
     public TestBill(String rootBrandModelDirectory, String restaurant, String bill,
-                    Queue<Pair> accuracyPercentQueue,
-                    Queue<Pair> passedResultsQueue,
-                    Queue<Pair> failedResultsQueue)
+                    Boolean isRunJustTM, Queue<Pair> accuracyPercentQueue,
+                    Queue<Pair> passedResultsQueue, Queue<Pair> failedResultsQueue)
     {
         _rootBrandModelDirectory = rootBrandModelDirectory;
         _restaurant = restaurant;
         _billFullName = bill;
         _results = new StringBuilder();
+        _isRunJustTM = isRunJustTM;
         _accuracyPercentQueue = accuracyPercentQueue;
         _passedResultsQueue = passedResultsQueue;
         _failedResultsQueue = failedResultsQueue;
@@ -106,6 +107,15 @@ public class TestBill extends Thread{
 
             int numOfItems = templateMatcher.priceAndQuantity.size();
 
+            if (_isRunJustTM) {
+                HandlingTMResults(numOfItems, expectedBillTextLines.size());
+                processedBillBitmap.recycle();
+                warpedMat.release();
+                warpedMatCopy.release();
+                tesseractOCREngine.End();
+                return;
+            }
+
             ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
             /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
             /***** Out Of Memory when running 4 threads parallel                                      *****/
@@ -119,6 +129,22 @@ public class TestBill extends Thread{
             warpedMatCopy.release();
             tesseractOCREngine.End();
             _passedResultsQueue.add(new Pair(_key, _results));
+        }
+    }
+
+    /**
+     *
+     * @param numOfItemsTM
+     * @param numOfItemsExpectedTxt
+     */
+    private void HandlingTMResults(int numOfItemsTM, int numOfItemsExpectedTxt) {
+        if(numOfItemsExpectedTxt == numOfItemsTM){
+            _passedResultsQueue.add(new Pair(_key, _results));
+            _accuracyPercentQueue.add(new Pair(_key, 100.0));
+        }
+        else{
+            _failedResultsQueue.add(new Pair(_key, _results));
+            _accuracyPercentQueue.add(new Pair(_key, 0.0));
         }
     }
 
