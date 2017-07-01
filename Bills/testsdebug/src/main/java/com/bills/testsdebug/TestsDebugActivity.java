@@ -36,6 +36,7 @@ import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.DragRectView;
 import com.bills.billslib.Utilities.FilesHandler;
+import com.bills.billslib.Utilities.TestsHelper;
 import com.gregacucnik.EditableSeekBar;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -43,15 +44,16 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 import static android.view.View.GONE;
@@ -158,43 +160,49 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         _kernelTypes.add(StructureElement.VERTICAL_LINE.toString());
         _kernelTypes.add(StructureElement.RECTANGULAR.toString());
         _kernelTypes.add(StructureElement.ELLIPTICAL.toString());
-        _kernelTypes.add( StructureElement.CROSS_SHAPED.toString());
+        _kernelTypes.add(StructureElement.CROSS_SHAPED.toString());
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, _kernelTypes);
         _kernelTypeSpinner.setAdapter(adapter);
 
         if (!OpenCVLoader.initDebug()) {
             Log.d("aa", "Failed to initialize OpenCV.");
         }
-
-        _rgba = new Mat();
-        _gray = new Mat();
         try {
-            Mat warpedBillMat = FilesHandler.GetWarpedBillMat(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
-            _warpedBill =  Bitmap.createBitmap(warpedBillMat.width(), warpedBillMat.height(), Bitmap.Config.ARGB_8888);
+            _rgba = new Mat();
+            _gray = new Mat();
+
+            File f = new File(Constants.IMAGES_PATH);
+            File[] listFiles = f.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File file) {
+                    String fileName = file.getName();
+                    return fileName.startsWith("ocrBytes") && fileName.endsWith(".txt");
+                }
+            });
+
+            Mat warpedBillMat = FilesHandler.GetWarpedBillMat(listFiles[0].getPath());
+            _warpedBill = Bitmap.createBitmap(warpedBillMat.width(), warpedBillMat.height(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(warpedBillMat, _warpedBill);
             _billWithPrintedRedLines = _warpedBill.copy(_warpedBill.getConfig(), true);
             warpedBillMat.release();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        _processedBill = Bitmap.createBitmap(_warpedBill.getWidth(), _warpedBill.getHeight(), Bitmap.Config.ARGB_8888);
-        _processedBillForCreateNewBill = Bitmap.createBitmap(_warpedBill.getWidth(), _warpedBill.getHeight(), Bitmap.Config.ARGB_8888);
+            _processedBill = Bitmap.createBitmap(_warpedBill.getWidth(), _warpedBill.getHeight(), Bitmap.Config.ARGB_8888);
+            _processedBillForCreateNewBill = Bitmap.createBitmap(_warpedBill.getWidth(), _warpedBill.getHeight(), Bitmap.Config.ARGB_8888);
 
-        //Show original image on ImageView
-        _originalImageView.setImageBitmap(_warpedBill);
-        _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
+            //Show original image on ImageView
+            _originalImageView.setImageBitmap(_warpedBill);
+            _photoViewAttacher = new PhotoViewAttacher(_originalImageView);
 
-        Preprocessing();
-        AddListenerOcrOnPreprocessedButton();
-        AddListenerSaveProccessedButton();
-        AddListenerGenerateBillButton();
-        AddListenerTemplateMatcherButton();
-        AddListenerPrintWordsLocationButton();
-        AddListenerAdaptiveThresholdButton();
-        AddListenerDilateButton();
-        AddListenerErodeButton();
-        tesseractOCREngine = new TesseractOCREngine();
-        try {
+            Preprocessing();
+            AddListenerOcrOnPreprocessedButton();
+            AddListenerSaveProccessedButton();
+            AddListenerGenerateBillButton();
+            AddListenerTemplateMatcherButton();
+            AddListenerPrintWordsLocationButton();
+            AddListenerAdaptiveThresholdButton();
+            AddListenerDilateButton();
+            AddListenerErodeButton();
+            tesseractOCREngine = new TesseractOCREngine();
+
             tesseractOCREngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
         } catch (Exception e) {
             e.printStackTrace();
@@ -495,14 +503,11 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             public void onClick(View arg0) {
                 try {
                     _billWithPrintedRedLines.recycle();
-//                    String pathToSave = Constants.IMAGES_PATH;
-//                    FilesHandler.SaveToJPGFile(_warpedBill, pathToSave + "/bill.jpg");
-                    _billWithPrintedRedLines = PrintWordsRects(_warpedBill, _processedBill);
-                    //TODO
+                    _billWithPrintedRedLines = TestsHelper.PrintWordsRects(tesseractOCREngine, _warpedBill, _processedBill,
+                                                                                                    this.getClass().getSimpleName());
 //                    String pathToSave = Constants.IMAGES_PATH;
 //                    FilesHandler.SaveToJPGFile(_billWithPrintedRedLines, pathToSave + "/CbillWithPrintedRedLines.jpg");
 //                    FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/CAprocessedBill.jpg");
-
                     _originalImageView.setImageBitmap(_billWithPrintedRedLines);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -582,50 +587,6 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         AlertDialog alertDialogAndroid = alertDialogBuilderUserInput.create();
         alertDialogAndroid.show();
     }
-
-    public Bitmap PrintWordsRects(Bitmap bitmap, Bitmap _processedBill){
-        //TODO
-//        String pathToSave = Constants.IMAGES_PATH;
-//        FilesHandler.SaveToJPGFile(bitmap, pathToSave + "/CBbitmap.jpg");
-//        FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/CBprocessedBill.jpg");
-
-        List<Rect> words;
-        Bitmap printedBitmap = Bitmap.createBitmap(bitmap);
-        try{
-            tesseractOCREngine.SetImage(_processedBill);
-            List<Rect> lineRects = tesseractOCREngine.GetTextlines();
-
-            /************ the following is waiting for GC to finish his job. ********/
-            /************ without it the red lines will not be printed. *************/
-//            Thread.sleep(50);
-            /**************************/
-            Paint paint = new Paint();
-            Canvas canvas = new Canvas(printedBitmap);
-            paint.setColor(Color.RED);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(3);
-
-            for (Rect line: lineRects) {
-                tesseractOCREngine.SetRectangle(line);
-                try {
-                    words = tesseractOCREngine.GetWords();
-                    for (Rect rect : words) {
-                        canvas.drawRect(rect, paint);
-                    }
-                }
-                catch(Exception ex){
-                    Log.d(this.getClass().getSimpleName(), "Failed to get words of line. Error: " + ex.getMessage());
-                    canvas.drawRect(line, paint);
-                }
-
-            }
-        }
-        catch(Exception ex){
-            Log.d(this.getClass().getSimpleName(), "Failed to map numbered values to location. Error: " + ex.getMessage());
-            return null;
-        }
-            return printedBitmap;
-        }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){

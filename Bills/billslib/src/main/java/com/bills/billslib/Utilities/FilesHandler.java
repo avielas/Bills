@@ -48,6 +48,13 @@ public class FilesHandler {
             if(file.exists()){
                 file.delete();
             }
+            File folder = new File(file.getParent());
+            if(!folder.exists())
+            {
+                Boolean isSuccess = folder.mkdirs();
+                if(!isSuccess)
+                    throw new Exception("Can't create directory(ies)");
+            }
             out = new FileOutputStream(path);
 
             // bmp is your Bitmap instance, PNG is a lossless format, the compression factor (100) is ignored

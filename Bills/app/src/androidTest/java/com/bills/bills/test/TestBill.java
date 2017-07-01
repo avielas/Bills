@@ -10,6 +10,7 @@ import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.Utilities.FilesHandler;
+import com.bills.billslib.Utilities.TestsHelper;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -25,6 +26,7 @@ import java.util.Queue;
  */
 
 public class TestBill extends Thread{
+    private String Tag = this.getClass().getSimpleName();
     String _rootBrandModelDirectory;
     String _restaurant;
     String _billFullName;
@@ -48,7 +50,7 @@ public class TestBill extends Thread{
         _passedResultsQueue = passedResultsQueue;
         _failedResultsQueue = failedResultsQueue;
         _fileName = _billFullName.substring(_billFullName.lastIndexOf("/")+1);
-        _key = _restaurant + "_" + _fileName;
+        _key = _restaurant + "_" + _fileName.subSequence(0, _fileName.lastIndexOf('.'));
     }
 
     @Override
@@ -61,8 +63,8 @@ public class TestBill extends Thread{
             List<String> expectedBillTextLines = null;
 
             if (!OpenCVLoader.initDebug()) {
-//                Log.d(Tag, "Failed to initialize OpenCV.");
-//                return false;
+                Log.d(Tag, "Failed to initialize OpenCV.");
+                return;
             }
             Mat warpedMat = new Mat();
             Mat warpedMatCopy = new Mat();
@@ -73,9 +75,6 @@ public class TestBill extends Thread{
                 expectedBillTextLines = FilesHandler.ReadTxtFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
                 warpedMat = FilesHandler.GetWarpedBillMat(_billFullName);
                 warpedMatCopy = warpedMat.clone();
-//                File file = new File(_billFullName);
-//                String pathToSave = file.getParent();
-//                FilesHandler.SaveToJPGFile(billBitmap, pathToSave + "/billBitmap.jpg");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -83,6 +82,17 @@ public class TestBill extends Thread{
             Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
             ImageProcessingLib.PreprocessingForTM(warpedMat);
             Utils.matToBitmap(warpedMat, processedBillBitmap);
+
+            /********* the following prints resd lines on bill and save it *********/
+//            Bitmap warpedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(warpedMatCopy, warpedBillBitmap);
+//            Bitmap printWordsRectsbill = TestsHelper.PrintWordsRects(tesseractOCREngine, warpedBillBitmap, processedBillBitmap,
+//                                                                                                            this.getClass().getSimpleName());
+//            String pathToSave = Constants.PRINTED_RECTS_IMAGES_PATH + "/" +_key + ".jpg";
+//            printWordsRectsbill.recycle();
+//            warpedBillBitmap.recycle();
+            /***********************************************************************/
+
             templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
             try{
                 templateMatcher.Match();

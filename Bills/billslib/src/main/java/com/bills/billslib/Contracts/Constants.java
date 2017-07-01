@@ -20,6 +20,7 @@ public final class Constants
                     Environment.getExternalStorageDirectory().toString();
 
     public static final String IMAGES_PATH = STORAGE_DIRECTORY + "/TesseractSample/imgs";
+    public static final String PRINTED_RECTS_IMAGES_PATH = STORAGE_DIRECTORY + "/TesseractSample/printRectsImgs";
     public static final String CAMERA_CAPTURED_PHOTO_PATH = IMAGES_PATH + "/ocr.tif";
     public static final String CAMERA_CAPTURED_JPG_PHOTO_PATH = IMAGES_PATH + "/ocr.jpg";
     public static final String CAMERA_CAPTURED_TXT_PHOTO_PATH = IMAGES_PATH + "/ocrBytes.txt";
