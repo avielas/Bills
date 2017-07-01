@@ -104,8 +104,9 @@ public class TestBill extends Thread{
                 return;
             }
 
-            ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
             int numOfItems = templateMatcher.priceAndQuantity.size();
+
+            ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
             /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
             /***** Out Of Memory when running 4 threads parallel                                      *****/
             Utils.matToBitmap(warpedMatCopy, processedBillBitmap);
