@@ -85,14 +85,16 @@ public class TestBill extends Thread{
             Utils.matToBitmap(warpedMat, processedBillBitmap);
 
             /********* the following prints resd lines on bill and save it *********/
-            Bitmap warpedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(warpedMatCopy, warpedBillBitmap);
-            Bitmap printWordsRectsbill = TestsHelper.PrintWordsRects(tesseractOCREngine, warpedBillBitmap, processedBillBitmap,
-                                                                                                            this.getClass().getSimpleName());
-            String pathToSave = Constants.PRINTED_RECTS_IMAGES_PATH + "/" +_key + ".jpg";
-            FilesHandler.SaveToJPGFile(printWordsRectsbill, pathToSave);
-            printWordsRectsbill.recycle();
-            warpedBillBitmap.recycle();
+//            Bitmap warpedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(warpedMatCopy, warpedBillBitmap);
+//            Bitmap printWordsRectsbill = TestsHelper.PrintWordsRects(tesseractOCREngine, warpedBillBitmap, processedBillBitmap,
+//                                                                                                            this.getClass().getSimpleName());
+//            String pathToSavePrintRects = Constants.PRINTED_RECTS_IMAGES_PATH + "/" +_key + ".jpg";
+//            String pathToSavePrePrintRects = Constants.PRINTED_RECTS_IMAGES_PATH + "/" +_key + "1.jpg";
+//            FilesHandler.SaveToJPGFile(printWordsRectsbill, pathToSavePrintRects);
+//            FilesHandler.SaveToJPGFile(processedBillBitmap, pathToSavePrePrintRects);
+//            printWordsRectsbill.recycle();
+//            warpedBillBitmap.recycle();
             /***********************************************************************/
 
             templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);

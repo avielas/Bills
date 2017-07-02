@@ -152,6 +152,19 @@ public class ImageProcessingLib {
         }
         AdaptiveThreshold(rgba, 60, 45.0);
         Erode(rgba, 1, 4, StructureElement.VERTICAL_LINE.toString());
+//        RemoveHorizontalLines(rgba);
+    }
+
+    private static void RemoveHorizontalLines(Mat rgba) {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+        Mat gray = new Mat();
+        Mat edges = new Mat(rgba.size(), CvType.CV_8UC1);
+        Mat lines = new Mat();
+        Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGB2GRAY, 4);
+        Imgproc.Canny(gray, edges, 80, 120);
+        Imgproc.HoughLinesP(edges, lines, 1, 3.14/2.0, 2, 30, 1);
     }
 
     public static void PreprocessingForParsing(Mat rgba) {

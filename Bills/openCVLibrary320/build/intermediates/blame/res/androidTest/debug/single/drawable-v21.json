@@ -1,31 +1,11 @@
 [
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\notification_action_background.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\drawable-v21\\notification_action_background.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\abc_btn_colored_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\drawable-v21\\abc_btn_colored_material.xml"
-    },
-    {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/androidTest/debug/drawable-v21/notification_action_background.xml",
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/drawable-v21/notification_action_background.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\abc_btn_colored_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\drawable-v21\\abc_btn_colored_material.xml"
-    },
-    {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/androidTest/debug/drawable-v21/abc_action_bar_item_background_material.xml",
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/drawable-v21/abc_action_bar_item_background_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\abc_edit_text_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\drawable-v21\\abc_edit_text_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\abc_action_bar_item_background_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\drawable-v21\\abc_action_bar_item_background_material.xml"
     },
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/androidTest/debug/drawable-v21/abc_edit_text_material.xml",
@@ -34,33 +14,5 @@
     {
         "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/androidTest/debug/drawable-v21/abc_btn_colored_material.xml",
         "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/drawable-v21/abc_btn_colored_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\abc_edit_text_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\drawable-v21\\abc_edit_text_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\notification_action_background.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\drawable-v21\\notification_action_background.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\Desktop\\BS\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\abc_action_bar_item_background_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\avielavr\\.android\\build-cache\\87804f4e490cb82cd3d9e7126fecaff7f959d128\\output\\res\\drawable-v21\\abc_action_bar_item_background_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\abc_btn_colored_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\drawable-v21\\abc_btn_colored_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\notification_action_background.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\drawable-v21\\notification_action_background.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\AndroidStudioProjects\\bills\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\abc_action_bar_item_background_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\home\\aviel\\.android\\build-cache\\fac19a4574930140bbd019c76028a4f053596b87\\output\\res\\drawable-v21\\abc_action_bar_item_background_material.xml"
-    },
-    {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\Projects\\BillSplitProject\\Bills\\openCVLibrary320\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-v21\\abc_edit_text_material.xml",
-        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/C:\\Users\\michaelvalershtein\\.android\\build-cache\\8b6b836142ddce5a60019102bf967a450329c5cf\\output\\res\\drawable-v21\\abc_edit_text_material.xml"
     }
 ]
