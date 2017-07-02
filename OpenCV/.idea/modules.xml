@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/openCVLibrary320/openCVLibrary320.iml" filepath="$PROJECT_DIR$/openCVLibrary320/openCVLibrary320.iml" />
       <module fileurl="file://$PROJECT_DIR$/openCVTutorial2MixedProcessing/openCVTutorial2MixedProcessing.iml" filepath="$PROJECT_DIR$/openCVTutorial2MixedProcessing/openCVTutorial2MixedProcessing.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openCVTutorial3CameraControl/openCVTutorial3CameraControl.iml" filepath="$PROJECT_DIR$/openCVTutorial3CameraControl/openCVTutorial3CameraControl.iml" />
     </modules>
   </component>
 </project>

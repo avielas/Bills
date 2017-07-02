@@ -1,1 +1,4 @@
 include ':app'
+include ':openCVLibrary320'
+include ':openCVTutorial2MixedProcessing'
+include ':openCVTutorial3CameraControl'
