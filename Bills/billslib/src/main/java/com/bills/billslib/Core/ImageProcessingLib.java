@@ -8,7 +8,9 @@ import android.graphics.Rect;
 import android.util.Log;
 
 
+import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.MutableBoolean;
+import com.bills.billslib.Utilities.FilesHandler;
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.Pixa;
 
@@ -33,7 +35,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C;
+import static org.opencv.imgproc.Imgproc.ADAPTIVE_THRESH_MEAN_C;
 import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
+import static org.opencv.imgproc.Imgproc.THRESH_BINARY_INV;
 
 /**
  * Created by michaelvalershtein on 18/04/2017.
@@ -150,21 +154,42 @@ public class ImageProcessingLib {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
+//        Mat rgbaCopy = rgba.clone();
         AdaptiveThreshold(rgba, 60, 45.0);
         Erode(rgba, 1, 4, StructureElement.VERTICAL_LINE.toString());
-//        RemoveHorizontalLines(rgba);
+//        RemoveHorizontalLines(rgbaCopy, rgba);
+//        rgbaCopy.release();
     }
 
-    private static void RemoveHorizontalLines(Mat rgba) {
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
-        Mat gray = new Mat();
-        Mat edges = new Mat(rgba.size(), CvType.CV_8UC1);
+    private static void RemoveHorizontalLines(Mat rgbaCopy, Mat rgba) {
+        Mat edges = new Mat(rgbaCopy.size(), CvType.CV_8UC1);
         Mat lines = new Mat();
-        Imgproc.cvtColor(rgba, gray, Imgproc.COLOR_RGB2GRAY, 4);
-        Imgproc.Canny(gray, edges, 80, 120);
-        Imgproc.HoughLinesP(edges, lines, 1, 3.14/2.0, 2, 30, 1);
+        AdaptiveThreshold(rgbaCopy, 60, 45.0);
+        Imgproc.Canny(rgbaCopy, rgbaCopy, 80, 120);
+        String pathToSave = Constants.IMAGES_PATH;
+        Bitmap newBill = Bitmap.createBitmap(rgbaCopy.width(), rgbaCopy.height(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(rgbaCopy, newBill);
+        FilesHandler.SaveToJPGFile(newBill, pathToSave + "/newBill.jpg");
+        int threshold = 20;
+        int minLineSize = 0;
+        int lineGap = 10;
+        Imgproc.HoughLinesP(rgbaCopy, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
+        for (int x = 0; x < lines.cols(); x++) {
+
+            double[] vec = lines.get(0, x);
+            double[] val = new double[4];
+
+            double x1 = vec[0],
+                    y1 = vec[1],
+                    x2 = vec[2],
+                    y2 = vec[3];
+
+            System.out.println("Coordinates: x1=>"+x1+" y1=>"+y1+" x2=>"+x2+" y2=>"+y2);
+            Point start = new Point(x1, y1);
+            Point end = new Point(x2, y2);
+
+            Imgproc.line(rgba, start, end, new Scalar(0,255, 0, 255), 3);
+        }
     }
 
     public static void PreprocessingForParsing(Mat rgba) {
