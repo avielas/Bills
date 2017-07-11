@@ -1,294 +1,435 @@
 package com.bills.deleteme;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
-import android.support.v7.app.AppCompatActivity;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.Transaction.Result;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class MainActivity extends AppCompatActivity {
+//TODO: sync database and storage timestamps
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    public static final String ANONYMOUS = "anonymous";
+    private static final int RC_SIGN_IN = 123;
 
-    LinearLayout mainLayout = null;
+    private Integer passCode = -1;
+    private List<PriceQuantityItem> mRows;
+    static Random random = new Random(10);
+
+    final Object lock = new Object();
+    final Object transactionLock = new Object();
+    final ConcurrentHashMap<String, Integer> passCodes = new ConcurrentHashMap<>();
+    final AtomicInteger newPassCode = new AtomicInteger(Integer.MIN_VALUE);
+    final AtomicBoolean transactionFinished = new AtomicBoolean(false);
+
+
+    private ArrayList<Integer> mLineToQuantityMapper = new ArrayList<>();
+
+    private String mBillStoragePath;
+
+    private Button mUploadButton;
+    private Button mUpadteButton;
+
+    private Uri mPhotoUri;
+
+    //Firebase Authentication members
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private String mUsername;
+
+
+    //Firebase Database members
+    private FirebaseDatabase mFirebaseDataBase;
+    private DatabaseReference mUsersDatabaseReference;
+    private DatabaseReference mUserIdsDatabaseReference;
+    private ChildEventListener mChildEventListener;
+
+    //Firebase Storage members
+    private FirebaseStorage mFirebaseStorage;
+    private StorageReference mBillsPerUserStorageReference;
+
+    private String mUid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mainLayout = (LinearLayout)findViewById(R.id.mainLayout);
+        mUploadButton = (Button)findViewById(R.id.uploadButton);
+        mUploadButton.setOnClickListener(this);
 
+        mUpadteButton = (Button)findViewById(R.id.updateButton);
+        mUpadteButton.setOnClickListener(this);
 
+        mUsername = ANONYMOUS;
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if(user != null){
+                    //user is signed in
+                    //onSignedInInitialize(user.getDisplayName());
+                    mUid = user.getUid();
+                    DateFormat sdf = new SimpleDateFormat("yyyy_MM_dd___HH_mm_ss");
+                    Date date = new Date();
+                    String now = sdf.format(date);
+
+                    mBillStoragePath = mUid + "/" +now;
+
+                    mUsersDatabaseReference = mFirebaseDataBase.getReference().child("users/" + "/" + mBillStoragePath);
+                    mUserIdsDatabaseReference = mFirebaseDataBase.getReference().child("userIds");
+
+                    Toast.makeText(MainActivity.this, "You are now signed in. Welcome", Toast.LENGTH_LONG).show();
+                }else{
+                    //user is signed out
+                    //onSignedOutCleanup();
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setIsSmartLockEnabled(false)
+                                    .setAvailableProviders(
+                                            Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
+                                    .build(),
+                            RC_SIGN_IN);
+                }
+            }
+        };
+
+        mFirebaseDataBase = FirebaseDatabase.getInstance();
+
+        mFirebaseStorage = FirebaseStorage.getInstance();
+        mBillsPerUserStorageReference = mFirebaseStorage.getReference().child("BillsPerUser");
+    }
+
+    public void onResume(){
+        super.onResume();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        if(mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+        //TODO: clear all displayed data
+    }
+
+    @Override
+    public void onActivityResult(int requesCode, int resultCode, Intent data){
+        super.onActivityResult(requesCode, resultCode, data);
+
+        if(requesCode == RC_SIGN_IN){
+            if(resultCode == RESULT_OK){
+                Toast.makeText(this, "Signed in!!!", Toast.LENGTH_LONG).show();
+            }else if(resultCode == RESULT_CANCELED){
+                Toast.makeText(this, "Sign in cancelled", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+    }
+
+    private void UploadBillToDB() {
+        mRows = GetBillRows(10);
+
+        passCode = GetPassCode();
 
     }
 
-    private String Tag = "BillAreaDetector";
+    private Integer GetPassCode() {
+            MyHandler handler = new MyHandler();
+            mUserIdsDatabaseReference.runTransaction(handler);
+//
+//            while (!transactionFinished.get()) {
+//            }
 
-    private  int _histSizeNum = 64;
-    private  int _bucketSize = 256 / _histSizeNum;
+//            if (newPassCode.get() >= 0) {
+//                break;
+//            }
 
-    public boolean GetBillCorners(Bitmap source, Point topLeft, Point topRight, Point buttomRight, Point buttomLeft){
-        Mat image = null;
-        Mat newImage = null;
-        Mat contrast = null;
-        Mat destinationImage = null;
-        Mat monoChromeMat = null;
-        MatOfPoint2f approx = null;
-        MatOfPoint2f contour = null;
-        Mat monoChromeMatCopy = null;
-        Mat emptyMat = null;
-        MatOfPoint approxPoint = null;
+        return newPassCode.get();
+    }
 
-        Mat mask = null;
-        MatOfInt channels = null;
-        Mat histMat = null;
-        MatOfInt histsize = null;
-        MatOfFloat ranges = null;
-        try {
-            if (!OpenCVLoader.initDebug()) {
-                Log.d(Tag, "Failed to initialize OpenCV.");
-                return false;
+    private List<PriceQuantityItem> GetBillRows(int numOfRows) {
+        List<PriceQuantityItem> items = new ArrayList<>();
+        double startingPrice = 1.0;
+        int startingQuantity = 1;
+        for(int i = 0; i < numOfRows; i++){
+            items.add(new PriceQuantityItem(startingPrice++, startingQuantity++, GetBitmap(""+i+i+i)));
+        }
+        return items;
+    }
+
+    private Bitmap GetBitmap(String text) {
+        int width = 50;
+        int height = 30;
+
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+
+        // The gesture threshold expressed in dip
+        float GESTURE_THRESHOLD_DIP = 12.0f;
+
+        final float scale = getResources().getDisplayMetrics().density;
+        int gestureThreshold = (int) (GESTURE_THRESHOLD_DIP * scale + 0.5f);
+
+        paint.setTextSize(gestureThreshold);
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
+        Bitmap res = Bitmap.createBitmap((int) (width * scale + 0.5f),(int) (height * scale + 0.5f), conf);
+
+        Canvas canvas = new Canvas(res);
+
+        canvas.drawText(text, 30, 30, paint);
+
+        return res;
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.uploadButton) {
+            UploadBillToDB();
+        }
+        else if(v.getId() == R.id.updateButton){
+            UpdateDb();
+        }
+    }
+
+    private void UpdateDb() {
+        final int lineNum = random.nextInt(9) + 1;
+        int newQuantity = random.nextInt(9) + 1;
+
+        final Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(""+lineNum, newQuantity);
+
+        mUserIdsDatabaseReference.orderByValue().equalTo("1234").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                DatabaseReference billLineDBReference = mFirebaseDataBase.getReference().child("users/" + dataSnapshot.getRef().getParent().getKey()+"/"+lineNum);
+                billLineDBReference.runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Result doTransaction(MutableData mutableData) {
+                        int curValue;
+                        try {
+                            curValue = (int) mutableData.getValue();
+                        }catch (Exception ex){
+                            //something went wrong, there sopposed to be no problems with parsing the value!!!
+                            return Transaction.success(mutableData);
+                        }
+                        if(curValue <= 0){
+                            //dont update anything and write something to the user
+                            return Transaction.success(mutableData);
+                        }else{
+                            mutableData.setValue(curValue-1);
+                            return Transaction.success(mutableData);
+                        }
+                    }
+
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                    }
+                });
             }
 
-            image  = new Mat(source.getWidth(), source.getHeight(), CvType.CV_8UC4);
-            Utils.bitmapToMat(source, image);
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-            newImage = new Mat(image.rows(), image.cols(), image.type());
-            Imgproc.cvtColor(image, newImage, Imgproc.COLOR_RGBA2GRAY);
-
-            List<Mat> listOfMat = new ArrayList<Mat>();
-            listOfMat.add(newImage);
-            histMat = new Mat();
-
-            mask = new Mat();
-            channels = new MatOfInt(0);
-            histsize = new MatOfInt(_histSizeNum);
-            ranges = new MatOfFloat(0.0f,256.0f);
-            Imgproc.calcHist(listOfMat, channels, mask, histMat, histsize, ranges);
-
-            float[] hist = new float[_histSizeNum];
-            histMat.get(0, 0, hist);
-
-            int thresh = GetThresholdIndex(hist, _histSizeNum) * _bucketSize;
-
-            Log.d(Tag, "Threshold for area detection: " + thresh);
-            Imgproc.threshold(newImage, newImage, thresh, 255, Imgproc.THRESH_BINARY);
-
-            ImageView imageView = new ImageView(this);
-            Bitmap bitmap = Bitmap.createBitmap(source);
-            Utils.matToBitmap(newImage, bitmap);
-            imageView.setImageBitmap(bitmap);
-
-            Imgproc.dilate(newImage, newImage,
-                    Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10,10)),
-                    new Point(-1,-1),
-                    2);
-            Imgproc.erode(newImage, newImage,
-                    Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10,10)),
-                    new Point(-1,-1),
-                    2);
-
-            ArrayList<MatOfPoint> contours = new ArrayList<>();
-            emptyMat = new Mat();
-            Imgproc.findContours(newImage, contours, emptyMat, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-            final int width = newImage.rows();
-            final int height = newImage.cols();
-            int matArea = width * height;
-
-            double maxContoursArea = Double.MIN_VALUE;
-            for (int i = 0; i < contours.size(); i++) {
-                if(Imgproc.contourArea(contours.get(i)) < matArea * 0.1)
-                {
-                    contours.remove(i);
-                    continue;
-                }
-                if(maxContoursArea < Imgproc.contourArea(contours.get(i))){
-                    maxContoursArea = Imgproc.contourArea(contours.get(i));
-                }
             }
-            for (int i = 0; i < contours.size(); i++) {
-                double contoursArea = Imgproc.contourArea(contours.get(i));
-                approx = new MatOfPoint2f();
-                contour = new MatOfPoint2f(contours.get(i).toArray());
-                double epsilon = Imgproc.arcLength(contour, true) * 0.1;
-                Imgproc.approxPolyDP(contour, approx, epsilon, true);
-                if (Math.abs(contoursArea) < matArea * 0.01 || Math.abs(contoursArea) > matArea * 0.99) {
-                    approx.release();
-                    contour.release();
-                    continue;
-                }
-                approxPoint = new MatOfPoint(approx.toArray());
-                if (!Imgproc.isContourConvex(approxPoint)) {
-                    approx.release();
-                    contour.release();
-                    approxPoint.release();
-                    continue;
-                }
-                Imgproc.drawContours(newImage, contours, i, new Scalar(0, 255, 0));
 
-                List<Point> points = approx.toList();
-                int pointCount = points.size();
-                LinkedList<Double> cos = new LinkedList<>();
-                for (int j = 2; j < pointCount + 1; j++) {
-                    cos.addLast(angle(points.get(j % pointCount), points.get(j - 2), points.get(j - 1)));
-                }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-                double mincos = Double.MAX_VALUE;
-                double maxcos = Double.MIN_VALUE;
-                for (Double val : cos) {
-                    if (mincos > val) {
-                        mincos = val;
-                    }
-                    if (maxcos < val) {
-                        maxcos = val;
-                    }
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void AttachDatabaseListener(){
+        if(mChildEventListener == null) {
+            mChildEventListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Integer index = Integer.parseInt(dataSnapshot.getKey());
+                    Integer quantity = dataSnapshot.getValue(Integer.class);
+
+                    mLineToQuantityMapper.add(index, quantity);
                 }
 
-                //we are assuming that the bill was shot vertically
-                if (points.size() == 4) {
-                    Collections.sort(points, new Comparator<Point>() {
-                        @Override
-                        public int compare(Point o1, Point o2) {
-                            if (o1.x > o2.x) {
-                                return 1;
-                            } else if (o1.x == o2.x) {
-                                return 0;
-                            } else {
-                                return -1;
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    Integer index = Integer.parseInt(dataSnapshot.getKey());
+                    Integer quantity = dataSnapshot.getValue(Integer.class);
+
+                    mLineToQuantityMapper.set(index, quantity);
+                    UpdateUIElement(index, quantity);
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {}
+            };
+
+            mUsersDatabaseReference.addChildEventListener(mChildEventListener);
+        }
+    }
+
+    private void UpdateUIElement(Integer lineNumber, Integer newQuantity) {
+
+    }
+
+    public class MyHandler implements Transaction.Handler {
+        @Override
+        public Result doTransaction(final MutableData mutableData) {
+            synchronized (lock) {
+                if (mutableData != null && mutableData.hasChildren()) {
+                    if (mutableData.hasChild(mUid)) {
+                        newPassCode.set(mutableData.child(mUid).getValue(Integer.class));
+                    } else {
+                        for (MutableData childMutableData : mutableData.getChildren()) {
+                            passCodes.put(childMutableData.getKey(), childMutableData.getValue(Integer.class));
+                        }
+
+                        //find an unused pass code
+                        for (int i = 0; i < 10000; i++) {
+                            if (!passCodes.containsValue(i)) {
+                                newPassCode.set(i);
+                                mutableData.child(mUid).setValue(i);
+                                break;
                             }
                         }
-                    });
-
-                    if (points.get(0).y < points.get(1).y) {
-                        topLeft.x = points.get(0).x;
-                        topLeft.y = points.get(0).y;
-                        buttomLeft.x = points.get(1).x;
-                        buttomLeft.y = points.get(1).y;
-                    } else {
-                        topLeft.x = points.get(1).x;
-                        topLeft.y = points.get(1).y;
-                        buttomLeft.x = points.get(0).x;
-                        buttomLeft.y = points.get(0).y;
-                    }
-
-                    if (points.get(2).y < points.get(3).y) {
-                        topRight.x = points.get(2).x;
-                        topRight.y = points.get(2).y;
-                        buttomRight.x = points.get(3).x;
-                        buttomRight.y = points.get(3).y;
-                    } else {
-                        topRight.x = points.get(3).x;
-                        topRight.y = points.get(3).y;
-                        buttomRight.x = points.get(2).x;
-                        buttomRight.y = points.get(2).y;
                     }
                 }
-                return true;
-            }
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            Log.d(Tag, "An exception accured while trying to find bill corners. Error: " + ex.getMessage());
-        }
-        finally {
-            if(image != null) {
-                image.release();
-            }
-            if(newImage != null) {
-                newImage.release();
-            }
-            if(contrast != null) {
-                contrast.release();
-            }
-            if(destinationImage != null) {
-                destinationImage.release();
-            }
-            if(monoChromeMat != null) {
-                monoChromeMat.release();
-            }
-            if(approx != null) {
-                approx.release();
-            }
-            if(contour != null) {
-                contour.release();
-            }
-            if(monoChromeMatCopy != null) {
-                monoChromeMatCopy.release();
-            }
-            if(emptyMat != null) {
-                emptyMat.release();
-            }
-            if(approxPoint != null){
-                approxPoint.release();
-            }
-        }
-        return false;
-
-    }
-
-    private int GetThresholdIndex(float[] hist, int histSizeNum) {
-        float maxValue = Float.MIN_VALUE;
-        int max1Index = Integer.MIN_VALUE;
-        int max2Index = Integer.MIN_VALUE;
-        //find largest peak
-        for(int h=0; h<histSizeNum; h++) {
-            if(maxValue < hist[h]){
-                maxValue = hist[h];
-                max1Index = h;
-            }
-            Log.d(Tag, "" + hist[h]);
-        }
-
-        maxValue = Float.MIN_VALUE;
-        //find second largest peak
-        for(int h=1; h<histSizeNum - 1; h++) {
-            if(maxValue < hist[h] &&
-                    hist[h] >= hist[h - 1]&&
-                    hist[h] >= hist[h + 1]&&
-                    h!= max1Index){
-                maxValue = hist[h];
-                max2Index = h;
+                return Transaction.success(mutableData);
             }
         }
 
-        int minIndex = Integer.MAX_VALUE;
-        float minValue = Float.MAX_VALUE;
-        //find lowest point between the two peaks
-        for(int h = max1Index < max2Index ? max1Index : max2Index;
-            h < (max1Index > max2Index ? max1Index : max2Index);
-            h++) {
-            if(minValue > hist[h]){
-                minValue = hist[h];
-                minIndex = h;
-            }
-        }
-        return minIndex;
-    }
+        @Override
+        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
 
-    private double angle(Point pt1, Point pt2, Point pt0) {
-        double dx1 = pt1.x - pt0.x;
-        double dy1 = pt1.y - pt0.y;
-        double dx2 = pt2.x - pt0.x;
-        double dy2 = pt2.y - pt0.y;
-        return (dx1 * dx2 + dy1 * dy2) / Math.sqrt((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2) + 1e-10);
+            passCode = newPassCode.get();
+            Toast.makeText(MainActivity.this, "new pass code=" + passCode, Toast.LENGTH_LONG).show();
+
+
+            LinearLayout itemsView = (LinearLayout) findViewById(R.id.itemsView);
+
+            int i = 0;
+            Map<String, Object> dbItems = new HashMap<>();
+
+            for (PriceQuantityItem row : mRows) {
+                Buffer buffer = ByteBuffer.allocate(row.Item.getByteCount());
+                row.Item.copyPixelsToBuffer(buffer);
+                byte[] data = (byte[]) buffer.array();
+
+                final StorageMetadata metadata = new StorageMetadata.Builder()
+                        .setContentType("image/jpg")
+                        .setCustomMetadata("width", Integer.toString(row.Item.getWidth()))
+                        .setCustomMetadata("height", Integer.toString(row.Item.getHeight()))
+                        .setCustomMetadata("Price", "" + row.Price)
+                        .setCustomMetadata("Quantity", "" + row.Quantity)
+                        .build();
+
+
+                final String item = "" + i;
+                final Integer itemIndex = new Integer(i);
+                final Integer itemQuantity = new Integer(row.Quantity);
+                final StorageReference billRef = mBillsPerUserStorageReference.child(mBillStoragePath + "/" + item);
+                billRef.putBytes(data).addOnSuccessListener(MainActivity.this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        billRef.updateMetadata(metadata);
+                    }
+                });
+
+                dbItems.put("" + i, row.Quantity);
+
+                LinearLayout itemRow = new LinearLayout(MainActivity.this);
+                itemRow.setOrientation(LinearLayout.VERTICAL);
+
+                TextView price = new TextView(MainActivity.this);
+                price.setText("" + row.Price);
+                itemRow.addView(price);
+
+                TextView quantity = new TextView(MainActivity.this);
+                quantity.setText("" + row.Quantity);
+                itemRow.addView(quantity);
+
+                ImageView imageView = new ImageView(MainActivity.this);
+                imageView.setImageBitmap(row.Item);
+                itemRow.addView(imageView);
+
+                itemsView.addView(itemRow);
+                i++;
+            }
+
+            mUsersDatabaseReference.updateChildren(dbItems);
+
+            EditText editText = (EditText) findViewById(R.id.passCode);
+            editText.setText(""+passCode);
+
+            AttachDatabaseListener();
+        }
+
     }
 }

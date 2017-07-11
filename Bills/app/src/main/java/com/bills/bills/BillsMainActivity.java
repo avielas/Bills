@@ -40,6 +40,11 @@ import com.bills.billslib.CustomViews.NameView;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 
 import org.opencv.android.OpenCVLoader;
@@ -86,9 +91,14 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
     private int currentColorIndex = -1;
     private NameView curNameView = null;
 
-    //Firebase members
+    //Firebase Authentication members
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
+    //Firebase Database members
+    private FirebaseDatabase mFirebaseDataBase;
+    private DatabaseReference mMessagesDatabaseReference;
+    private ChildEventListener mChildEventListener;
 
 
     @Override
@@ -128,7 +138,7 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
             }
         }
 
-        //Firebase initialization
+        //Firebase Authentication initialization
         mUsername = ANONYMOUS;
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -155,6 +165,10 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
                 }
             }
         };
+
+        //Firebase Database initialization
+        mFirebaseDataBase = FirebaseDatabase.getInstance();
+        mMessagesDatabaseReference = mFirebaseDataBase.getReference().child("bill_summaries");
 
     }
 
