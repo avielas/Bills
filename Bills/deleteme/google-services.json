@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1085121722503",
+    "firebase_url": "https://deleteme-d73f2.firebaseio.com",
+    "project_id": "deleteme-d73f2",
+    "storage_bucket": "deleteme-d73f2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1085121722503:android:3f548c6187eef70c",
+        "android_client_info": {
+          "package_name": "com.bills.deleteme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1085121722503-prjvsvj8u746qrlf3502v43reserjpb9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bills.deleteme",
+            "certificate_hash": "dc118c130353fea38741bf28d93020ae044a2b00"
+          }
+        },
+        {
+          "client_id": "1085121722503-g39a8llfm0p347it6lu0un2sftqj658t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdEf9xG2VxiLGSp3UQGa4WOLATdHuxS9A"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1085121722503-g39a8llfm0p347it6lu0un2sftqj658t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
