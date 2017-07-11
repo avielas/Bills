@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
+import com.bills.billslib.Contracts.PreparingEnvironmentUtil;
 
 import static android.view.View.GONE;
 
@@ -68,6 +69,7 @@ public class MainActivityBase extends AppCompatActivity {
                     // result of the request.
                 }
             }
+            PreparingEnvironmentUtil.PrepareTesseract(this);
         }
     }
 }

@@ -118,15 +118,8 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         _testsDebugView = (LinearLayout)findViewById(R.id.tests_debug_view);
         _emptyRelativeLayoutView = (RelativeLayout)findViewById(R.id.empty_relative_layout_view);
         _emptyRelativeLayoutView.setVisibility(GONE);
-//        PreparingEnvironmentUtil.PrepareTesseract(this);
-        //copy images to internal memory just in case of emulator
-//        if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
-//        {
-//            PreparingEnvironmentUtil.PrepareImagesForTests(this);
-//        }
         _restaurantName = "nola4";
         _brandAndModelPath = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL;
-        //extract date from bill, for creating expected txt file name
         _expectedTxtFileName = _restaurantName + ".txt";
         _originalImageView = (ImageView)findViewById(R.id.originalImageView);
         _processedImageView = (ImageView)findViewById(R.id.processedImageView);

@@ -26,10 +26,6 @@ public class PreparingEnvironmentUtil {
         copyAssetFolder(context.getAssets(), Constants.TESSDATA, Constants.TESSERACT_SAMPLE_DIRECTORY + Constants.TESSDATA);
     }
 
-    public static void PrepareImagesForTests(Context context) {
-        copyAssetFolder(context.getAssets(), Constants.BILLS_TO_TEST, Constants.TESSERACT_SAMPLE_DIRECTORY);
-    }
-
     public static void CreateDirectory(String path) {
 
         File dir = new File(path);
@@ -63,9 +59,14 @@ public class PreparingEnvironmentUtil {
                                            String fromAssetPath, String toPath) {
         try {
             String[] files = assetManager.list(fromAssetPath);
-            new File(toPath).mkdirs();
+            File path = new File(toPath);
+            if(!path.exists()){
+                path.mkdirs();
+            }
             boolean res = true;
-            for (String file : files)
+            for (String file : files) {
+                if(new File(toPath + "/" + file).exists())
+                    continue;
                 if (file.contains("."))
                     res &= copyAsset(assetManager,
                             fromAssetPath + "/" + file,
@@ -74,6 +75,7 @@ public class PreparingEnvironmentUtil {
                     res &= copyAssetFolder(assetManager,
                             fromAssetPath + "/" + file,
                             toPath + "/" + file);
+            }
             return res;
         } catch (Exception e) {
             e.printStackTrace();

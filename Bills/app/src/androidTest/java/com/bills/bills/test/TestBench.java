@@ -82,12 +82,11 @@ public class TestBench {
         _context = getInstrumentation().getContext();
         _timeMs = System.currentTimeMillis();
         String sourceDirectory;
-        _isRunJustTM = true;
+        _isRunJustTM = false;
         //copy images to internal memory
         //if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
         //{
         //   PreparingEnvironmentUtil.PrepareTesseract(_context);
-        //   PreparingEnvironmentUtil.PrepareImagesForTests(_context);
         //}
         switch(_testToRun)
         {
@@ -106,7 +105,7 @@ public class TestBench {
                 _restaurantsNamesTestFilter = Arrays.asList(/**/"pastaMarket1", "pastaMarket2",
                                                              "iza1",
                                                              "dovrin1", "dovrin2", "dovrin3",
-                                                              "nola1", "nola3", "nola4"/*, "nola5", "nola6"*/);
+                                                              "nola1", "nola3"/*, "nola4", "nola5", "nola6"*/);
                 _billsTestFilter = Arrays.asList(/*ocrBytes3.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);

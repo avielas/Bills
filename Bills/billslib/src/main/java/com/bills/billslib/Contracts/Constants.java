@@ -30,7 +30,6 @@ public final class Constants
     public static final String WARPED_JPG_PHOTO_PATH = IMAGES_PATH + "/warped.jpg";
     public static final String PREPROCESSED_CAPTURED_PHOTO_PATH = IMAGES_PATH + "/preprocessed.jpg";
     public static final String TESSDATA = "tessdata";
-    public static final String BILLS_TO_TEST = "billsToTest";
     public static final String TESSDATA_PATH = STORAGE_DIRECTORY + "/TesseractSample/"+TESSDATA;
     public static final String TESSERACT_SAMPLE_DIRECTORY = STORAGE_DIRECTORY + "/TesseractSample/";
     public static final String TEST_OUTPUT_FILE = TESSERACT_SAMPLE_DIRECTORY + "/TestsOutput.txt";
