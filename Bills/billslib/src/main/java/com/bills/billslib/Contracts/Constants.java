@@ -16,7 +16,7 @@ public final class Constants
      ***/
     public static final String STORAGE_DIRECTORY =
             PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL) ?
-                    "/data/user/0/com.billsplit.billsplit/files" :
+                    "/data/local/tmp" :
                     Environment.getExternalStorageDirectory().toString();
 
     public static final String IMAGES_PATH = STORAGE_DIRECTORY + "/TesseractSample/imgs";

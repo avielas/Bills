@@ -52,7 +52,8 @@ public class PreparingEnvironmentUtil {
         return buildModel.startsWith("sdk")
                 || "google_sdk".equals(buildModel)
                 || buildModel.contains("Emulator")
-                || buildModel.contains("Android SDK");
+                || buildModel.contains("Android SDK")
+                || buildModel.contains("API");
     }
 
     private static boolean copyAssetFolder(AssetManager assetManager,

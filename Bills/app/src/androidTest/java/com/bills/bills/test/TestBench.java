@@ -19,11 +19,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,7 +185,9 @@ public class TestBench {
         }
         Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (accuracyPercentQueue.size()*100)) * 100;
         String formattedAccuracyPercentTestsBench = String.format("%.02f", accuracyPercentTestsBench);
+        String currentDateTime = DateFormat.getDateTimeInstance().format(new Date());
         stream.write(("\nConclusions:").getBytes());
+        stream.write(("\nRun at "+ currentDateTime).getBytes());
         stream.write(("\nAccuracy of tests bench is "+ formattedAccuracyPercentTestsBench +"%").getBytes());
         stream.write(("\nTotally run " + (passedResultsQueue.size() + failedResultsQueue.size()) + " bills").getBytes());
         stream.write(("\n" + passedResultsQueue.size() + " passed").getBytes());

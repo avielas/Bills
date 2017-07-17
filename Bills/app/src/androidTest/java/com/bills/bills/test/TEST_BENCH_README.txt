@@ -4,10 +4,6 @@
 
 INSTRUCTIONS
 
--. BEFORE RUNNING TEST YOU SHOULD COPY billsToTest FOLDER FROM ASSETS OF billsgenerator MODULE TO ASSETS OF
-   CURRENT PROJECT AND ALSO REMOVE THE COMMENTED LINES ON THE BEGINNING OF THE TEST.
-   NOW, THE TEST COPY THE IMAGES TO PHONE/EMULATOR BEFORE RUNNING
-
 -. open adb shell
    *. make sure your emulator is running
    *. open cmd
@@ -34,11 +30,9 @@ INSTRUCTIONS
    *. now rerun the emulator as mentioned before
 
 -. copy files from pc to emulator
-   *. adb push <pc-path> <emulator-path>
-      for example:
-      adb push
-      "C:\Users\avielavr\Desktop\BS\billsplit\app\src\main\assets\tessdata\eng.traineddata"
-      /sdcard/TesseractSample/tessdata
+   *. sudo ./adb shell
+   *. su
+   *. ./adb push ~/Desktop/BS/TesseractSample /data/local/tmp
 
 -. Project Directory
     *. cd /data/data/com.billsplit.billsplit/files/TesseractSample
