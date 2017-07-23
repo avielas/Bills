@@ -1,18 +1,18 @@
 [
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v21/notification_template_icon_group.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/layout-v21/notification_template_icon_group.xml"
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v21/notification_template_custom_big.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout-v21/notification_template_custom_big.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v21/notification_action.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/layout-v21/notification_action.xml"
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v21/notification_action.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout-v21/notification_action.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v21/notification_action_tombstone.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/layout-v21/notification_action_tombstone.xml"
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v21/notification_action_tombstone.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout-v21/notification_action_tombstone.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v21/notification_template_custom_big.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/layout-v21/notification_template_custom_big.xml"
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v21/notification_template_icon_group.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout-v21/notification_template_icon_group.xml"
     }
 ]

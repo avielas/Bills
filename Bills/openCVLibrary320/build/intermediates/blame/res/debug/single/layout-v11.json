@@ -1,26 +1,26 @@
 [
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_media_action.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/layout-v11/notification_media_action.xml"
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_media_cancel_action.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout-v11/notification_media_cancel_action.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_custom.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/layout-v11/notification_template_big_media_custom.xml"
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout-v11/notification_template_big_media.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_narrow_custom.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/layout-v11/notification_template_big_media_narrow_custom.xml"
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_narrow_custom.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout-v11/notification_template_big_media_narrow_custom.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/layout-v11/notification_template_big_media.xml"
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_custom.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout-v11/notification_template_big_media_custom.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_media_cancel_action.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/layout-v11/notification_media_cancel_action.xml"
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_media_action.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout-v11/notification_media_action.xml"
     },
     {
-        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_narrow.xml",
-        "source": "/home/aviel/.android/build-cache/fac19a4574930140bbd019c76028a4f053596b87/output/res/layout-v11/notification_template_big_media_narrow.xml"
+        "merged": "/Users/michaelvalershtein/Projects/BillSplitProject/Bills/openCVLibrary320/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_narrow.xml",
+        "source": "/Users/michaelvalershtein/.android/build-cache/8b6b836142ddce5a60019102bf967a450329c5cf/output/res/layout-v11/notification_template_big_media_narrow.xml"
     }
 ]

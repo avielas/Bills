@@ -117,7 +117,7 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
         Camera.Size size = GetMaxCameraResolution(listSize);
         p.setPictureSize(size.width, size.height);
         /*********** end ***********/
-        p.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
+        p.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
         _camera.setParameters(p);
         _renderThread.start();
     }
