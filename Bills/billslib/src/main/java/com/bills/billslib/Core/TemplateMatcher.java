@@ -184,24 +184,22 @@ public class TemplateMatcher  {
                     itemLocationsRect.add(itemLocation);
 
                     /** the following code save product name as ByteArray for later serialize to BillSummarizer **/
-                    mOCREngine.SetRectangle(itemLocation);
-                    Rect itemsRect = null;
-                    try {
-
-
-                        //TODO crashing here sometimes
-                        List<Rect> textLines =  mOCREngine.GetTextlines();
-                        itemsRect = textLines.get(0);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        continue;
-                    }
-                    int xBegin = itemsRect.left;
-                    int xEnd = itemsRect.right;
-                    int yBegin = itemsRect.top;
-                    int yEnd = itemsRect.bottom;
+//                    mOCREngine.SetRectangle(itemLocation);
+//                    Rect itemsRect = null;
+//                    try {
+//                        //TODO crashing here sometimes
+//                        List<Rect> textLines =  mOCREngine.GetTextlines();
+//                        itemsRect = textLines.get(0);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        continue;
+//                    }
+                    int xBegin = itemLocation.left;
+                    int xEnd = itemLocation.right;
+                    int yBegin = itemLocation.top;
+                    int yEnd = itemLocation.bottom;
                     Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
-
+//                    FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/" + i + "_" + j +".jpg");
                     itemLocationsByteArray.add(bitmap);
                     /****** end ******/
                     break;

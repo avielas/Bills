@@ -939,9 +939,9 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
     @Override
     public void onPause(){
         super.onPause();
-//        if(mAuthListener != null) {
-//            mAuth.removeAuthStateListener(mAuthListener);
-//        }
+        if(mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
 //        //TODO: clear all displayed data
     }
 

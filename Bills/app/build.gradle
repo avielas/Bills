@@ -35,7 +35,7 @@ android {
             // To avoid using legacy multidex, set minSdkVersion to 21 or higher.
             minSdkVersion 16
             versionNameSuffix "-dev"
-            applicationIdSuffix '.dev'
+            applicationIdSuffix ''
         }
 
         prod {
@@ -69,3 +69,4 @@ dependencies {
     compile 'com.google.firebase:firebase-messaging:11.0.1'
 }
 apply plugin: 'com.google.gms.google-services'
+
