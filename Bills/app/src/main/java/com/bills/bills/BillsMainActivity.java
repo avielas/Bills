@@ -159,8 +159,6 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
 
         setContentView(R.layout.activity_bills_main);
 
-//        FirebaseApp.initializeApp(this);
-
         mBillsMainView = (LinearLayout) findViewById(R.id.activity_bills_main);
         mBillSummarizerTotalSum = (TextView)findViewById(R.id.totalSum);
         mBillSummarizerTip = (EditText)findViewById(R.id.tipTextView);
@@ -425,13 +423,11 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
                                 }
 
                                 mCommonLineNumberToQuantityView.get(index).setText("0");
-                                mBillSummarizerCommonItemsLayout.removeView(mCommonLineNumToLineView.get(index));
+                                mCommonLineNumToLineView.get(index).setVisibility(GONE);
                                 return;
                             }else{
-                                Integer oldQuantity = Integer.parseInt(mCommonLineNumberToQuantityView.get(index).getText().toString());
-                                if(oldQuantity == 0){
-                                    mBillSummarizerCommonItemsLayout.addView(mCommonLineNumToLineView.get(index));
-                                }
+
+                                mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                                 mCommonLineNumberToQuantityView.get(index).setText(""+newQuantity);
                                 mCommonLineToQuantityMapper.put(index, newQuantity);
                             }
