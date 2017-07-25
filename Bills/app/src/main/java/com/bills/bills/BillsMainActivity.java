@@ -423,14 +423,11 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
                                 }
 
                                 mCommonLineNumberToQuantityView.get(index).setText("0");
-                                mBillSummarizerCommonItemsLayout.removeView(mCommonLineNumToLineView.get(index));
                                 mCommonLineNumToLineView.get(index).setVisibility(GONE);
                                 return;
                             }else{
-                                Integer oldQuantity = Integer.parseInt(mCommonLineNumberToQuantityView.get(index).getText().toString());
-                                if(oldQuantity == 0){
-                                    mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                                }
+
+                                mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                                 mCommonLineNumberToQuantityView.get(index).setText(""+newQuantity);
                                 mCommonLineToQuantityMapper.put(index, newQuantity);
                             }
