@@ -486,10 +486,9 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
 
                     mutableData.child(mUid).setValue(value);
                 } else {
-                    for (MutableData childMutableData : mutableData.getChildren()) {
-                        passCodes.put(childMutableData.getKey(), childMutableData.getValue(Integer.class));
-                    }
-
+                        for (MutableData childMutableData : mutableData.getChildren()) {
+                            passCodes.put(childMutableData.getKey(), (Integer)((HashMap<String, Object>)childMutableData.getValue()).get(mPassCodeDbKey));
+                        }
                     //find an unused pass code
                     for (int i = 0; i < 10000; i++) {
                         if (!passCodes.containsValue(i)) {
