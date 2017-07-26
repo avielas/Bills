@@ -854,13 +854,20 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
                 Integer index = Integer.parseInt(dataSnapshot.getKey());
                 Integer newQuantity = dataSnapshot.getValue(Integer.class);
 
-                //Add one to common items
-                if(newQuantity > mCommonLineToQuantityMapper.get(index)){
+                if(newQuantity <= 0){
+                    //nothing to update at common items view
+                    if(!mCommonLineNumToLineView.containsKey(index)){
+                        return;
+                    }
 
-                }
-                //remove one from common items
-                else if(newQuantity < mCommonLineToQuantityMapper.get(index)){
+                    mCommonLineNumberToQuantityView.get(index).setText("0");
+                    mCommonLineNumToLineView.get(index).setVisibility(GONE);
+                    return;
+                }else{
 
+                    mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
+                    mCommonLineNumberToQuantityView.get(index).setText(""+newQuantity);
+                    mCommonLineToQuantityMapper.put(index, newQuantity);
                 }
             }
 
@@ -920,10 +927,6 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
             case REQUEST_CAMERA_PERMISSION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     StartPassCodeResolver();
-
-//                    StartCameraActivity();
-//                    StartSummarizerView();
-
                 }
             }
         }
