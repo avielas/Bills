@@ -838,7 +838,7 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
             i++;
         }
 
-        mBillsPerUserStorageReference.child(mBillRelativePath + "/bytesImage").putBytes(image);
+        mBillsPerUserStorageReference.child(mBillRelativePath + "/ocrBytes").putBytes(image);
 
         mUsersDatabaseReference.updateChildren(dbItems);
 
