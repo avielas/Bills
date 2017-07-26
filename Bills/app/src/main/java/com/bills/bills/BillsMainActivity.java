@@ -838,6 +838,8 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
             i++;
         }
 
+        mBillsPerUserStorageReference.child(mBillRelativePath + "/bytesImage").putBytes(image);
+
         mUsersDatabaseReference.updateChildren(dbItems);
 
         TextView passCodeTextView = (TextView) findViewById(R.id.passCode);
