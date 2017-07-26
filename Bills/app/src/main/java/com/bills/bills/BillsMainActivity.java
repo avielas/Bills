@@ -1,5 +1,6 @@
 package com.bills.bills;
 
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -157,6 +158,8 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         setContentView(R.layout.activity_bills_main);
 
         mBillsMainView = (LinearLayout) findViewById(R.id.activity_bills_main);
@@ -278,7 +281,7 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
         }
 
         mStartCameraButton = new Button(this);
-        mStartCameraButton.setText("Start Camera");
+        mStartCameraButton.setText("Start \n Camera");
         mStartCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -295,7 +298,7 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
         mBillsMainView.addView(mStartCameraButton);
 
         mCheckPassCodeButton = new Button(this);
-        mCheckPassCodeButton.setText("Check Pass Code");
+        mCheckPassCodeButton.setText("Check \n Pass \n Code");
         mCheckPassCodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
