@@ -39,6 +39,7 @@ import com.bills.billslib.CustomViews.ItemView;
 import com.bills.billslib.CustomViews.NameView;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -636,6 +637,9 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
 
 //        StartSummarizerView();
 //        return;
+        //upload the raw image to Storage
+        mBillsPerUserStorageReference.child(mBillRelativePath + "/ocrBytes").putBytes(image);
+
         mBillsMainView.removeView(mCameraCaptureButton);
         mBillsMainView.removeView(mCameraPreviewView);
         mBillsMainView.removeView(mCameraPreviewLayout);
@@ -837,8 +841,6 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
 
             i++;
         }
-
-        mBillsPerUserStorageReference.child(mBillRelativePath + "/ocrBytes").putBytes(image);
 
         mUsersDatabaseReference.updateChildren(dbItems);
 
