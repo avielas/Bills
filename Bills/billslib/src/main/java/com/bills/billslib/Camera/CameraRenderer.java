@@ -268,7 +268,12 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
     }
 
     public void takePicture() {
-        _camera.takePicture(null, null, mPicture);
+        _camera.autoFocus(new Camera.AutoFocusCallback() {
+            @Override
+            public void onAutoFocus(boolean b, Camera camera) {
+                _camera.takePicture(null, null, mPicture);
+            }
+        });
     }
 
     Camera.PictureCallback mPicture = new Camera.PictureCallback() {
