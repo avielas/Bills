@@ -32,9 +32,11 @@ import com.bills.billslib.CustomViews.DragRectView;
 import org.opencv.core.Point;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class CameraActivity extends AppCompatActivity implements IOnCameraFinished, View.OnClickListener{
-    public static final String BILLS_CROPPED_PHOTO_EXTRA_NAME = "imagePathToSave";
     private static final int REQUEST_CAMERA_PERMISSION = 101;
     private Bitmap mOriginalImage;
     private CameraRenderer _renderer;
@@ -136,7 +138,11 @@ public class CameraActivity extends AppCompatActivity implements IOnCameraFinish
 
     @Override
     public void OnCameraFinished(byte[] image){
-        FilesHandler.SaveToTXTFile(image, Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
+        DateFormat sdf = new SimpleDateFormat("yyyy_MM_dd___HH_mm_ss");
+        Date date = new Date();
+        String now = sdf.format(date);
+        String fileFullName = Constants.IMAGES_PATH + "/ocrBytes_" + now + ".txt";
+        FilesHandler.SaveToTXTFile(image, fileFullName);
         mOriginalImage = FilesHandler.ByteArrayToBitmap(image);
         mOriginalImage = FilesHandler.Rotating(mOriginalImage);
         FilesHandler.SaveToJPGFile(mOriginalImage, Constants.CAMERA_CAPTURED_JPG_PHOTO_PATH);

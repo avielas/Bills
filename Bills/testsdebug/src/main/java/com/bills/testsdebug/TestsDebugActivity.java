@@ -43,8 +43,6 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -164,16 +162,8 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             _rgba = new Mat();
             _gray = new Mat();
 
-            File f = new File(Constants.IMAGES_PATH);
-            File[] listFiles = f.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    String fileName = file.getName();
-                    return fileName.startsWith("ocrBytes") && fileName.endsWith(".txt");
-                }
-            });
-
-            Mat warpedBillMat = FilesHandler.GetWarpedBillMat(listFiles[0].getPath());
+            String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
+            Mat warpedBillMat = FilesHandler.GetWarpedBillMat(lastCapturedBillPath);
             _warpedBill = Bitmap.createBitmap(warpedBillMat.width(), warpedBillMat.height(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(warpedBillMat, _warpedBill);
             _billWithPrintedRedLines = _warpedBill.copy(_warpedBill.getConfig(), true);
@@ -539,9 +529,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
 
     private void RunBillsMainFlow(int requestCode) {
         try {
-            String imagePathToSave = Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH;
             Intent intent = new Intent(getBaseContext(), CameraActivity.class);
-            intent.putExtra(CameraActivity.BILLS_CROPPED_PHOTO_EXTRA_NAME, imagePathToSave);
             if (intent.resolveActivity(getPackageManager()) != null) {
                 startActivityForResult(intent, requestCode);
             }
@@ -587,7 +575,8 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             case RESULT_OK:
                 _warpedBill.recycle();
                 try {
-                    _warpedBill = FilesHandler.GetRotatedBill(Constants.CAMERA_CAPTURED_TXT_PHOTO_PATH);
+                    String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
+                    _warpedBill = FilesHandler.GetRotatedBill(lastCapturedBillPath);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

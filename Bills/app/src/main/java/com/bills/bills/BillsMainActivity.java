@@ -37,6 +37,7 @@ import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.ItemView;
 import com.bills.billslib.CustomViews.NameView;
+import com.bills.billslib.Utilities.FilesHandler;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
@@ -141,6 +142,7 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
     private final String mRelativePathDbKey = "RelativeDbPath";
     private final String mPassCodeDbKey = "PassCode";
 
+    private String mNow;
     private String mBillRelativePath;
 
     private Hashtable<Integer, String> mPasCodeToUsersDbPathMapper = new Hashtable<>();
@@ -477,9 +479,9 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
                     HashMap<String, Object> value = (HashMap<String, Object>)mutableData.child(mUid).getValue();
                     DateFormat sdf = new SimpleDateFormat("yyyy_MM_dd___HH_mm_ss");
                     Date date = new Date();
-                    String now = sdf.format(date);
+                    mNow = sdf.format(date);
 
-                    mBillRelativePath = mUid + "/" + now;
+                    mBillRelativePath = mUid + "/" + mNow;
                     value.put(mRelativePathDbKey, mBillRelativePath);
 
                     newPassCode.set(((Long)(value.get(mPassCodeDbKey))).intValue());
@@ -492,12 +494,7 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
                     //find an unused pass code
                     for (int i = 0; i < 10000; i++) {
                         if (!passCodes.containsValue(i)) {
-                            DateFormat sdf = new SimpleDateFormat("yyyy_MM_dd___HH_mm_ss");
-                            Date date = new Date();
-                            String now = sdf.format(date);
-
-                            mBillRelativePath = mUid + "/" + now;
-
+                            mBillRelativePath = mUid + "/" + mNow;
                             Map<String, Object> userIdsValue = new HashMap<>();
                             userIdsValue.put(mPassCodeDbKey, i);
                             userIdsValue.put(mRelativePathDbKey, mBillRelativePath);
@@ -634,11 +631,12 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
 
     @Override
     public void OnCameraFinished(byte[] image) {
-
+        String fileFullName = Constants.IMAGES_PATH + "/ocrBytes_" + mNow + ".txt";
+        FilesHandler.SaveToTXTFile(image, fileFullName);
 //        StartSummarizerView();
 //        return;
         //upload the raw image to Storage
-        mBillsPerUserStorageReference.child(mBillRelativePath + "/ocrBytes").putBytes(image);
+        mBillsPerUserStorageReference.child(mBillRelativePath + "/ocr.jpg").putBytes(image);
 
         mBillsMainView.removeView(mCameraCaptureButton);
         mBillsMainView.removeView(mCameraPreviewView);

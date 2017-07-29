@@ -21,6 +21,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -30,7 +31,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 
@@ -75,9 +81,9 @@ public class FilesHandler {
         }
     }
 
-    public static boolean SaveToTXTFile(byte[] image, String path){
+    public static boolean SaveToTXTFile(byte[] image, String fileFullName){
         try {
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path));
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(fileFullName));
             bos.write(image);
             bos.flush();
             bos.close();
@@ -237,5 +243,31 @@ public class FilesHandler {
             e.printStackTrace();
         }
         System.setOut(printStreamToFile);
+    }
+
+    public static String GetLastCapturedBillPath() {
+        File f = new File(Constants.IMAGES_PATH);
+        File[] listFiles = f.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                String fileName = file.getName();
+                return fileName.startsWith("ocrBytes") && fileName.endsWith(".txt");
+            }
+        });
+
+        //sorting to take the last capture which took by Bills app
+        Arrays.sort( listFiles, new Comparator()
+        {
+            public int compare(Object o1, Object o2) {
+                if (((File)o1).lastModified() > ((File)o2).lastModified()) {
+                    return -1;
+                } else if (((File)o1).lastModified() < ((File)o2).lastModified()) {
+                    return +1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+        return listFiles[0].getPath();
     }
 }
