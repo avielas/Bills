@@ -13,86 +13,12 @@
     tools:context="com.bills.bills.BillsMainActivity"
     android:orientation="horizontal">
 
-    <LinearLayout
-        android:id="@+id/summarizerContainerView"
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:visibility="visible">
 
-        <LinearLayout
-            android:layout_width="85dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:weightSum="1">
-
-            <TextView
-                android:id="@+id/passCode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.04"
-                android:ems="10"
-                tools:text="PassCode" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.95" />
-
-            <EditText
-                android:id="@+id/tipTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="numberDecimal" />
-
-        </LinearLayout>
-
-        <ScrollView
-            android:layout_width="117dp"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:id="@+id/commonBillView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:weightSum="1">
-
-            </LinearLayout>
-        </ScrollView>
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.07">
-
-            <LinearLayout
-                android:id="@+id/myBillViewView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:weightSum="1">
-
-                <EditText
-                    android:id="@+id/totalSum"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.07"
-                    android:autoText="false"
-                    android:contextClickable="false"
-                    android:cursorVisible="false"
-                    android:editable="false"
-                    android:ems="10"
-                    android:inputType="none"
-                    android:text=""
-                    android:textIsSelectable="false"
-                    android:textSize="13dp"
-                    tools:autoText="false" />
-
-            </LinearLayout>
-        </ScrollView>
-
-    </LinearLayout>
-
+    </FrameLayout>
 </LinearLayout>
 

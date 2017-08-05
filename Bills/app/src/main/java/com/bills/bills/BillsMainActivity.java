@@ -1,132 +1,58 @@
 package com.bills.bills;
 
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.TextWatcher;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.TextureView;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bills.billslib.Camera.CameraRenderer;
-import com.bills.billslib.Camera.IOnCameraFinished;
-import com.bills.billslib.Contracts.Constants;
-import com.bills.billslib.Contracts.Enums.Language;
-import com.bills.billslib.Contracts.Interfaces.IOcrEngine;
-import com.bills.billslib.Core.BillAreaDetector;
-import com.bills.billslib.Core.ImageProcessingLib;
+import com.bills.bills.firebase.FirebaseUploader;
+import com.bills.bills.firebase.PassCodeResolver;
+import com.bills.bills.fragments.BillSummarizerFragment;
+import com.bills.bills.fragments.CameraFragment;
+import com.bills.bills.fragments.WelcomeScreenFragment;
+import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Core.MainActivityBase;
+<<<<<<< Updated upstream
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.ItemView;
 import com.bills.billslib.CustomViews.NameView;
 import com.bills.billslib.Utilities.FilesHandler;
+=======
+>>>>>>> Stashed changes
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
-
-import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 
-import static android.view.View.GONE;
+public class BillsMainActivity extends MainActivityBase implements
+        WelcomeScreenFragment.OnFragmentInteractionListener,
+        BillSummarizerFragment.OnFragmentInteractionListener,
+        CameraFragment.OnFragmentInteractionListener{
 
-public class BillsMainActivity extends MainActivityBase implements IOnCameraFinished, View.OnClickListener {
     private String Tag = this.getClass().getSimpleName();
     private static final int RC_SIGN_IN = 123;
     private static final int REQUEST_CAMERA_PERMISSION = 101;
 
-    private boolean mCameraViewEnabled = false;
+    private String mUid;
 
-    private ConcurrentHashMap<Integer, Integer> mCommonLineToQuantityMapper = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Integer, LinearLayout> mCommonLineNumToLineView = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Integer, TextView> mCommonLineNumberToQuantityView = new ConcurrentHashMap<>();
-
-    private ConcurrentHashMap<Integer, Integer> mMyLineToQuantityMapper = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Integer, LinearLayout> mMyLineNumToLineView = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Integer, TextView> mMyLineNumberToQuantityView = new ConcurrentHashMap<>();
-
-    private HashMap<Integer, Double> mLineNumToPriceMapper = new HashMap<>();
-    private Double mMyTotalSum = 0.0;
-
-    //Camera Elements
-    private RelativeLayout mCameraPreviewLayout = null;
-    private TextureView mCameraPreviewView = null;
-    private Button mCameraCaptureButton = null;
-
-    //Summarizer Elements
-    private LinearLayout mBillSummarizerContainerView = null;
-    private EditText mBillSummarizerTip = null;
-    private LinearLayout mBillSummarizerCommonItemsLayout = null;
-    private LinearLayout mBillSummarizerMyItemsLayout = null;
-    private TextView mBillSummarizerTotalSum = null;
-
-    //Main bills layout
-    private LinearLayout mBillsMainView;
-
-    //PassCode resolver elements
-    private Button mStartCameraButton = null;
-    private Button mCheckPassCodeButton = null;
-    private EditText mPassCodeTextBox = null;
-
-    //Camera Renderer
-    private CameraRenderer mRenderer;
-
-    private double mTip = 10;
-
-    private IOcrEngine mOcrEngine;
-
-    //Firebase members
+    //Fragments
+    private BillSummarizerFragment mBillSummarizerFragment;
+    private WelcomeScreenFragment mWelcomeFragment;
+    private CameraFragment mCameraFragment;
+    private Fragment mCurrentFragment;
 
     //Firebase Authentication members
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+<<<<<<< Updated upstream
     //Firebase Database members
     private FirebaseDatabase mFirebaseDataBase;
     private DatabaseReference mUsersDatabaseReference;
@@ -156,42 +82,22 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
     final AtomicBoolean newPassCodeRetrieved = new AtomicBoolean(false);
     final ConcurrentHashMap<String, Integer> passCodes = new ConcurrentHashMap<>();
 
+=======
+    private PassCodeResolver mPassCodeResolver;
+>>>>>>> Stashed changes
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_bills_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        setContentView(R.layout.activity_bills_main);
-
-        mBillsMainView = (LinearLayout) findViewById(R.id.activity_bills_main);
-        mBillSummarizerTotalSum = (TextView)findViewById(R.id.totalSum);
-        mBillSummarizerTip = (EditText)findViewById(R.id.tipTextView);
-        mBillSummarizerCommonItemsLayout = (LinearLayout)findViewById(R.id.commonBillView);
-        mBillSummarizerMyItemsLayout = (LinearLayout)findViewById(R.id.myBillViewView);
-        mBillSummarizerContainerView = (LinearLayout)findViewById(R.id.summarizerContainerView);
-
-        mBillSummarizerTotalSum.setVisibility(GONE);
-        mBillSummarizerTip.setVisibility(GONE);
-        mBillSummarizerCommonItemsLayout.setVisibility(GONE);
-        mBillSummarizerMyItemsLayout.setVisibility(GONE);
-        mBillSummarizerContainerView.setVisibility(GONE);
-
-        mRenderer = new CameraRenderer(this);
-        mRenderer.SetOnCameraFinishedListener(this);
-
-        if(mOcrEngine == null){
-            try {
-                mOcrEngine = new TesseractOCREngine();
-                mOcrEngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
-            }catch (Exception ex){
-                TextView textView = new TextView(this);
-                textView.setText("Failed to initialize " + mOcrEngine.getClass().getSimpleName() + ". Error: " + ex.getMessage());
-                mBillsMainView.addView(textView);
-                return;
-            }
-        }
+        mBillSummarizerFragment = new BillSummarizerFragment();
+        mWelcomeFragment = new WelcomeScreenFragment();
+        mCameraFragment = new CameraFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, mWelcomeFragment).commit();
+        mCurrentFragment = mWelcomeFragment;
 
         //Firebase Authentication initialization
         mAuth = FirebaseAuth.getInstance();
@@ -202,7 +108,8 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
                 if(user != null){
                     //user is signed in
                     mUid = user.getUid();
-                    StartPassCodeResolver();
+                    mPassCodeResolver = new PassCodeResolver(mUid);
+
                     Toast.makeText(BillsMainActivity.this, "You are now signed in. Welcome", Toast.LENGTH_LONG).show();
                 }else{
                     //user is signed out
@@ -219,257 +126,10 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
                 }
             }
         };
-
-        //Firebase init DB and Storage
-        mFirebaseDataBase = FirebaseDatabase.getInstance();
-
-        mUserIdsDatabaseReference = mFirebaseDataBase.getReference().child("userIds/");
-        //Add listener to populate userIds from DB. this is useful for all BillConsumer users(not taking the bill photo)
-        mUserIdsDatabaseReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Integer passCode = 0;
-                String usersDbPath;
-                try{
-                    HashMap<String, Object> value = ((HashMap<String, Object>)dataSnapshot.getValue());
-                    passCode = ((Long)value.get(mPassCodeDbKey)).intValue();
-                    usersDbPath = (String)value.get(mRelativePathDbKey);
-                }catch (Exception ex){
-                    return;
-                }
-                mPasCodeToUsersDbPathMapper.put(passCode, usersDbPath);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Integer passCode = 0;
-                try{
-                    passCode = dataSnapshot.getValue(Integer.class);
-                }catch (Exception ex){
-                    return;
-                }
-
-                mPasCodeToUsersDbPathMapper.put(passCode, dataSnapshot.getKey());
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                try {
-                    mPasCodeToUsersDbPathMapper.remove(dataSnapshot.getValue(Integer.class));
-                }catch (Exception ex){
-                    return;
-                }
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-
-        mFirebaseStorage = FirebaseStorage.getInstance();
-        mBillsPerUserStorageReference = mFirebaseStorage.getReference().child("BillsPerUser");
-
+        StartWelcomeScreen();
     }
 
-    private void StartPassCodeResolver() {
-
-        if(mCameraViewEnabled) {
-            mBillsMainView.addView(mStartCameraButton);
-            mBillsMainView.addView(mCheckPassCodeButton);
-            mBillsMainView.addView(mPassCodeTextBox);
-            mCameraViewEnabled = false;
-            return;
-        }
-
-        mStartCameraButton = new Button(this);
-        mStartCameraButton.setText("Start \n Camera");
-        mStartCameraButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBillsMainView.removeView(mStartCameraButton);
-                mBillsMainView.removeView(mCheckPassCodeButton);
-                mBillsMainView.removeView(mPassCodeTextBox);
-
-                ResolvePassCode();
-
-                StartCameraActivity();
-            }
-        });
-
-        mBillsMainView.addView(mStartCameraButton);
-
-        mCheckPassCodeButton = new Button(this);
-        mCheckPassCodeButton.setText("Check \n Pass \n Code");
-        mCheckPassCodeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Integer passCode;
-                try{
-                    passCode = Integer.parseInt(mPassCodeTextBox.getText().toString());
-                }catch(Exception ex){
-                    Toast.makeText(BillsMainActivity.this, "Invalid Pass Code", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if(mPasCodeToUsersDbPathMapper.containsKey(passCode)){
-                    mBillsMainView.removeView(mStartCameraButton);
-                    mBillsMainView.removeView(mCheckPassCodeButton);
-                    mBillsMainView.removeView(mPassCodeTextBox);
-
-                    mUsersDatabaseReference = mFirebaseDataBase.getReference().child("users").child(mPasCodeToUsersDbPathMapper.get(passCode));
-
-                    AddBillSummarizerView();
-
-                    mUsersDatabaseReference.addChildEventListener(new ChildEventListener() {
-                        @Override
-                        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                            final Integer rowIndex = Integer.parseInt(dataSnapshot.getKey());
-
-                            final StorageReference curLineStorageReference = mBillsPerUserStorageReference.child(mPasCodeToUsersDbPathMapper.get(passCode)).child(Integer.toString(rowIndex));
-
-                            curLineStorageReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-                                @Override
-                                public void onSuccess(StorageMetadata storageMetadata) {
-
-                                    final long ONE_MEGABYTE = 1024 * 1024;
-                                    final String rowPrice;
-                                    final String rowQuantity;
-                                    final Integer itemHeight;
-                                    final Integer itemWidth;
-                                    try {
-                                        rowPrice = storageMetadata.getCustomMetadata(Price);
-                                        rowQuantity = storageMetadata.getCustomMetadata(Quantity);
-                                        itemHeight = Integer.parseInt(storageMetadata.getCustomMetadata(ImageHeight));
-                                        itemWidth = Integer.parseInt(storageMetadata.getCustomMetadata(ImageWidth));
-                                    }catch (Exception e){
-                                        Log.d("","");
-                                        return;
-                                    }
-                                    curLineStorageReference.getBytes(3 * ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                        @Override
-                                        public void onSuccess(byte[] bytes) {
-                                            LinearLayout commonItemRow = new LinearLayout(BillsMainActivity.this);
-                                            commonItemRow.setOrientation(LinearLayout.VERTICAL);
-
-                                            LinearLayout myItemRow = new LinearLayout(BillsMainActivity.this);
-                                            myItemRow.setOrientation(LinearLayout.VERTICAL);
-
-                                            TextView commonPrice = new TextView(BillsMainActivity.this);
-                                            commonPrice.setText("" + rowPrice);
-                                            commonItemRow.addView(commonPrice);
-
-                                            TextView myPrice = new TextView(BillsMainActivity.this);
-                                            myPrice.setText("" + rowPrice);
-                                            myItemRow.addView(myPrice);
-
-                                            TextView commonQuantityView = new TextView(BillsMainActivity.this);
-                                            commonQuantityView.setText("" + rowQuantity);
-                                            commonItemRow.addView(commonQuantityView);
-
-                                            TextView myQuantityView = new TextView(BillsMainActivity.this);
-                                            myQuantityView.setText("0");
-                                            myItemRow.addView(myQuantityView);
-
-                                            ByteBuffer buffer = ByteBuffer.wrap(bytes);
-                                            Bitmap commonItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
-                                            commonItemBitmap.copyPixelsFromBuffer(buffer);
-
-                                            buffer = ByteBuffer.wrap(bytes);
-                                            Bitmap myItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
-                                            myItemBitmap.copyPixelsFromBuffer(buffer);
-
-                                            ImageView commonImageView = new ImageView(BillsMainActivity.this);
-                                            commonImageView.setImageBitmap(commonItemBitmap);
-                                            commonItemRow.addView(commonImageView);
-
-                                            ImageView myImageView = new ImageView(BillsMainActivity.this);
-                                            myImageView.setImageBitmap(myItemBitmap);
-                                            myItemRow.addView(myImageView);
-
-                                            LinearLayout commonItemsView = (LinearLayout) findViewById(R.id.commonBillView);
-                                            commonItemsView.addView(commonItemRow);
-
-                                            LinearLayout myItemsView = (LinearLayout) findViewById(R.id.myBillViewView);
-                                            myItemsView.addView(myItemRow);
-                                            myItemRow.setVisibility(GONE);
-
-                                            Integer rowIndexParsed = rowIndex;
-                                            Integer rowQuantityPrsed = Integer.parseInt(rowQuantity);
-                                            Double rowPriceParsed = Double.parseDouble(rowPrice);
-                                            mLineNumToPriceMapper.put(rowIndex, rowPriceParsed);
-
-                                            commonItemRow.setOnClickListener(BillsMainActivity.this);
-
-                                            mCommonLineToQuantityMapper.put(rowIndexParsed, rowQuantityPrsed);
-                                            mCommonLineNumToLineView.put(rowIndexParsed, commonItemRow);
-                                            mCommonLineNumberToQuantityView.put(rowIndexParsed, commonQuantityView);
-
-                                            myItemRow.setOnClickListener(BillsMainActivity.this);
-
-                                            mMyLineToQuantityMapper.put(rowIndexParsed, 0);
-                                            mMyLineNumToLineView.put(rowIndexParsed, myItemRow);
-                                            mMyLineNumberToQuantityView.put(rowIndexParsed, myQuantityView);
-                                        }
-                                    });
-                                }
-                            });
-
-                        }
-
-                        @Override
-                        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                            Integer index = Integer.parseInt(dataSnapshot.getKey());
-                            Integer newQuantity = dataSnapshot.getValue(Integer.class);
-
-                            if(newQuantity <= 0){
-                                //nothing to update at common items view
-                                if(!mCommonLineNumToLineView.containsKey(index)){
-                                    return;
-                                }
-
-                                mCommonLineNumberToQuantityView.get(index).setText("0");
-                                mCommonLineNumToLineView.get(index).setVisibility(GONE);
-                                return;
-                            }else{
-
-                                mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                                mCommonLineNumberToQuantityView.get(index).setText(""+newQuantity);
-                                mCommonLineToQuantityMapper.put(index, newQuantity);
-                            }
-                        }
-
-                        @Override
-                        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                        }
-
-                        @Override
-                        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-
-                }else{
-                    Toast.makeText(BillsMainActivity.this, "Pass code not found, Try again", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        mBillsMainView.addView(mCheckPassCodeButton);
-
-        mPassCodeTextBox = new EditText(this);
-        mPassCodeTextBox.setInputType(InputType.TYPE_CLASS_NUMBER);
-        mPassCodeTextBox.setHint("Enter pass code");
-
-        mBillsMainView.addView(mPassCodeTextBox);
-    }
-
+<<<<<<< Updated upstream
     private void ResolvePassCode() {
         //Generate unique PassCode and DB path
         mUserIdsDatabaseReference.runTransaction(new Transaction.Handler() {
@@ -521,115 +181,52 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
                 newPassCodeRetrieved.set(true);
             }
         });
+=======
+    public void onResume(){
+        super.onResume();
+        mAuth.addAuthStateListener(mAuthListener);
+>>>>>>> Stashed changes
     }
 
-    private void StartSummarizerView() {
-        AddBillSummarizerView();
-
-
-        int numOfEntries = 5;
-        int color = Color.WHITE;
-        Bitmap[] Items = CreateItems(numOfEntries);
-        Double[] prices = {12.3, 34.0, 50.0, 45.0, 55.0};
-        for(int i = 0; i < numOfEntries; i++){
-            ItemView itemView = new ItemView(this, prices[i], Items[i]);
-            itemView.SetItemBackgroundColor(color);
-            itemView.setOnClickListener(this);
-            mBillSummarizerCommonItemsLayout.addView(itemView, i);
-            mMyTotalSum +=prices[i];
+    @Override
+    public void onPause(){
+        super.onPause();
+        if(mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
         }
-
-        NameView nameView = new NameView(this, "Aviel", 10);
-        nameView.setBackgroundColor(Color.RED);
-        nameView.setOnClickListener(this);
-        mBillSummarizerMyItemsLayout.addView(nameView);
-        nameView = new NameView(this, "Mike", 10);
-        nameView.setBackgroundColor(Color.BLUE);
-        nameView.setOnClickListener(this);
-        mBillSummarizerMyItemsLayout.addView(nameView);
-
-
+//        //TODO: clear all displayed data
     }
 
-    private Bitmap[] CreateItems(int numOfEntries) {
-        Bitmap[] res = new Bitmap[numOfEntries];
-
-        for (int i = 0; i < numOfEntries; i++){
-            res[i] = CreateItemBitmap(i);
-        }
-        return res;
-    }
-
-    private Bitmap CreateItemBitmap(int i) {
-        int width = 50;
-        int height = 30;
-
-        Paint paint = new Paint();
-        paint.setColor(Color.BLACK);
-
-        // The gesture threshold expressed in dip
-        float GESTURE_THRESHOLD_DIP = 12.0f;
-
-        final float scale = getResources().getDisplayMetrics().density;
-        int gestureThreshold = (int) (GESTURE_THRESHOLD_DIP * scale + 0.5f);
-
-        paint.setTextSize(gestureThreshold);
-        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-        Bitmap res = Bitmap.createBitmap((int) (width * scale + 0.5f),(int) (height * scale + 0.5f), conf);
-
-        Canvas canvas = new Canvas(res);
-
-        canvas.drawText("" + i + i + i, 30, 30, paint);
-
-        return res;
-    }
-
-    private void StartCameraActivity() {
-        try {
-            mCameraViewEnabled = true;
-            mCameraPreviewLayout = new RelativeLayout(this);
-            mBillsMainView.addView(mCameraPreviewLayout);
-
-            mCameraPreviewView = new TextureView(this);
-            mCameraPreviewView.setSurfaceTextureListener(mRenderer);
-            mCameraPreviewView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            //mRenderer.set_selectedFilter(R.id.filter0);
-                            mRenderer.setAutoFocus();
-                            break;
-                    }
-                    return true;
-                }
-            });
-            mCameraPreviewView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                    mRenderer.onSurfaceTextureSizeChanged(null, v.getWidth(), v.getHeight());
-                }
-            });
-
-            mCameraPreviewLayout.addView(mCameraPreviewView);
-
-            mCameraCaptureButton = new Button(this);
-            mCameraCaptureButton.setText("Capture");
-            mCameraCaptureButton.setOnClickListener(this);
-
-            RelativeLayout.LayoutParams buttonLayoutParameters = new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.WRAP_CONTENT,
-                    RelativeLayout.LayoutParams.WRAP_CONTENT);
-            buttonLayoutParameters.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            buttonLayoutParameters.addRule(RelativeLayout.CENTER_HORIZONTAL);
-
-            mCameraPreviewLayout.addView(mCameraCaptureButton, buttonLayoutParameters);
-        } catch (Exception e) {
-            Log.e(Tag, e.getMessage());
+    @Override
+    public void onBackPressed(){
+        if(mCurrentFragment == mCameraFragment || mCurrentFragment == mBillSummarizerFragment){
+            StartWelcomeScreen();
+        }else{
+            super.onBackPressed();
         }
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString("WORKAROUND_FOR_BUG_19917_KEY", "WORKAROUND_FOR_BUG_19917_VALUE");
+        super.onSaveInstanceState(outState);
+    }
+
+    public void StartWelcomeScreen() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack so the user can navigate back
+        transaction.replace(R.id.fragment_container, mWelcomeFragment);
+        transaction.addToBackStack(null);
+
+        // Commit the transaction
+        transaction.commit();
+        mCurrentFragment = mWelcomeFragment;
+    }
+
+    @Override
+<<<<<<< Updated upstream
     public void OnCameraFinished(byte[] image) {
         String fileFullName = Constants.IMAGES_PATH + "/ocrBytes_" + mNow + ".txt";
         FilesHandler.SaveToTXTFile(image, fileFullName);
@@ -834,211 +431,103 @@ public class BillsMainActivity extends MainActivityBase implements IOnCameraFini
                     mMyLineNumberToQuantityView.put(rowIndex, myQuantityView);
                 }
             });
+=======
+    public void StartCameraFragment() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+>>>>>>> Stashed changes
 
-            dbItems.put(itemIndex, row[1].intValue());
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack so the user can navigate back
+        transaction.replace(R.id.fragment_container, mCameraFragment);
+        transaction.addToBackStack(null);
 
-            i++;
-        }
-
-        mUsersDatabaseReference.updateChildren(dbItems);
-
-        TextView passCodeTextView = (TextView) findViewById(R.id.passCode);
-        passCodeTextView.setText(""+newPassCode.get());
-
-        AddBillSummarizerView();
-
-        mUsersDatabaseReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {}
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Integer index = Integer.parseInt(dataSnapshot.getKey());
-                Integer newQuantity = dataSnapshot.getValue(Integer.class);
-
-                if(newQuantity <= 0){
-                    //nothing to update at common items view
-                    if(!mCommonLineNumToLineView.containsKey(index)){
-                        return;
-                    }
-
-                    mCommonLineNumberToQuantityView.get(index).setText("0");
-                    mCommonLineNumToLineView.get(index).setVisibility(GONE);
-                    return;
-                }else{
-
-                    mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                    mCommonLineNumberToQuantityView.get(index).setText(""+newQuantity);
-                    mCommonLineToQuantityMapper.put(index, newQuantity);
-                }
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
+        // Commit the transaction
+        transaction.commit();
+        mCurrentFragment = mCameraFragment;
     }
 
-    private void AddBillSummarizerView() {
-        mBillSummarizerContainerView.setVisibility(View.VISIBLE);
-        mBillSummarizerTip.setVisibility(View.VISIBLE);
-        mBillSummarizerCommonItemsLayout.setVisibility(View.VISIBLE);
-        mBillSummarizerMyItemsLayout.setVisibility(View.VISIBLE);
-        mBillSummarizerTotalSum.setVisibility(View.VISIBLE);
+    @Override
+    public void StartSummarizerFragment(int passCode) {
 
-        mBillSummarizerTip.setClickable(true);
-        mBillSummarizerTip.addTextChangedListener(new TextWatcher() {
-            private String curTip = "10";
-            public void afterTextChanged(Editable s) {
-                if(s.toString().equalsIgnoreCase("")) {
-                    mTip = 0;
-                }else {
-                    int newTip = Integer.parseInt(s.toString());
-                    if (newTip < 0 || newTip > 100) {
-                        mBillSummarizerTip.setText(curTip);
-                    } else {
-                        curTip = s.toString();
-                        mTip = (1.0*newTip)/100;
+        mPassCodeResolver.GetRelativePath(passCode, new PassCodeResolver.IPassCodeResolverCallback() {
+            @Override
+            public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath) {
+                mBillSummarizerFragment.Init(BillsMainActivity.this.getApplicationContext(),
+                        passCode,
+                        "users/" + relativeDbAndStoragePath,
+                        "BillsPerUser/" + relativeDbAndStoragePath);
 
-                    }
-                }
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, mBillSummarizerFragment);
+                transaction.addToBackStack(null);
 
+                // Commit the transaction
+                transaction.commit();
+                mCurrentFragment = mBillSummarizerFragment;
             }
 
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
+            @Override
+            public void OnPassCodeResolveFail(String error) {
+                Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
+                StartWelcomeScreen();
             }
         });
-        mBillSummarizerTotalSum.setClickable(false);
-        mBillSummarizerTotalSum.setText("");
-        mBillSummarizerTip.setText("10", TextView.BufferType.EDITABLE);
+
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_CAMERA_PERMISSION: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    StartPassCodeResolver();
-                }
+    public void StartSummarizerFragment(final List<BillRow> rows, final Bitmap image) {
+        mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback() {
+            @Override
+            public void OnPassCodeResovled(final Integer passCode, final String relativeDbAndStoragePath) {
+                FirebaseUploader uploader = new FirebaseUploader("users/" + relativeDbAndStoragePath, "BillsPerUser/" + relativeDbAndStoragePath, BillsMainActivity.this);
+                uploader.UploadRows(rows, image, new FirebaseUploader.IFirebaseUploaderCallback(){
+
+                    @Override
+                    public void OnSuccess() {
+                        image.recycle();
+                    }
+
+                    @Override
+                    public void OnFail(String message) {
+                        Log.e(Tag, "Error accured while uploading bill rows. Error: " + message);
+                        StartWelcomeScreen();
+                    }
+                });
+
+                mBillSummarizerFragment.Init(BillsMainActivity.this.getApplicationContext(), passCode, relativeDbAndStoragePath, rows);
+
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, mBillSummarizerFragment);
+                transaction.addToBackStack(null);
+
+                // Commit the transaction
+                transaction.commit();
+                mCurrentFragment = mBillSummarizerFragment;
             }
-        }
-    }
 
-    public void onResume(){
-        super.onResume();
-        mAuth.addAuthStateListener(mAuthListener);
-    }
-
-    @Override
-    public void onPause(){
-        super.onPause();
-        if(mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
-//        //TODO: clear all displayed data
-    }
-
-    @Override
-    public void onBackPressed() {
-        if(mCameraViewEnabled) {
-            StartPassCodeResolver();
-        }else{
-            super.onBackPressed();
-        }
-    }
-    @Override
-    public void onClick(View v) {
-
-        if(v == mBillSummarizerTip) {
-
-            return;
-        }
-        if (v == mCameraCaptureButton){
-            mRenderer.takePicture();
-            return;
-        }
-
-        //move item from my Bill to common Bill
-        if(((LinearLayout)v.getParent()).getId() == R.id.myBillViewView) {
-            //find relevant entry
-            for (HashMap.Entry<Integer, LinearLayout> entry : mMyLineNumToLineView.entrySet()) {
-                if(entry.getValue() == v){
-                    Integer index = entry.getKey();
-                    if(mMyLineToQuantityMapper.get(index) == 1){ // Line should be removed from my view and added to common view
-                        mMyLineNumToLineView.get(index).setVisibility(GONE);
-                        mMyLineToQuantityMapper.put(index, 0);
-                        mMyLineNumberToQuantityView.get(index).setText("0");
-                    }else if(mMyLineToQuantityMapper.get(index) > 1){ //Line should be moved to common view
-                        mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) - 1);
-                        mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
-                    }
-
-                    //Line in common view should be updated
-                    if(mCommonLineToQuantityMapper.get(index) > 0){
-                        mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                        mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index ) + 1);
-                        mCommonLineNumberToQuantityView.get(index).setText(""+mCommonLineToQuantityMapper.get(index));
-                    }else{ //Line in common view shlould be added
-                        mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                        mCommonLineNumberToQuantityView.get(index).setText("1");
-                        mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) + 1);
-                    }
-
-                    mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));
-
-                    mMyTotalSum -= mLineNumToPriceMapper.get(index);
-                    mBillSummarizerTotalSum.setText(Double.toString(mMyTotalSum *(1+mTip)));
-                    return;
-                }
+            @Override
+            public void OnPassCodeResolveFail(String error) {
+                Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
+                StartWelcomeScreen();
             }
-            //TODO: what to do if entry not found?
-            Log.e(Tag, "did not find the line: " + v.getId());
-        }
+        });
 
-        //move item from common Bill to my Bill and substract 1 from item's quantity
-        if(((LinearLayout) v.getParent()).getId() == R.id.commonBillView){
-            for (HashMap.Entry<Integer, LinearLayout> entry : mCommonLineNumToLineView.entrySet()) {
-                if(entry.getValue() == v){
-                    Integer index = entry.getKey();
-                    if(mCommonLineToQuantityMapper.get(index) <= 1){ // Line should be removed from common view and added to my view
-                        mCommonLineNumToLineView.get(index).setVisibility(GONE);
-                        mCommonLineToQuantityMapper.put(index, 0);
-                        mCommonLineNumberToQuantityView.get(index).setText("0");
-                    }else{ //Line should be moved to my view
-                        mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) - 1);
-                        mCommonLineNumberToQuantityView.get(index).setText(""+mCommonLineToQuantityMapper.get(index));
-                    }
+    }
 
-                    //Line in my view should be updated
-                    if(mMyLineToQuantityMapper.get(index) > 0){
-                        mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                        mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index ) + 1);
-                        mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
-                    }else{ //Line in My view shlould be added
-                        mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                        mMyLineNumberToQuantityView.get(index).setText("1");
-                        mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) + 1);
-                    }
+    @Override
+    public void StartWelcomeFragment() {
+        StartWelcomeScreen();
+    }
 
-                    mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));
+    @Override
+    public void Finish() {
+        finish();
+    }
 
-                    mMyTotalSum += mLineNumToPriceMapper.get(index);
-                    mBillSummarizerTotalSum.setText(Double.toString(mMyTotalSum *(1+mTip)));
 
-                    return;
-                }
-            }
-        }
+    @Override
+    public void onFragmentInteraction() {
 
     }
 }

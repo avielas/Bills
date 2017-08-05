@@ -1,0 +1,62 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/welcome_frame_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.bills.bills.fragments.WelcomeScreenFragment">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="1">
+
+        <EditText
+            android:id="@+id/editText7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|top"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Bills"
+            android:textAlignment="center"
+            android:textSize="36dp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.24" />
+
+        <Button
+            android:id="@+id/start_camera_button"
+            android:layout_width="260dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+
+            android:text="Start Camera" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.15" />
+
+        <Button
+            android:id="@+id/check_pass_code_button"
+            android:layout_width="260dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Check PassCode" />
+
+        <EditText
+            android:id="@+id/pass_code_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Enter pass code"
+            android:inputType="number"
+            android:textAlignment="center" />
+    </LinearLayout>
+
+
+</FrameLayout>

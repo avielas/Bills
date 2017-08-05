@@ -1,0 +1,105 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bill_summarizer_frame_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.bills.bills.fragments.BillSummarizerFragment">
+
+
+    <Button
+        android:id="@+id/back_button"
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:layout_gravity="top|left"
+        android:text="Back" />
+
+    <TextView
+        android:id="@+id/passcode_textview"
+        android:layout_width="211dp"
+        android:layout_height="40dp"
+        android:gravity="right"
+        android:layout_gravity="top|right"
+        android:textSize="32dp"
+        tools:text="PassCode: " />
+
+    <ScrollView
+        android:layout_width="188dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="40dp">
+
+        <LinearLayout
+            android:id="@+id/my_items_area_linearlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/my_bill_heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:background="@android:color/transparent"
+                android:text="My" />
+        </LinearLayout>
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/common_total_sum_edittext"
+        android:layout_width="113dp"
+        android:layout_height="30dp"
+        android:layout_gravity="bottom|left"
+        android:ems="10"
+        android:background="@android:color/transparent"
+        android:inputType="number"
+        android:text="Sum:"
+        android:textSize="24dp" />
+
+    <TextView
+        android:id="@+id/my_total_sum_edittext"
+        android:layout_width="133dp"
+        android:layout_height="30dp"
+        android:layout_gravity="bottom|right"
+        android:ems="10"
+        android:background="@android:color/transparent"
+        android:inputType="number"
+        android:text="Sum:"
+        android:textSize="24dp" />
+
+    <EditText
+        android:id="@+id/tip_edittext"
+        android:layout_width="114dp"
+        android:layout_height="29dp"
+        android:layout_gravity="bottom|center"
+        android:background="@android:color/transparent"
+        android:ems="10"
+        android:hint="Tip"
+        android:inputType="number" />
+
+    <ScrollView
+        android:layout_width="188dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="40dp">
+
+        <LinearLayout
+            android:id="@+id/common_items_area_linearlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/common_bill_heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:background="@android:color/transparent"
+                android:inputType="textPersonName"
+                android:text="Common" />
+        </LinearLayout>
+    </ScrollView>
+
+
+</FrameLayout>
