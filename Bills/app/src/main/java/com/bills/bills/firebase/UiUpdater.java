@@ -26,6 +26,7 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -272,27 +273,27 @@ public class UiUpdater implements View.OnClickListener {
                                 myImageView.setImageBitmap(myItemBitmap);
                                 myItemRow.addView(myImageView);
 
-                                mCommonItemsArea.addView(commonItemRow);
+                                int rowIndexInUi = GetRowUiIndex(rowIndex);
+                                mCommonItemsArea.addView(commonItemRow, rowIndexInUi);
 
-                                mMyItemsArea.addView(myItemRow);
+                                mMyItemsArea.addView(myItemRow, rowIndexInUi );
                                 myItemRow.setVisibility(GONE);
 
-                                Integer rowIndexParsed = rowIndex;
                                 Integer rowQuantityPrsed = Integer.parseInt(rowQuantity);
                                 Double rowPriceParsed = Double.parseDouble(rowPrice);
                                 mLineNumToPriceMapper.put(rowIndex, rowPriceParsed);
 
                                 commonItemRow.setOnClickListener(UiUpdater.this);
 
-                                mCommonLineToQuantityMapper.put(rowIndexParsed, rowQuantityPrsed);
-                                mCommonLineNumToLineView.put(rowIndexParsed, commonItemRow);
-                                mCommonLineNumberToQuantityView.put(rowIndexParsed, commonQuantityView);
+                                mCommonLineToQuantityMapper.put(rowIndex, rowQuantityPrsed);
+                                mCommonLineNumToLineView.put(rowIndex, commonItemRow);
+                                mCommonLineNumberToQuantityView.put(rowIndex, commonQuantityView);
 
                                 myItemRow.setOnClickListener(UiUpdater.this);
 
-                                mMyLineToQuantityMapper.put(rowIndexParsed, 0);
-                                mMyLineNumToLineView.put(rowIndexParsed, myItemRow);
-                                mMyLineNumberToQuantityView.put(rowIndexParsed, myQuantityView);
+                                mMyLineToQuantityMapper.put(rowIndex, 0);
+                                mMyLineNumToLineView.put(rowIndex, myItemRow);
+                                mMyLineNumberToQuantityView.put(rowIndex, myQuantityView);
                             }
                         });
                     }
@@ -338,6 +339,26 @@ public class UiUpdater implements View.OnClickListener {
             }
         });
 
+    }
+
+    private int GetRowUiIndex(Integer newRowIndex) {
+        if(mCommonLineNumToLineView.size() == 0){
+            return 0;
+        }
+
+        Integer[] rowIndeces = new Integer[mCommonLineNumToLineView.size()];
+        mCommonLineNumToLineView.keySet().toArray(rowIndeces);
+        Arrays.sort(rowIndeces);
+        if(newRowIndex < rowIndeces[0]){
+            return 0;
+        }
+        for(int retVal = 1; retVal < rowIndeces.length; retVal++){
+            if(newRowIndex < rowIndeces[retVal] && newRowIndex > rowIndeces[retVal-1]){
+                return retVal;
+            }
+        }
+
+        return rowIndeces.length;
     }
 
     private void AddRowsToUi(BillRow row) {
