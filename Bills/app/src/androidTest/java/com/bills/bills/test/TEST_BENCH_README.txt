@@ -14,13 +14,13 @@ INSTRUCTIONS
 -. changing of emulator Build.BRAND and Build.MODEL:
    *. changing to root: 'sudo ./adb root'
    *. ./adb pull /system/build.prop "/home/aviel/Desktop/BS"
-   *. changing the following two properties (for example for emulator Nexus_6_API_26) by gedit
-        ro.product.model=6_API_26
+   *. changing the following two properties (for example for emulator Nexus_6P_API_26) by gedit
+        ro.product.model=6P_API_26
         ro.product.brand=Nexus
    *. before push build.prop back to emulator, we should prepare emulator to be writable
       - go to ~/Android/Sdk/emulator
       - see all emulators: ./emulator -list-avds
-      - run emulator with write privilage: sudo ./emulator -writable-system -avd Nexus_6_API_26_1 -no-snapshot-load -qemu
+      - run emulator with write privilage: sudo ./emulator -writable-system -avd Nexus_6P_API_26 -no-snapshot-load -qemu
       - go to ~/Android/Sdk/platform-tools
       - sudo ./adb shell
       - su
@@ -48,9 +48,7 @@ INSTRUCTIONS
        -. exit
        -. exit
     *. pull from sdcard to pc:
-       adb pull /sdcard/OCRWrapperTestOutput.txt "C:\Users\avielavr\Desktop\BS"
-       or
-       adb pull /sdcard/ocr.jpg "C:\Users\avielavr\Desktop\BS"
+       ./adb pull /data/local/tmp/TesseractSample/TestsOutput.txt ~/Desktop/BS
 
 -. How to use tests?
     *. read Tests Configuration at the begin of OCRWrapperTest.java

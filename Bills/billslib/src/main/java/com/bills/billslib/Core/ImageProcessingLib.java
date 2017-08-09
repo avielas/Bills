@@ -155,8 +155,8 @@ public class ImageProcessingLib {
             // Handle initialization error
         }
 //        Mat rgbaCopy = rgba.clone();
-        AdaptiveThreshold(rgba, 60, 45.0);
-        Erode(rgba, 1, 4, StructureElement.VERTICAL_LINE.toString());
+        AdaptiveThreshold(rgba, 60, 10.0);
+        Erode(rgba, 1, 5, StructureElement.VERTICAL_LINE.toString());
 //        RemoveHorizontalLines(rgbaCopy, rgba);
 //        rgbaCopy.release();
     }

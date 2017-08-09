@@ -530,9 +530,10 @@ public class TemplateMatcher  {
 
     private boolean InRange(Rect word, Rect nextLineWord) {
         double range = 0.4*Math.abs(word.bottom - word.top);
-        boolean inRange = ((word.right >= nextLineWord.right && word.right - range <= nextLineWord.right) ||
+        boolean isInRange = ((word.right >= nextLineWord.right && word.right - range <= nextLineWord.right) ||
                 (word.right <= nextLineWord.right && word.right + range >= nextLineWord.right));
-        return inRange;
+        //boolean isHeightSame = Math.abs(Math.abs(word.bottom - word.top) - Math.abs(nextLineWord.bottom - nextLineWord.top)) <= range;
+        return isInRange;// && isHeightSame;
     }
 
     private ArrayList<ArrayList<Rect>> GetWordLocations(Bitmap processedBillImage) {
@@ -584,6 +585,9 @@ public class TemplateMatcher  {
                 }
                 else
                 {
+                    //TODO - to remove???
+                    if(j >= connections[i].keySet().size())
+                        continue;
                     connection = (Rect) (connections[i].keySet().toArray()[j]);
                 }
 
