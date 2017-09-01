@@ -122,6 +122,9 @@ public class PassCodeResolver {
                 if(databaseError != null || !commited){
                     if(mTransactionRetries.get() < 3){
                         mTransactionRetries.incrementAndGet();
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {}
                         GetRelativePath(passCode, callback);
                     }else {
                         if (databaseError != null) {

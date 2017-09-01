@@ -343,22 +343,22 @@ public class UiUpdater implements View.OnClickListener {
 
     private int GetRowUiIndex(Integer newRowIndex) {
         if(mCommonLineNumToLineView.size() == 0){
-            return 0;
+            return 1;
         }
 
         Integer[] rowIndeces = new Integer[mCommonLineNumToLineView.size()];
         mCommonLineNumToLineView.keySet().toArray(rowIndeces);
         Arrays.sort(rowIndeces);
         if(newRowIndex < rowIndeces[0]){
-            return 0;
+            return 1;
         }
         for(int retVal = 1; retVal < rowIndeces.length; retVal++){
             if(newRowIndex < rowIndeces[retVal] && newRowIndex > rowIndeces[retVal-1]){
-                return retVal;
+                return retVal + 1;
             }
         }
 
-        return rowIndeces.length;
+        return rowIndeces.length + 1;
     }
 
     private void AddRowsToUi(BillRow row) {

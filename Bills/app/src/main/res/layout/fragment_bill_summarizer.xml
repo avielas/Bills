@@ -46,7 +46,7 @@
         android:background="@android:color/transparent"
         android:inputType="number"
         android:text="Sum:"
-        android:textSize="24dp" />
+        android:textSize="20dp" />
 
     <TextView
         android:id="@+id/my_total_sum_edittext"
@@ -57,7 +57,7 @@
         android:background="@android:color/transparent"
         android:inputType="number"
         android:text="Sum:"
-        android:textSize="24dp" />
+        android:textSize="20dp" />
 
     <EditText
         android:id="@+id/tip_edittext"
