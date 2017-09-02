@@ -2,8 +2,10 @@ package com.bills.bills.firebase;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 
 import com.bills.billslib.Contracts.BillRow;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -17,6 +19,8 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by michaelvalershtein on 01/08/2017.
@@ -37,6 +41,9 @@ public class FirebaseUploader {
     private final String Price = "Price";
     private final String Quantity = "Quantity";
 
+    private final AtomicInteger mUplodedRowsCounter = new AtomicInteger(0);
+    private AtomicBoolean mUploadFailed = new AtomicBoolean(false);
+
     public FirebaseUploader(String dbPath, String storagePath, Activity activity){
         mFirebseDatabase = FirebaseDatabase.getInstance();
         mUsersDatabaseReference = mFirebseDatabase.getReference().child(dbPath);
@@ -47,13 +54,21 @@ public class FirebaseUploader {
         mActivity = activity;
     }
 
-    public void UploadRows(List<BillRow> rows, Bitmap fullBillImage, IFirebaseUploaderCallback callback) {
+    public void UploadRows(final List<BillRow> rows, Bitmap fullBillImage, final IFirebaseUploaderCallback callback) {
+        mUploadFailed.set(false);
+        mUplodedRowsCounter.set(0);
         //Upload full bill image
         Buffer fullBillBuffer = ByteBuffer.allocate(fullBillImage.getByteCount());
         fullBillImage.copyPixelsToBuffer(fullBillBuffer);
         byte[] fullBillData = (byte[]) fullBillBuffer.array();
 
-        mBillsPerUserStorageReference.child("ocrBytes").putBytes(fullBillData);
+        mBillsPerUserStorageReference.child("ocrBytes").putBytes(fullBillData).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                mUploadFailed.set(true);
+                callback.OnFail("Failed to upload full bill image");
+            }
+        });
 
         //Upload rows to Storage and to DB
         Map<String, Object> dbItems = new HashMap<>();
@@ -71,7 +86,6 @@ public class FirebaseUploader {
                     .setCustomMetadata(Quantity, Integer.toString(row.GetQuantity()))
                     .build();
 
-            final Double rowPrice = row.GetPrice();
             final Integer rowQuantity = row.GetQuantity();
             final Integer rowIndex = row.GetRowIndex();
             final StorageReference storageBillRef = mBillsPerUserStorageReference.child(Integer.toString(row.GetRowIndex()));
@@ -79,7 +93,19 @@ public class FirebaseUploader {
             storageBillRef.putBytes(data).addOnSuccessListener(mActivity, new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    if(mUploadFailed.get()){
+                        return;
+                    }
                     storageBillRef.updateMetadata(metadata);
+                    if(mUplodedRowsCounter.incrementAndGet() == rows.size()){
+                        callback.OnSuccess();
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    mUploadFailed.set(true);
+                    callback.OnFail("Failed to upload row: " + Integer.toString(rowIndex));
                 }
             });
             dbItems.put(Integer.toString(rowIndex), rowQuantity);
