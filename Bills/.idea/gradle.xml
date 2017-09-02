@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/billslib" />
             <option value="$PROJECT_DIR$/deleteme" />
+            <option value="$PROJECT_DIR$/fetchstorage" />
             <option value="$PROJECT_DIR$/openCVLibrary320" />
             <option value="$PROJECT_DIR$/testsdebug" />
           </set>
