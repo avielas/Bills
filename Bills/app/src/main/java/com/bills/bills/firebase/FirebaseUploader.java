@@ -3,8 +3,11 @@ package com.bills.bills.firebase;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.bills.billslib.Contracts.BillRow;
+import com.bills.billslib.Contracts.Constants;
+import com.bills.billslib.Utilities.FilesHandler;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -14,6 +17,7 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -60,9 +64,32 @@ public class FirebaseUploader {
         //Upload full bill image
         Buffer fullBillBuffer = ByteBuffer.allocate(fullBillImage.getByteCount());
         fullBillImage.copyPixelsToBuffer(fullBillBuffer);
-        byte[] fullBillData = (byte[]) fullBillBuffer.array();
+        byte[] fullBillData = new byte[0];//byte[]) fullBillBuffer.array();
+        try {
+            fullBillData = FilesHandler.ImageTxtFile2ByteArray (Constants.IMAGES_PATH + "/ocrBytes.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        mBillsPerUserStorageReference.child("ocrBytes").putBytes(fullBillData).addOnFailureListener(new OnFailureListener() {
+        final StorageMetadata ocrBytesMetadata = new StorageMetadata.Builder()
+                .setContentType("text/plain")
+                .setCustomMetadata(ImageWidth, Integer.toString(fullBillImage.getWidth()))
+                .setCustomMetadata(ImageHeight, Integer.toString(fullBillImage.getHeight()))
+                .build();
+
+        final StorageReference storageFullBillRef = mBillsPerUserStorageReference.child("ocrBytes.txt");
+
+        storageFullBillRef.putBytes(fullBillData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                storageFullBillRef.updateMetadata(ocrBytesMetadata).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("","");
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 mUploadFailed.set(true);
