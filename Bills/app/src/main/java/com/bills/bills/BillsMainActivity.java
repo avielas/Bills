@@ -32,6 +32,8 @@ public class BillsMainActivity extends MainActivityBase implements
     private static final int RC_SIGN_IN = 123;
     private static final int REQUEST_CAMERA_PERMISSION = 101;
 
+    private static final String UsersDbKey = "users";
+    private static final String BillsPerUserDbKey = "BillsPerUser";
     private String mUid;
 
     //Fragments
@@ -133,7 +135,6 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
-
     public void StartCameraFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
@@ -181,7 +182,8 @@ public class BillsMainActivity extends MainActivityBase implements
         mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback() {
             @Override
             public void OnPassCodeResovled(final Integer passCode, final String relativeDbAndStoragePath) {
-                FirebaseUploader uploader = new FirebaseUploader("users/" + relativeDbAndStoragePath, "BillsPerUser/" + relativeDbAndStoragePath, BillsMainActivity.this);
+                FirebaseUploader uploader = new FirebaseUploader(UsersDbKey + "/" + relativeDbAndStoragePath,
+                        BillsPerUserDbKey + "/" + relativeDbAndStoragePath, BillsMainActivity.this);
                 uploader.UploadRows(rows, image, new FirebaseUploader.IFirebaseUploaderCallback(){
 
                     @Override
@@ -222,10 +224,28 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
+    public void StartWelcomeFragment(final Bitmap image, final String category, final String message) {
+        mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback(){
+            @Override
+            public void OnPassCodeResovled(final Integer passCode, final String relativeDbAndStoragePath) {
+                FirebaseUploader uploader = new FirebaseUploader(UsersDbKey + "/" + relativeDbAndStoragePath,
+                        BillsPerUserDbKey + "/" + relativeDbAndStoragePath, BillsMainActivity.this);
+                uploader.UploadFullBillImage(image, category, message);
+            }
+
+            @Override
+            public void OnPassCodeResolveFail(String error) {
+                Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        StartWelcomeScreen();
+    }
+
+    @Override
     public void Finish() {
         finish();
     }
-
 
     @Override
     public void onFragmentInteraction() {

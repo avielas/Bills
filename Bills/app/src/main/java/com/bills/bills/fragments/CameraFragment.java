@@ -159,7 +159,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     @Override
     public void OnCameraFinished(byte[] image) {
 
-        while(!mOcrEngine.Initialized()){
+
+        Bitmap bitmap = null;
+        while (!mOcrEngine.Initialized()) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
@@ -170,9 +172,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
         bitmapOptions.inMutable = true;
         bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        Bitmap  bitmap = BitmapFactory.decodeByteArray(image, 0, image.length, bitmapOptions);
+        bitmap = BitmapFactory.decodeByteArray(image, 0, image.length, bitmapOptions);
 
-        if(bitmap.getHeight() < bitmap.getWidth()) {
+        if (bitmap.getHeight() < bitmap.getWidth()) {
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
             Bitmap rotatedImage = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
@@ -180,76 +182,75 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
             bitmap = rotatedImage;
         }
 
-
-
-        BillAreaDetector areaDetector = new BillAreaDetector();
-        Point topLeft = new Point();
-        Point topRight = new Point();
-        Point buttomRight = new Point();
-        Point buttomLeft = new Point();
-        if (!OpenCVLoader.initDebug()) {
-            Log.d(Tag, "Failed to initialize OpenCV.");
-            mListener.Finish();
-        }
-
-        Mat mat = new Mat();
-        Utils.bitmapToMat(bitmap, mat);
-
-        if(!areaDetector.GetBillCorners(mat, topLeft,topRight, buttomRight, buttomLeft)){
-            //TODO: add drag rect view here
-            Log.d(Tag, "Failed\n");
-            mListener.StartWelcomeFragment();
-            return;
-        }
-
-        Mat warpedMat = new Mat();
-        Mat warpedMatCopy = new Mat();
         try {
-            warpedMat = ImageProcessingLib.WarpPerspective(mat, topLeft,topRight, buttomRight, buttomLeft);
-            warpedMatCopy = warpedMat.clone();
-        } catch (Exception e) {
-            e.printStackTrace();
-            //TODO: decide what to do. Retake the picture? crash the app?
-            mListener.StartWelcomeFragment();
-            return;
+            BillAreaDetector areaDetector = new BillAreaDetector();
+            Point topLeft = new Point();
+            Point topRight = new Point();
+            Point buttomRight = new Point();
+            Point buttomLeft = new Point();
+            if (!OpenCVLoader.initDebug()) {
+                Log.d(Tag, "Failed to initialize OpenCV.");
+                mListener.Finish();
+            }
+
+            Mat mat = new Mat();
+            Utils.bitmapToMat(bitmap, mat);
+
+            if (!areaDetector.GetBillCorners(mat, topLeft, topRight, buttomRight, buttomLeft)) {
+                //TODO: add drag rect view here
+                Log.d(Tag, "Failed\n");
+                throw new Exception();
+            }
+
+            Mat warpedMat = new Mat();
+            Mat warpedMatCopy = new Mat();
+            try {
+                warpedMat = ImageProcessingLib.WarpPerspective(mat, topLeft, topRight, buttomRight, buttomLeft);
+                warpedMatCopy = warpedMat.clone();
+            } catch (Exception e) {
+                e.printStackTrace();
+                //TODO: decide what to do. Retake the picture? crash the app?
+                throw new Exception();
+            }
+
+            Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
+            ImageProcessingLib.PreprocessingForTM(warpedMat);
+            Utils.matToBitmap(warpedMat, processedBillBitmap);
+
+            TemplateMatcher templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
+            try {
+                templateMatcher.Match();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
+            int numOfItems = templateMatcher.priceAndQuantity.size();
+
+            /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
+            /***** Out Of Memory when running 4 threads parallel                                      *****/
+            Utils.matToBitmap(warpedMatCopy, processedBillBitmap);
+            templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
+            templateMatcher.Parsing(numOfItems);
+
+            processedBillBitmap.recycle();
+            warpedMat.release();
+            warpedMatCopy.release();
+            mat.release();
+
+            List<BillRow> rows = new ArrayList<>();
+            int index = 0;
+            for (Double[] row : templateMatcher.priceAndQuantity) {
+                Bitmap item = templateMatcher.itemLocationsByteArray.get(index);
+                Double price = row[0];
+                Integer quantity = row[1].intValue();
+                rows.add(new BillRow(price, quantity, index, item));
+                index++;
+            }
+            mListener.StartSummarizerFragment(rows, bitmap);
+        }catch (Exception ex){
+            mListener.StartWelcomeFragment(bitmap, "Error", "Error: " + ex.getMessage());
         }
-
-        Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-        ImageProcessingLib.PreprocessingForTM(warpedMat);
-        Utils.matToBitmap(warpedMat, processedBillBitmap);
-
-        TemplateMatcher templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
-        try{
-            templateMatcher.Match();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-
-        ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
-        int numOfItems = templateMatcher.priceAndQuantity.size();
-
-        /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
-        /***** Out Of Memory when running 4 threads parallel                                      *****/
-        Utils.matToBitmap(warpedMatCopy, processedBillBitmap);
-        templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
-        templateMatcher.Parsing(numOfItems);
-
-        processedBillBitmap.recycle();
-        warpedMat.release();
-        warpedMatCopy.release();
-        mat.release();
-
-        List<BillRow> rows = new ArrayList<>();
-        int index = 0;
-        for (Double[] row : templateMatcher.priceAndQuantity) {
-            Bitmap item = templateMatcher.itemLocationsByteArray.get(index);
-            Double price = row[0];
-            Integer quantity = row[1].intValue();
-            rows.add(new BillRow(price, quantity, index, item));
-            index++;
-        }
-        mListener.StartSummarizerFragment(rows, bitmap);
     }
 
 
@@ -267,5 +268,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         void StartSummarizerFragment(List<BillRow> rows, Bitmap image);
         void StartWelcomeFragment();
         void Finish();
+        void StartWelcomeFragment(Bitmap image, final String category, final String message);
     }
 }

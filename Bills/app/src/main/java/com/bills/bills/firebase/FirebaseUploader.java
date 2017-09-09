@@ -44,6 +44,7 @@ public class FirebaseUploader {
     private final String ImageHeight = "height";
     private final String Price = "Price";
     private final String Quantity = "Quantity";
+    private final String RowsDbKey = "Rows";
 
     private final AtomicInteger mUplodedRowsCounter = new AtomicInteger(0);
     private AtomicBoolean mUploadFailed = new AtomicBoolean(false);
@@ -64,7 +65,7 @@ public class FirebaseUploader {
         //Upload full bill image
         Buffer fullBillBuffer = ByteBuffer.allocate(fullBillImage.getByteCount());
         fullBillImage.copyPixelsToBuffer(fullBillBuffer);
-        byte[] fullBillData = new byte[0];//byte[]) fullBillBuffer.array();
+        byte[] fullBillData = new byte[0];
         try {
             fullBillData = FilesHandler.ImageTxtFile2ByteArray (Constants.IMAGES_PATH + "/ocrBytes.txt");
         } catch (IOException e) {
@@ -82,10 +83,11 @@ public class FirebaseUploader {
         storageFullBillRef.putBytes(fullBillData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                mUsersDatabaseReference.child("Logs").child("Info").setValue("Uploaded full bill image");
                 storageFullBillRef.updateMetadata(ocrBytesMetadata).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.d("","");
+                        mUsersDatabaseReference.child("Logs").child("Info").setValue("Uploaded MetaData");
                     }
                 });
             }
@@ -138,7 +140,44 @@ public class FirebaseUploader {
             dbItems.put(Integer.toString(rowIndex), rowQuantity);
         }
 
-        mUsersDatabaseReference.updateChildren(dbItems);
+        mUsersDatabaseReference.child(RowsDbKey).updateChildren(dbItems);
+    }
+
+    public void UploadFullBillImage(Bitmap fullBillImage, final String category, final String message) {
+        //Upload full bill image
+        Buffer fullBillBuffer = ByteBuffer.allocate(fullBillImage.getByteCount());
+        fullBillImage.copyPixelsToBuffer(fullBillBuffer);
+        byte[] fullBillData = new byte[0];
+        try {
+            fullBillData = FilesHandler.ImageTxtFile2ByteArray (Constants.IMAGES_PATH + "/ocrBytes.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        final StorageMetadata ocrBytesMetadata = new StorageMetadata.Builder()
+                .setContentType("text/plain")
+                .setCustomMetadata(ImageWidth, Integer.toString(fullBillImage.getWidth()))
+                .setCustomMetadata(ImageHeight, Integer.toString(fullBillImage.getHeight()))
+                .build();
+
+        final StorageReference storageFullBillRef = mBillsPerUserStorageReference.child("ocrBytes.txt");
+
+        storageFullBillRef.putBytes(fullBillData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                storageFullBillRef.updateMetadata(ocrBytesMetadata).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("","");
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                    @Override
+                    public void onSuccess(StorageMetadata storageMetadata) {
+                        mUsersDatabaseReference.child("Logs").child(category).setValue(message);
+                    }
+                });
+            }
+        });
     }
 
     public interface IFirebaseUploaderCallback{
