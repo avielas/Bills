@@ -27,14 +27,9 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.logging.FileHandler;
-
-import static com.example.fetchstorage.MainActivity.FileType.*;
 
 public class MainActivity extends AppCompatActivity {
     Button _button;
@@ -116,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                                             public void onSuccess(byte[] bytes) {
                                                 Log.d(timeStamp, userId.getKey());
                                                 String phone = userId.getKey();
-                                                String path = Constants.FIREBASE_STORAGE + "/" + phone + "/" + timeStamp;
+                                                String path = Constants.FIREBASE_LOCAL_STORAGE + "/" + phone + "/" + timeStamp;
                                                 SaveImageToDisk(path, bytes, "ocrBytes.txt", FileType.Txt, 0, 0);
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
@@ -141,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                                                                 Integer itemHeight = Integer.parseInt(storageMetadata.getCustomMetadata(ImageHeight));
                                                                 Integer itemWidth = Integer.parseInt(storageMetadata.getCustomMetadata(ImageWidth));
                                                                 String phone = userId.getKey();
-                                                                String path = Constants.FIREBASE_STORAGE + "/" + phone + "/" + timeStamp;
+                                                                String path = Constants.FIREBASE_LOCAL_STORAGE + "/" + phone + "/" + timeStamp;
                                                                 SaveImageToDisk(path, bytes, tempRow + ".jpg", FileType.Jpg, itemWidth, itemHeight);
                                                             }
                                                         });

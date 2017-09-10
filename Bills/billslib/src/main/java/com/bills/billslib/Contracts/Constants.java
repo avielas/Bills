@@ -20,7 +20,7 @@ public final class Constants
                     Environment.getExternalStorageDirectory().toString();
 
     public static final String IMAGES_PATH = STORAGE_DIRECTORY + "/TesseractSample/imgs";
-    public static final String FIREBASE_STORAGE = STORAGE_DIRECTORY + "/TesseractSample/fb_storage";
+    public static final String FIREBASE_LOCAL_STORAGE = STORAGE_DIRECTORY + "/TesseractSample/fb_storage";
     public static final String CAMERA_CAPTURED_JPG_PHOTO_PATH = IMAGES_PATH + "/ocr.jpg";
     public static final String TESSDATA = "tessdata";
     public static final String TESSERACT_SAMPLE_DIRECTORY = STORAGE_DIRECTORY + "/TesseractSample/";
