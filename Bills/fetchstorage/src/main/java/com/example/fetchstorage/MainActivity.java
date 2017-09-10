@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.bills.billslib.Contracts.Constants;
+import com.bills.billslib.Utilities.FilesHandler;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -21,16 +23,28 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.logging.FileHandler;
+
+import static com.example.fetchstorage.MainActivity.FileType.*;
 
 public class MainActivity extends AppCompatActivity {
     Button _button;
     private String mUid;
     private static final int RC_SIGN_IN = 123;
+    private static final String TAG = "MainActivity";
+    private final String ImageWidth = "width";
+    private final String ImageHeight = "height";
+    private final String RowsDbKey = "Rows";
+    public enum FileType{ Txt, Jpg};
 
     //Firebase Authentication members
     private FirebaseAuth mAuth;
@@ -52,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
                 if(user != null){
                     //user is signed in
                     mUid = user.getUid();
-
                     Toast.makeText(MainActivity.this, "You are now signed in. Welcome", Toast.LENGTH_LONG).show();
                 }else{
                     //user is signed out
@@ -78,80 +91,81 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     FirebaseDatabase mFirebaseDatabase;
                     final DatabaseReference mUsersDatabaseReference;
+
                     String dbPath = "users";
                     mFirebaseDatabase = FirebaseDatabase.getInstance();
                     mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath);
 
                     mUsersDatabaseReference.runTransaction(new Transaction.Handler() {
                         @Override
-                        public Transaction.Result doTransaction(MutableData mutableData) {
-                            Log.d("","");
-                            if(mutableData == null || mutableData.getKey() == null){
-                                mUsersDatabaseReference.runTransaction(new Transaction.Handler() {
-                                    @Override
-                                    public Transaction.Result doTransaction(MutableData mutableData) {
-                                        Log.d("","");
-                                        for (MutableData child : mutableData.getChildren()) {
-                                            try {
-                                                HashMap<String, Object> value = (HashMap<String, Object>) child.getValue();
-                                                Object[] set = value.keySet().toArray();
-//                                int curPassCode = ((Long)value.get(mPassCodeDbKey)).intValue();
-//                                if(curPassCode == passCode) {
-//                                    return Transaction.success(mutableData);
-//                                }
-                                            } catch (Exception ex) {
-                                            }
-                                        }
-
-                                        return Transaction.abort();
-                                    }
-
-                                    @Override
-                                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
-                                    }
-                                });
-                            }
-
+                        public Transaction.Result doTransaction(final MutableData mutableData) {
                             FirebaseStorage mFirebaseStorage;
                             StorageReference mBillsPerUserStorageReference;
                             mFirebaseStorage = FirebaseStorage.getInstance();
+//                            final Iterable<MutableData> mutableDataChildren = mutableData.getChildren();
 
-
-                            for (MutableData child : mutableData.getChildren()) {
+                            for (final MutableData userId : mutableData.getChildren()) {
                                 try {
-                                    HashMap<String, Object> value = (HashMap<String, Object>) child.getValue();
-                                    Object[] set = value.keySet().toArray();
+                                    final HashMap<String, Object> timeStamps = (HashMap<String, Object>) userId.getValue();
 
-                                    for (String key: value.keySet()) {
-                                        String pathToOcrBytes = "BillsPerUser/" + child.getKey().toString() + "/" + key + "/ocrBytes";
+                                    for (final String timeStamp: timeStamps.keySet()) {
+                                        String pathToOcrBytes = "BillsPerUser/" + userId.getKey().toString() + "/" + timeStamp + "/ocrBytes.txt";
                                         mBillsPerUserStorageReference = mFirebaseStorage.getReference().child(pathToOcrBytes);
-                                        mBillsPerUserStorageReference.getBytes(1024*1024*1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                        mBillsPerUserStorageReference.getBytes(1024 * 1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                             @Override
                                             public void onSuccess(byte[] bytes) {
-                                                Log.d("","");
-//                                                ByteBuffer buffer = ByteBuffer.wrap(bytes);
-//                                                Bitmap commonItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
-//                                                commonItemBitmap.copyPixelsFromBuffer(buffer);
+                                                Log.d(timeStamp, userId.getKey());
+                                                String phone = userId.getKey();
+                                                String path = Constants.FIREBASE_STORAGE + "/" + phone + "/" + timeStamp;
+                                                SaveImageToDisk(path, bytes, "ocrBytes.txt", FileType.Txt, 0, 0);
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
-                                                Log.d("","");
                                             }
                                         });
+
+                                        ArrayList<Long> billQuantityLines = (ArrayList<Long>) mutableData.child(userId.getKey()).child(timeStamp).child(RowsDbKey).getValue();
+                                        if (null != billQuantityLines){
+                                            for (int row=0; row < billQuantityLines.size(); row++) {
+                                                final int tempRow = row;
+                                                String pathToRowQuantityImage = "BillsPerUser/" + userId.getKey().toString() + "/" + timeStamp + "/" + tempRow;
+                                                mBillsPerUserStorageReference = mFirebaseStorage.getReference().child(pathToRowQuantityImage);
+                                                final StorageReference billsPerUserStorageReference = mBillsPerUserStorageReference;
+                                                billsPerUserStorageReference.getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                                    @Override
+                                                    public void onSuccess(final byte[] bytes) {
+                                                        billsPerUserStorageReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                                                            @Override
+                                                            public void onSuccess(StorageMetadata storageMetadata) {
+                                                                Integer itemHeight = Integer.parseInt(storageMetadata.getCustomMetadata(ImageHeight));
+                                                                Integer itemWidth = Integer.parseInt(storageMetadata.getCustomMetadata(ImageWidth));
+                                                                String phone = userId.getKey();
+                                                                String path = Constants.FIREBASE_STORAGE + "/" + phone + "/" + timeStamp;
+                                                                SaveImageToDisk(path, bytes, tempRow + ".jpg", FileType.Jpg, itemWidth, itemHeight);
+                                                            }
+                                                        });
+
+                                                    }
+                                                }).addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                    }
+                                                });
+                                            }
+                                        }
                                     }
 
                                 } catch (Exception ex) {
+                                    Log.d("fetchstorage", ex.getMessage());
                                 }
                             }
-
                             return Transaction.abort();
                         }
 
                         @Override
                         public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
+                            Toast.makeText(MainActivity.this, "All images downloaded", Toast.LENGTH_LONG).show();
                         }
                     });
                 } catch (Exception e) {
@@ -159,6 +173,33 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void SaveImageToDisk(String path, byte[] bytes, String fileName, FileType fileType, Integer itemWidth, Integer itemHeight) {
+
+        File dir = new File(path);
+
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                Log.e(TAG, "ERROR: Creation of directory " + path + " failed, check does Android Manifest have permission to write to external storage.");
+            }
+        } else {
+            Log.i(TAG, "Created directory " + path);
+        }
+
+        File file = new File(dir + "/" + fileName);
+        if(!file.exists()) {
+            switch (fileType) {
+                case Jpg:
+                    Bitmap bitmap = FilesHandler.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight); //FilesHandler.ByteArrayToBitmap(bytes);
+                    FilesHandler.SaveToJPGFile(bitmap, path + "/" + fileName);
+                    bitmap.recycle();
+                    break;
+                case Txt:
+                    FilesHandler.SaveToTXTFile(bytes, path + "/" + fileName);
+                    break;
+            }
+        }
     }
 
     public void onResume(){

@@ -104,10 +104,10 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList("sinta1", "pastaMarket1", "pastaMarket2",
+                _restaurantsNamesTestFilter = Arrays.asList(/*"sinta1", "pastaMarket1", "pastaMarket2",
                         "iza1",
-                        "dovrin1", "dovrin2", "dovrin3",
-                        "nola1"/*, "nola3"/*, "nola4", "nola5", "nola6"*/);
+                        "dovrin1", "dovrin2", "dovrin3",*/
+                        "nola1", /*"nola3",*/ "nola4", /*"nola5",*/ "nola6");
                 _billsTestFilter = Arrays.asList(/*"ocrBytes.txt", "ocrBytes1.txt", "ocrBytes2.txt", "ocrBytes3.txt", "ocrBytes4.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);

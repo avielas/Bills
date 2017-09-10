@@ -34,6 +34,7 @@ public class BillsMainActivity extends MainActivityBase implements
 
     private static final String UsersDbKey = "users";
     private static final String BillsPerUserDbKey = "BillsPerUser";
+    private final String RowsDbKey = "Rows";
     private String mUid;
 
     //Fragments
@@ -156,7 +157,7 @@ public class BillsMainActivity extends MainActivityBase implements
             public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath) {
                 mBillSummarizerFragment.Init(BillsMainActivity.this.getApplicationContext(),
                         passCode,
-                        "users/" + relativeDbAndStoragePath,
+                        "users/" + relativeDbAndStoragePath + "/" + RowsDbKey,
                         "BillsPerUser/" + relativeDbAndStoragePath);
 
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

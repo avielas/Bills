@@ -270,4 +270,11 @@ public class FilesHandler {
         });
         return listFiles[0].getPath();
     }
+
+    public static Bitmap ConvertFirebaseBytesToBitmap(byte[] bytes, Integer itemWidth, Integer itemHeight){
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        Bitmap commonItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
+        commonItemBitmap.copyPixelsFromBuffer(buffer);
+        return commonItemBitmap;
+    }
 }

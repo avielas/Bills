@@ -2,7 +2,6 @@ package com.bills.bills.firebase;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.provider.Contacts;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -12,9 +11,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.bills.bills.BillsMainActivity;
 import com.bills.bills.R;
 import com.bills.billslib.Contracts.BillRow;
+import com.bills.billslib.Utilities.FilesHandler;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -25,11 +24,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static android.view.View.GONE;
@@ -211,7 +208,6 @@ public class UiUpdater implements View.OnClickListener {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 final Integer rowIndex = Integer.parseInt(dataSnapshot.getKey());
-
                 final StorageReference curLineStorageReference = mBillsPerUserStorageReference.child(Integer.toString(rowIndex));
 
                 curLineStorageReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
@@ -257,13 +253,8 @@ public class UiUpdater implements View.OnClickListener {
                                 myQuantityView.setText("0");
                                 myItemRow.addView(myQuantityView);
 
-                                ByteBuffer buffer = ByteBuffer.wrap(bytes);
-                                Bitmap commonItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
-                                commonItemBitmap.copyPixelsFromBuffer(buffer);
-
-                                buffer = ByteBuffer.wrap(bytes);
-                                Bitmap myItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
-                                myItemBitmap.copyPixelsFromBuffer(buffer);
+                                Bitmap commonItemBitmap = FilesHandler.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
+                                Bitmap myItemBitmap = FilesHandler.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
 
                                 ImageView commonImageView = new ImageView(mContext);
                                 commonImageView.setImageBitmap(commonItemBitmap);

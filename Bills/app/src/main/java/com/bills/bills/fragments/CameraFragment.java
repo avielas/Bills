@@ -33,6 +33,7 @@ import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
+import com.bills.billslib.Utilities.FilesHandler;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -174,7 +175,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
         bitmap = BitmapFactory.decodeByteArray(image, 0, image.length, bitmapOptions);
 
-        if (bitmap.getHeight() < bitmap.getWidth()) {
+        String fileFullName = Constants.IMAGES_PATH + "/ocrBytes" + ".txt";
+        FilesHandler.SaveToTXTFile(image, fileFullName);
+
+        if(bitmap.getHeight() < bitmap.getWidth()) {
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
             Bitmap rotatedImage = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
