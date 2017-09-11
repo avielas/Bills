@@ -120,6 +120,7 @@ public class UiUpdater implements View.OnClickListener {
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath);
+        mUsersDatabaseReference.keepSynced(true);
 
         mUsersDatabaseReference.addChildEventListener(new ChildEventListener() {
             @Override
@@ -200,6 +201,7 @@ public class UiUpdater implements View.OnClickListener {
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath);
+        mUsersDatabaseReference.keepSynced(true);
 
         mFirebaseStorage = FirebaseStorage.getInstance();
         mBillsPerUserStorageReference = mFirebaseStorage.getReference().child(storagePath);

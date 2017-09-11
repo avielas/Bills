@@ -40,6 +40,7 @@ public class PassCodeResolver {
         mUid = uid;
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mUserIdsDatabaseReference = mFirebaseDatabase.getReference().child("userIds/");
+        mUserIdsDatabaseReference.keepSynced(true);
     }
 
     //Generate unique PassCode and DB path
