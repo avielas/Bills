@@ -9,6 +9,7 @@ import com.google.firebase.database.Transaction;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,12 +63,15 @@ public class PassCodeResolver {
 
                     mutableData.child(mUid).setValue(value);
                 } else {
+                    ArrayList<Integer> usedPassCodes = new ArrayList<>();
+
                     for (MutableData childMutableData : mutableData.getChildren()) {
                         mPassCodes.put(childMutableData.getKey(), (HashMap<String, Object>)childMutableData.getValue());
+                        usedPassCodes.add(((Long)((HashMap<String, Object>)childMutableData.getValue()).get(mPassCodeDbKey)).intValue());
                     }
                     //find an unused pass code
                     for (int i = 0; i < 10000; i++) {
-                        if (!mPassCodes.containsValue(i)) {
+                        if (!usedPassCodes.contains(i)) {
                             DateFormat sdf = new SimpleDateFormat("yyyy_MM_dd___HH_mm_ss");
                             Date date = new Date();
                             String now = sdf.format(date);
@@ -79,6 +83,11 @@ public class PassCodeResolver {
                             userIdsValue.put(mRelativePathDbKey, mBillRelativePath);
                             newPassCode.set(i);
                             mutableData.child(mUid).setValue(userIdsValue);
+
+                            HashMap<String, Object> curUserData = new HashMap<String, Object>();
+                            curUserData.put(mPassCodeDbKey, i);
+                            curUserData.put(mRelativePathDbKey, mBillRelativePath);
+                            mPassCodes.put(mUid, curUserData);
                             break;
                         }
                     }
