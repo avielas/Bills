@@ -39,6 +39,10 @@ public class MainActivity extends AppCompatActivity {
     private final String ImageWidth = "width";
     private final String ImageHeight = "height";
     private final String RowsDbKey = "Rows";
+    private long dbUsersChildrenCount = 0;
+    private long storageUserChildrenCount = 0;
+    private long currBillParsedRowsCount = 0;
+    private boolean isDownloading = false;
     public enum FileType{ Txt, Jpg};
 
     //Firebase Authentication members
@@ -97,12 +101,14 @@ public class MainActivity extends AppCompatActivity {
                             FirebaseStorage mFirebaseStorage;
                             StorageReference mBillsPerUserStorageReference;
                             mFirebaseStorage = FirebaseStorage.getInstance();
-//                            final Iterable<MutableData> mutableDataChildren = mutableData.getChildren();
-
+                            dbUsersChildrenCount = mutableData.getChildrenCount();
+                            int i = 0;
                             for (final MutableData userId : mutableData.getChildren()) {
                                 try {
                                     final HashMap<String, Object> timeStamps = (HashMap<String, Object>) userId.getValue();
-
+                                    isDownloading = true;
+                                    storageUserChildrenCount = timeStamps.keySet().size();
+                                    int j = 0;
                                     for (final String timeStamp: timeStamps.keySet()) {
                                         String pathToOcrBytes = "BillsPerUser/" + userId.getKey().toString() + "/" + timeStamp + "/ocrBytes.txt";
                                         mBillsPerUserStorageReference = mFirebaseStorage.getReference().child(pathToOcrBytes);
@@ -122,11 +128,15 @@ public class MainActivity extends AppCompatActivity {
 
                                         ArrayList<Long> billQuantityLines = (ArrayList<Long>) mutableData.child(userId.getKey()).child(timeStamp).child(RowsDbKey).getValue();
                                         if (null != billQuantityLines){
+                                            currBillParsedRowsCount = billQuantityLines.size();
                                             for (int row=0; row < billQuantityLines.size(); row++) {
                                                 final int tempRow = row;
                                                 String pathToRowQuantityImage = "BillsPerUser/" + userId.getKey().toString() + "/" + timeStamp + "/" + tempRow;
                                                 mBillsPerUserStorageReference = mFirebaseStorage.getReference().child(pathToRowQuantityImage);
                                                 final StorageReference billsPerUserStorageReference = mBillsPerUserStorageReference;
+                                                final int finalI = i;
+                                                final int finalJ = j;
+                                                final int finalRow = row;
                                                 billsPerUserStorageReference.getBytes(1024 * 1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                                     @Override
                                                     public void onSuccess(final byte[] bytes) {
@@ -138,6 +148,11 @@ public class MainActivity extends AppCompatActivity {
                                                                 String phone = userId.getKey();
                                                                 String path = Constants.FIREBASE_LOCAL_STORAGE + "/" + phone + "/" + timeStamp;
                                                                 SaveImageToDisk(path, bytes, tempRow + ".jpg", FileType.Jpg, itemWidth, itemHeight);
+                                                                if(finalI == dbUsersChildrenCount - 1 &&
+                                                                   finalJ == storageUserChildrenCount - 1 &&
+                                                                   finalRow == currBillParsedRowsCount - 1) {
+                                                                    Toast.makeText(MainActivity.this, "finished! the location is " + Constants.FIREBASE_LOCAL_STORAGE, Toast.LENGTH_LONG).show();
+                                                                }
                                                             }
                                                         });
 
@@ -149,18 +164,22 @@ public class MainActivity extends AppCompatActivity {
                                                 });
                                             }
                                         }
+                                        j++;
                                     }
 
                                 } catch (Exception ex) {
                                     Log.d("fetchstorage", ex.getMessage());
                                 }
+                                i++;
                             }
                             return Transaction.abort();
                         }
 
                         @Override
                         public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                            Toast.makeText(MainActivity.this, "All images downloaded", Toast.LENGTH_LONG).show();
+                            if(isDownloading) {
+                                Toast.makeText(MainActivity.this, "Downloading Storage from Firebase to "+ Constants.FIREBASE_LOCAL_STORAGE, Toast.LENGTH_LONG).show();
+                            }
                         }
                     });
                 } catch (Exception e) {
