@@ -43,6 +43,8 @@ public class UiUpdater implements View.OnClickListener {
     private final String Price = "Price";
     private final String Quantity = "Quantity";
 
+    private final String RowsDbKey = "Rows";
+
     private Context mContext;
 
     private DatabaseReference mUsersDatabaseReference;
@@ -119,7 +121,7 @@ public class UiUpdater implements View.OnClickListener {
 
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath);
+        mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath).child(RowsDbKey);
         mUsersDatabaseReference.keepSynced(true);
 
         mUsersDatabaseReference.addChildEventListener(new ChildEventListener() {
@@ -200,7 +202,7 @@ public class UiUpdater implements View.OnClickListener {
         });
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath);
+        mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath).child(RowsDbKey);
         mUsersDatabaseReference.keepSynced(true);
 
         mFirebaseStorage = FirebaseStorage.getInstance();
