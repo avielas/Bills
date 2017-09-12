@@ -199,7 +199,8 @@ public class BillsMainActivity extends MainActivityBase implements
                     }
                 });
 
-                mBillSummarizerFragment.Init(BillsMainActivity.this.getApplicationContext(), passCode, relativeDbAndStoragePath, rows);
+                mBillSummarizerFragment.Init(BillsMainActivity.this.getApplicationContext(), passCode,
+                        "users/" + relativeDbAndStoragePath + "/" + RowsDbKey, rows);
 
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container, mBillSummarizerFragment);
