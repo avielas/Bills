@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
                     String dbPath = "users";
                     mFirebaseDatabase = FirebaseDatabase.getInstance();
                     mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath);
+                    mUsersDatabaseReference.keepSynced(true);
 
                     mUsersDatabaseReference.runTransaction(new Transaction.Handler() {
                         @Override

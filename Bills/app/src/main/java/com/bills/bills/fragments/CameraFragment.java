@@ -28,8 +28,10 @@ import com.bills.billslib.Camera.IOnCameraFinished;
 import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
+import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Contracts.Interfaces.IOcrEngine;
 import com.bills.billslib.Core.BillAreaDetector;
+import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
@@ -38,6 +40,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ThrowOnExtraProperties;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -76,8 +79,16 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
 
     private IOcrEngine mOcrEngine;
 
+    private Integer mPassCode;
+    private String mRelativeDbAndStoragePath;
+
     public CameraFragment() {
         // Required empty public constructor
+    }
+
+    public void Init(Integer passCode, String relativeDbAndStoragePath){
+        mPassCode = passCode;
+        mRelativeDbAndStoragePath = relativeDbAndStoragePath;
     }
 
     @Override
@@ -193,7 +204,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
             Point buttomRight = new Point();
             Point buttomLeft = new Point();
             if (!OpenCVLoader.initDebug()) {
-                Log.d(Tag, "Failed to initialize OpenCV.");
+                String message = "Failed to initialize OpenCV.";
+                Log.d(Tag, message);
+                BillsLog.Log(LogLevel.Error, message);
                 mListener.Finish();
             }
 
@@ -203,8 +216,15 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
             if (!areaDetector.GetBillCorners(mat, topLeft, topRight, buttomRight, buttomLeft)) {
                 //TODO: add drag rect view here
                 Log.d(Tag, "Failed\n");
+                BillsLog.Log(LogLevel.Error, "Failed to get bill corners.");
                 throw new Exception();
             }
+
+            BillsLog.Log(LogLevel.Info, "Got bill corners: " +
+                    "Top Left: " + topLeft +
+                    "; Top Right: " + topRight +
+                    "; Buttom Right: " + buttomRight +
+                    "; Buttom Left: " + buttomLeft);
 
             Mat warpedMat = new Mat();
             Mat warpedMatCopy = new Mat();
@@ -213,9 +233,12 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 warpedMatCopy = warpedMat.clone();
             } catch (Exception e) {
                 e.printStackTrace();
+                BillsLog.Log(LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage());
                 //TODO: decide what to do. Retake the picture? crash the app?
                 throw new Exception();
             }
+
+            BillsLog.Log(LogLevel.Info, "Warped perspective successfully.");
 
             Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
             ImageProcessingLib.PreprocessingForTM(warpedMat);
@@ -224,9 +247,13 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
             TemplateMatcher templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
             try {
                 templateMatcher.Match();
+                BillsLog.Log(LogLevel.Info, "Template matcher succeed.");
             } catch (Exception e) {
+                BillsLog.Log(LogLevel.Error, "Template matcher threw an exception: " + e.getMessage());
                 e.printStackTrace();
             }
+
+
 
             ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
             int numOfItems = templateMatcher.priceAndQuantity.size();
@@ -251,9 +278,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 rows.add(new BillRow(price, quantity, index, item));
                 index++;
             }
-            mListener.StartSummarizerFragment(rows, bitmap);
+            mListener.StartSummarizerFragment(rows, bitmap, mPassCode, mRelativeDbAndStoragePath);
+            BillsLog.Log(LogLevel.Info, "Parsing finished");
         }catch (Exception ex){
-            mListener.StartWelcomeFragment(bitmap, "Error", "Error: " + ex.getMessage());
+            mListener.StartWelcomeFragment(bitmap);
         }
     }
 
@@ -269,9 +297,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        void StartSummarizerFragment(List<BillRow> rows, Bitmap image);
+        void StartSummarizerFragment(List<BillRow> rows, Bitmap image, Integer passCode, String relativeDbAndStoragePath);
         void StartWelcomeFragment();
         void Finish();
-        void StartWelcomeFragment(Bitmap image, final String category, final String message);
+        void StartWelcomeFragment(Bitmap image);
     }
 }

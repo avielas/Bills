@@ -62,7 +62,7 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState)     {
         ((Button)view.findViewById(R.id.start_camera_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
