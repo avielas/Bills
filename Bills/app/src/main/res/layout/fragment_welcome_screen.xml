@@ -1,8 +1,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/welcome_frame_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/welcome_screen_background"
     tools:context="com.bills.bills.fragments.WelcomeScreenFragment">
 
 
@@ -22,6 +24,17 @@
             <!--android:text="Bills"-->
             <!--android:textAlignment="center"-->
             <!--android:textSize="36dp" />-->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.21" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.21"
+            app:srcCompat="@mipmap/bills_icon" />
 
         <TextView
             android:id="@+id/textView"
@@ -37,14 +50,15 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.24" />
+            android:layout_weight="0.23" />
 
         <Button
             android:id="@+id/start_camera_button"
-            android:layout_width="260dp"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_action_icon___camera"
             android:layout_gravity="center"
-
+            android:background="@drawable/welcome_screen_green_button"
             android:text="Start Camera" />
 
         <Space
@@ -54,9 +68,10 @@
 
         <Button
             android:id="@+id/check_pass_code_button"
-            android:layout_width="260dp"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:background="@drawable/welcome_screen_green_button"
             android:text="Check PassCode" />
 
         <EditText
