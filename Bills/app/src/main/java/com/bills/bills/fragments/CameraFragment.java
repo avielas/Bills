@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -74,6 +76,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     //Camera Elements
     private TextureView mCameraPreviewView = null;
     private Button mCameraCaptureButton = null;
+
+    //selection order: auto->on->off
+    private Button mCameraFlashMode = null;
+    private Integer mCurrentFlashMode = R.drawable.camera_screen_flash_auto;
 
     private OnFragmentInteractionListener mListener;
 
@@ -150,6 +156,27 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         mCameraCaptureButton = (Button) getView().findViewById(R.id.camera_capture_button);
         mCameraCaptureButton.setOnClickListener(this);
 
+        mCameraFlashMode = (Button)getView().findViewById(R.id.camera_flash_mode);
+        mCameraFlashMode.setBackgroundResource(mCurrentFlashMode);
+        mCameraFlashMode.setTag(mCurrentFlashMode);
+        mCameraFlashMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mCurrentFlashMode == R.drawable.camera_screen_flash_auto){
+                    mCurrentFlashMode = R.drawable.camera_screen_flash_on;
+                    mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_ON);
+
+                }else if(mCurrentFlashMode == R.drawable.camera_screen_flash_on){
+                    mCurrentFlashMode = R.drawable.camera_screen_flash_off;
+                    mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                }else {
+                    mCurrentFlashMode = R.drawable.camera_screen_flash_auto;
+                    mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+                }
+                mCameraFlashMode.setBackgroundResource(mCurrentFlashMode);
+            }
+        });
+
         if(mOcrEngine == null) {
             mOcrEngine = new TesseractOCREngine();
             Thread t = new Thread(new Runnable() {
@@ -160,6 +187,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
             });
             t.start();
         }
+
     }
 
     @Override

@@ -32,6 +32,7 @@ import com.bills.billslib.Camera.filter.TiltShiftBlurFilter;
 import com.bills.billslib.R;
 
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.List;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -64,6 +65,9 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
     private int _selectedFilterId = R.id.noFilter;
     private SparseArray<CameraFilter> _cameraFilterMap = new SparseArray<>();
 //    String _imagePathToSave;
+
+    private String mFlashMode = Camera.Parameters.FLASH_MODE_AUTO;
+
     public byte[] PictureData;
 
     private IOnCameraFinished _cameraListener = null;
@@ -117,7 +121,7 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
         Camera.Size size = GetMaxCameraResolution(listSize);
         p.setPictureSize(size.width, size.height);
         /*********** end ***********/
-        p.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+        p.setFlashMode(mFlashMode);
         _camera.setParameters(p);
         _renderThread.start();
     }
@@ -283,5 +287,18 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
 
     public void SetOnCameraFinishedListener(IOnCameraFinished listener){
         _cameraListener = listener;
+    }
+
+    public void SetFlashMode(String flashMode){
+        if(flashMode != Camera.Parameters.FLASH_MODE_AUTO &&
+                flashMode != Camera.Parameters.FLASH_MODE_OFF &&
+                flashMode != Camera.Parameters.FLASH_MODE_ON){
+            throw new InvalidParameterException("Invalid flash mode: " + flashMode);
+        }
+
+        mFlashMode = flashMode;
+        Camera.Parameters p = _camera.getParameters();
+        p.setFlashMode(mFlashMode);
+        _camera.setParameters(p);
     }
 }
