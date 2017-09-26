@@ -219,7 +219,16 @@ public class FilesHandler {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
-        return Imgcodecs.imdecode(new MatOfByte(bytes), Imgcodecs.CV_LOAD_IMAGE_ANYCOLOR);
+        MatOfByte matOfByte = new MatOfByte(bytes);
+        try{
+            return Imgcodecs.imdecode(matOfByte, Imgcodecs.CV_LOAD_IMAGE_ANYCOLOR);
+        }
+        catch (Exception e){
+            return null;
+        }
+        finally{
+            matOfByte.release();
+        }
     }
 
     public static void RotateClockwise90(Mat src, Mat dest) {
