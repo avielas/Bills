@@ -221,6 +221,12 @@ public class FilesHandler {
         }
         MatOfByte matOfByte = new MatOfByte(bytes);
         try{
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+            int imageHeight = options.outHeight;
+            int imageWidth = options.outWidth;
+
             return Imgcodecs.imdecode(matOfByte, Imgcodecs.CV_LOAD_IMAGE_ANYCOLOR);
         }
         catch (Exception e){
