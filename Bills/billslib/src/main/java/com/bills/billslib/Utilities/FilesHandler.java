@@ -191,11 +191,11 @@ public class FilesHandler {
             return mat;
         }
         /** Preparing Warp Perspective Dimensions **/
-        Mat warpedBitmapReturned;
+        Mat warpedMatReturned;
         try{
-            warpedBitmapReturned = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
-//            warpedBitmap = Bitmap.createBitmap(warpedBitmapReturned.width(), warpedBitmapReturned.height(), Bitmap.Config.ARGB_8888);
-//            Utils.matToBitmap(warpedBitmapReturned, warpedBitmap);
+            warpedMatReturned = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+//            warpedBitmap = Bitmap.createBitmap(warpedMatReturned.width(), warpedMatReturned.height(), Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(warpedMatReturned, warpedBitmap);
 //            FilesHandler.SaveToJPGFile(warpedBitmap, Constants.PREPROCESSED_CAPTURED_PHOTO_PATH);
         }
         catch (Exception ex){
@@ -203,7 +203,7 @@ public class FilesHandler {
             return mat;
         }
 //        bitmap.recycle();
-        return warpedBitmapReturned;
+        return warpedMatReturned;
     }
 
     public static Mat GetRotatedBillMat(String billFullName) throws IOException {

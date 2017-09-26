@@ -585,7 +585,7 @@ public class TemplateMatcher  {
                 }
                 else
                 {
-                    // ??????
+                    // ???????????
                     //TODO - to remove???
                     if(j >= connections[i].keySet().size())
                         continue;
