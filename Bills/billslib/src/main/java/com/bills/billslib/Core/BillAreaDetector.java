@@ -269,8 +269,7 @@ public class BillAreaDetector {
         double dy2 = pt2.y - pt0.y;
         return (dx1 * dx2 + dy1 * dy2) / Math.sqrt((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2) + 1e-10);
     }
-
-    //can be used for a line of glare...
+    
     public static void RemoveGlare(Mat grayscaleMat, int threshold){
         Mat binaryGlareVerticalKernelImageMat = new Mat();
         Mat binaryGlareHorizontalKernelImageMat = new Mat();
