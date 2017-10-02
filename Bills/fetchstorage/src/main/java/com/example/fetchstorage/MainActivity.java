@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
             switch (fileType) {
                 case Jpg:
                     Bitmap bitmap = FilesHandler.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight); //FilesHandler.ByteArrayToBitmap(bytes);
-                    FilesHandler.SaveToJPGFile(bitmap, path + "/" + fileName);
+                    FilesHandler.SaveToPNGFile(bitmap, path + "/" + fileName);
                     bitmap.recycle();
                     break;
                 case Txt:

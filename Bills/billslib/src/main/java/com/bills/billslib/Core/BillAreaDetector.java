@@ -32,7 +32,7 @@ public class BillAreaDetector {
     private static int _histSizeNum = 64;
     private static int _bucketSize = 256 / _histSizeNum;
 
-    public static boolean GetBillCorners(Mat source, Point topLeft, Point topRight, Point buttomRight, Point buttomLeft){
+    public static boolean GetBillCorners(final Mat source, Point topLeft, Point topRight, Point buttomRight, Point buttomLeft){
         Mat newImage = null;
         Mat contrast = null;
         Mat destinationImage = null;

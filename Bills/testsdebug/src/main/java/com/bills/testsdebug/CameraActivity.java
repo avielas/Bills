@@ -4,41 +4,31 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Camera.IOnCameraFinished;
 import com.bills.billslib.Contracts.Constants;
-import com.bills.billslib.Core.BillAreaDetector;
-import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Utilities.FilesHandler;
 
-import com.bills.billslib.CustomViews.DragRectView;
-import org.opencv.core.Point;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class CameraActivity extends AppCompatActivity implements IOnCameraFinished, View.OnClickListener{
     private static final int REQUEST_CAMERA_PERMISSION = 101;
-    private Bitmap mOriginalImage;
     private CameraRenderer _renderer;
 
     @Override
@@ -137,15 +127,14 @@ public class CameraActivity extends AppCompatActivity implements IOnCameraFinish
     }
 
     @Override
-    public void OnCameraFinished(byte[] image){
+    public void OnCameraFinished(byte[] bytes){
         DateFormat sdf = new SimpleDateFormat("yyyy_MM_dd___HH_mm_ss");
         Date date = new Date();
         String now = sdf.format(date);
         String fileFullName = Constants.IMAGES_PATH + "/ocrBytes_" + now + ".txt";
-        FilesHandler.SaveToTXTFile(image, fileFullName);
-        mOriginalImage = FilesHandler.ByteArrayToBitmap(image);
-        mOriginalImage = FilesHandler.Rotating(mOriginalImage);
-        FilesHandler.SaveToJPGFile(mOriginalImage, Constants.CAMERA_CAPTURED_JPG_PHOTO_PATH);
+        FilesHandler.SaveToTXTFile(bytes, fileFullName);
+        //TODO - dont delete! using for debugging
+//        FilesHandler.BytesToMatAndRotation(bytes);
         FinishActivity();
     }
 }

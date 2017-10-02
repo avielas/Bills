@@ -199,7 +199,7 @@ public class TemplateMatcher  {
                     int yBegin = itemLocation.top;
                     int yEnd = itemLocation.bottom;
                     Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
-//                    FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/" + i + "_" + j +".jpg");
+//                    FilesHandler.SaveToPNGFile(bitmap, Constants.IMAGES_PATH + "/" + i + "_" + j +".jpg");
                     itemLocationsByteArray.add(bitmap);
                     /****** end ******/
                     break;
@@ -497,7 +497,7 @@ public class TemplateMatcher  {
 //                int yBegin    = entry.getValue().top ;
 //                int yEnd = entry.getValue().bottom;
 //                Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
-//                FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/rect_test_" + i + "_" + j + ".jpg");
+//                FilesHandler.SaveToPNGFile(bitmap, Constants.IMAGES_PATH + "/rect_test_" + i + "_" + j + ".jpg");
 //                bitmap.recycle();
                 /**********************************************/
             }
@@ -585,7 +585,7 @@ public class TemplateMatcher  {
                 }
                 else
                 {
-                    // ???????????
+                    // ?????
                     //TODO - to remove???
                     if(j >= connections[i].keySet().size())
                         continue;

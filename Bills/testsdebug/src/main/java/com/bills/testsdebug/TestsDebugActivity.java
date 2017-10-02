@@ -11,7 +11,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -76,10 +75,10 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     PhotoViewAttacher _photoViewAttacher;
     Bitmap _billWithPrintedRedLines;
     Bitmap _warpedBill;
+    Mat _warpedBillMat;
+    Mat _processedBillMat;
     Bitmap _processedBill;
     Bitmap _processedBillForCreateNewBill;
-    Mat _rgba;
-    Mat _gray;
     ImageView _processedImageView;
     ImageView _processedForCreateNewBillImageView;
     ImageView _originalImageView;
@@ -159,15 +158,14 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             Log.d("aa", "Failed to initialize OpenCV.");
         }
         try {
-            _rgba = new Mat();
-            _gray = new Mat();
+            _warpedBillMat = new Mat();
+            _processedBillMat = new Mat();
 
             String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
-            Mat warpedBillMat = FilesHandler.GetWarpedBillMat(lastCapturedBillPath);
-            _warpedBill = Bitmap.createBitmap(warpedBillMat.width(), warpedBillMat.height(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(warpedBillMat, _warpedBill);
+            _warpedBillMat = FilesHandler.GetWarpedBillMat(lastCapturedBillPath);
+            _warpedBill = Bitmap.createBitmap(_warpedBillMat.width(), _warpedBillMat.height(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(_warpedBillMat, _warpedBill);
             _billWithPrintedRedLines = _warpedBill.copy(_warpedBill.getConfig(), true);
-            warpedBillMat.release();
             _processedBill = Bitmap.createBitmap(_warpedBill.getWidth(), _warpedBill.getHeight(), Bitmap.Config.ARGB_8888);
             _processedBillForCreateNewBill = Bitmap.createBitmap(_warpedBill.getWidth(), _warpedBill.getHeight(), Bitmap.Config.ARGB_8888);
 
@@ -193,28 +191,28 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     }
 
     private void Preprocessing() {
-        Mat warpedMat = new Mat();
-        Mat warpedMatCopy = new Mat();
-        Utils.bitmapToMat(_warpedBill, warpedMat);
-        Utils.bitmapToMat(_warpedBill, warpedMatCopy);
+        Mat warpedMat = _warpedBillMat.clone();
+        Mat warpedMatCopy = _warpedBillMat.clone();
         ImageProcessingLib.PreprocessingForTM(warpedMat);
         ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
         _processedBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-        _processedBillForCreateNewBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
+        _processedBillForCreateNewBill = Bitmap.createBitmap(warpedMatCopy.width(), warpedMatCopy.height(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(warpedMat, _processedBill);
         _processedImageView.setImageBitmap(_processedBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
         Utils.matToBitmap(warpedMatCopy, _processedBillForCreateNewBill);
+        _processedBillMat = warpedMat.clone();
         _processedForCreateNewBillImageView.setImageBitmap(_processedBillForCreateNewBill);
         _photoViewAttacher = new PhotoViewAttacher(_processedForCreateNewBillImageView);
-        warpedMat.release();
         warpedMatCopy.release();
+        warpedMat.release();
     }
 
     public void AddListenerAdaptiveThresholdButton() {
         _adaptiveThresholdButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
+                Mat tempWarpedBillMat = _warpedBillMat.clone();
                 try {
                     _algorithmsTracing.setLength(0);
                     _algorithmsTracing.append("Algorithms Tracing:");
@@ -224,15 +222,15 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                     /*** convert block size to odd number according to opencv specs ***/
                     int blockSizeToOddNumber = blockSize%2 == 0 ? blockSize-1 : blockSize;
                     /****************/
-                    _rgba.release();
-                    _rgba = new Mat();
-                    Utils.bitmapToMat(_warpedBill, _rgba);
-                    AdaptiveThreshold(_rgba, blockSizeToOddNumber, constantSubtracted);
-                    Utils.matToBitmap(_rgba, _processedBill);
+                    AdaptiveThreshold(tempWarpedBillMat, blockSizeToOddNumber, constantSubtracted);
+                    Utils.matToBitmap(tempWarpedBillMat, _processedBill);
                     _processedImageView.setImageBitmap(_processedBill);
                     _photoViewAttacher = new PhotoViewAttacher(_processedImageView);
                 } catch (Exception e) {
                     e.printStackTrace();
+                }
+                finally {
+                    tempWarpedBillMat.release();
                 }
             }
         });
@@ -244,7 +242,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         _algorithmsTracing.append(System.getProperty("line.separator"));
     }
 
-    private void ValidateOcrBillResult(String imageStatus, Bitmap billBitmap) throws Exception{
+    private void ValidateOcrBillResult(String imageStatus) throws Exception{
         List<String> expectedBillTextLines = FilesHandler.ReadTxtFile(_brandAndModelPath + "/" +_restaurantName + "/" + _expectedTxtFileName);
         _results.append("Test of " + imageStatus + " " + _restaurantName);
         _results.append(System.getProperty("line.separator"));
@@ -355,19 +353,22 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         _dilateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
+                Mat tempProcessedBill = new Mat();
                 try {
-
                     int iterations = Integer.parseInt(_dilateIterationsEditText.getText().toString());
                     int kernelSize = _dilateKernelSizeSeekBar.getValue();
                     String selectedStructureElement = _kernelTypeSpinner.getSelectedItem().toString();
-                    Utils.bitmapToMat(_processedBill, _rgba);
-                    ImageProcessingLib.Dilate(_rgba, iterations, kernelSize, selectedStructureElement);
-                    Utils.matToBitmap(_rgba, _processedBill);
+                    Utils.bitmapToMat(_processedBill, tempProcessedBill);
+                    ImageProcessingLib.Dilate(tempProcessedBill, iterations, kernelSize, selectedStructureElement);
+                    Utils.matToBitmap(tempProcessedBill, _processedBill);
                     _algorithmsTracing.append("Dilate: iterations " + iterations + ", kernel size " + kernelSize);
                     _algorithmsTracing.append(System.getProperty("line.separator"));
                     _processedImageView.setImageBitmap(_processedBill);
                 } catch (Exception e) {
                     e.printStackTrace();
+                }
+                finally {
+                    tempProcessedBill.release();
                 }
             }
         });
@@ -377,18 +378,22 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         _erodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
+                Mat tempProcessedBill = new Mat();
                 try {
                     int iterations = Integer.parseInt(_erodeIterationsEditText.getText().toString());
                     int kernelSize = _erodeKernelSizeSeekBar.getValue();
                     String selectedStructureElement = _kernelTypeSpinner.getSelectedItem().toString();
-                    Utils.bitmapToMat(_processedBill, _rgba);
-                    ImageProcessingLib.Erode(_rgba, iterations, kernelSize, selectedStructureElement);
-                    Utils.matToBitmap(_rgba, _processedBill);
+                    Utils.bitmapToMat(_processedBill, tempProcessedBill);
+                    ImageProcessingLib.Erode(tempProcessedBill, iterations, kernelSize, selectedStructureElement);
+                    Utils.matToBitmap(tempProcessedBill, _processedBill);
                     _algorithmsTracing.append("Erode: iterations " + iterations + ", kernel size " + kernelSize);
                     _algorithmsTracing.append(System.getProperty("line.separator"));
                     _processedImageView.setImageBitmap(_processedBill);
                 } catch (Exception e) {
                     e.printStackTrace();
+                }
+                finally {
+                    tempProcessedBill.release();
                 }
             }
         });
@@ -404,7 +409,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                     templateMatcher.InitializeBeforeSecondUse(_processedBill);
                     templateMatcher.Parsing(numOfItems);
                     //ValidateOcrBillResult("Original", _warpedBill);
-                    ValidateOcrBillResult("Processed", _processedBill);
+                    ValidateOcrBillResult("Processed");
                     OpenUserInputDialog();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -467,7 +472,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
 //                int yBegin    = keyListCurrentIndex.get(j).top ;
 //                int yEnd = keyListCurrentIndex.get(j).bottom;
 //                Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
-//                FilesHandler.SaveToJPGFile(bitmap, Constants.IMAGES_PATH + "/rect_" + i + "_" + j + ".jpg");
+//                FilesHandler.SaveToPNGFile(bitmap, Constants.IMAGES_PATH + "/rect_" + i + "_" + j + ".jpg");
 //                bitmap.recycle();
                 /**********************************************/
                 keyListCurrentIndex.get(j).left -= Constants.ENLARGE_RECT_VALUE;
@@ -486,11 +491,14 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             public void onClick(View arg0) {
                 try {
                     _billWithPrintedRedLines.recycle();
+                    _warpedBill.recycle();
+                    _warpedBill = Bitmap.createBitmap(_warpedBillMat.width(), _warpedBillMat.height(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(_warpedBillMat, _warpedBill);
+                    _processedBill.recycle();
+                    _processedBill = Bitmap.createBitmap(_processedBillMat.width(), _processedBillMat.height(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(_processedBillMat, _processedBill);
                     _billWithPrintedRedLines = TestsHelper.PrintWordsRects(tesseractOCREngine, _warpedBill, _processedBill,
                                                                                                     this.getClass().getSimpleName());
-//                    String pathToSave = Constants.IMAGES_PATH;
-//                    FilesHandler.SaveToJPGFile(_billWithPrintedRedLines, pathToSave + "/CbillWithPrintedRedLines.jpg");
-//                    FilesHandler.SaveToJPGFile(_processedBill, pathToSave + "/CAprocessedBill.jpg");
                     _originalImageView.setImageBitmap(_billWithPrintedRedLines);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -505,8 +513,8 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             public void onClick(View arg0) {
                 try {
                     String processedImagePathToSave = _brandAndModelPath +"/" + _restaurantName + "/"
-                            + "bill.jpg";
-                    FilesHandler.SaveToJPGFile(_warpedBill, processedImagePathToSave);
+                            + "bill.png";
+                    FilesHandler.SaveToPNGFile(_warpedBill, processedImagePathToSave);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -573,13 +581,21 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         switch (resultCode) {
             case RESULT_OK:
-                _warpedBill.recycle();
+                Mat warpedBillMat = null;
                 try {
                     String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
-                    _warpedBill = FilesHandler.GetRotatedBill(lastCapturedBillPath);
+                    warpedBillMat = FilesHandler.GetRotatedBillMat(lastCapturedBillPath);
+                    _warpedBill.recycle();
+                    _warpedBill = Bitmap.createBitmap(warpedBillMat.width(), warpedBillMat.height(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(warpedBillMat, _warpedBill);
+                    _warpedBillMat = warpedBillMat.clone();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                finally {
+                    warpedBillMat.release();
+                }
+
                 _userCropFinished = new Button(this);
                 _userCropFinished.setText("Done");
                 _userCropFinished.setOnClickListener(this);
@@ -589,10 +605,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                     Log.d("aa", "Failed to initialize OpenCV.");
                 }
 
-                Mat warpedBillMat = new Mat();
-                Utils.bitmapToMat(_warpedBill, warpedBillMat);
-
-                if (!areaDetector.GetBillCorners(warpedBillMat, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
+                if (!areaDetector.GetBillCorners(_warpedBillMat, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
                     Log.d(this.getClass().getSimpleName(), "Failed ot get bounding rectangle automatically.");
                     _dragRectView.TopLeft = null;
                     _dragRectView.TopRight = null;
@@ -628,7 +641,6 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 _emptyRelativeLayoutView.setVisibility(View.VISIBLE);
                 _emptyRelativeLayoutView.addView(_dragRectView);
                 _emptyRelativeLayoutView.addView(_userCropFinished);
-                warpedBillMat.release();
                 break;
             default:
                 //mBeginBillSplitFlowButton.setVisibility(View.VISIBLE);
@@ -659,15 +671,11 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             _buttomRight = new Point(x,y);
 
             /** Preparing Warp Perspective Dimensions **/
-            Bitmap warpedBitmap;
-            Mat warpedMat = new Mat();
-            Mat returnedWarpedMat;
-            Utils.bitmapToMat(_warpedBill, warpedMat);
             try{
-                returnedWarpedMat = ImageProcessingLib.WarpPerspective(warpedMat, _topLeft, _topRight, _buttomRight, _buttomLeft);
-                warpedBitmap = Bitmap.createBitmap(returnedWarpedMat.width(), returnedWarpedMat.height(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(returnedWarpedMat, warpedBitmap);
-                returnedWarpedMat.release();
+                _warpedBillMat = ImageProcessingLib.WarpPerspective(_warpedBillMat, _topLeft, _topRight, _buttomRight, _buttomLeft);
+                _warpedBill.recycle();
+                _warpedBill = Bitmap.createBitmap(_warpedBillMat.width(), _warpedBillMat.height(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(_warpedBillMat, _warpedBill);
             }
             catch (Exception ex){
                 Log.d(this.getClass().getSimpleName(), "Failed to warp perspective");
@@ -676,14 +684,12 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             _billWithPrintedRedLines.recycle();
             _processedBill.recycle();
             _processedBillForCreateNewBill.recycle();
-            _warpedBill = warpedBitmap.copy(warpedBitmap.getConfig(), true);
             _billWithPrintedRedLines = _warpedBill.copy(_warpedBill.getConfig(), true);
             _emptyRelativeLayoutView.removeView(_dragRectView);
             _emptyRelativeLayoutView.removeView(_userCropFinished);
             _emptyRelativeLayoutView.setVisibility(GONE);
             _testsDebugView.setVisibility(View.VISIBLE);
             _originalImageView.setImageBitmap(_warpedBill);
-            warpedBitmap.recycle();
             Preprocessing();
         }
     }

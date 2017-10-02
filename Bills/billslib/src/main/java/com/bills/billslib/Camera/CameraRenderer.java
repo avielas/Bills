@@ -16,6 +16,7 @@
 package com.bills.billslib.Camera;
 
 import android.content.Context;
+import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES11Ext;
@@ -118,6 +119,7 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
         Camera.Parameters p = _camera.getParameters();
         /*** set capture to max resolution ***/
         List<Camera.Size> listSize = p.getSupportedPictureSizes();
+        p.setPictureFormat(ImageFormat.NV21);
         Camera.Size size = GetMaxCameraResolution(listSize);
         p.setPictureSize(size.width, size.height);
         /*********** end ***********/
