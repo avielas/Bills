@@ -78,20 +78,6 @@ public class FilesHandler {
         }
     }
 
-    public static boolean SaveMatToPNGFile(Mat mat, String path){
-        Bitmap bmp = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mat, bmp);
-        try {
-            return SaveToPNGFile(bmp, path);
-        }
-        catch (Exception e){
-            return false;
-        }
-        finally {
-            bmp.recycle();
-        }
-    }
-
     public static boolean SaveToTXTFile(byte[] image, String fileFullName){
         try {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(fileFullName));
@@ -165,7 +151,6 @@ public class FilesHandler {
     }
 
     public static Mat GetWarpedBillMat(byte[] bytes) throws IOException {
-        Mat warpedMat = null;
         Mat mat = null;
         try{
             mat = Bytes2MatAndRotateClockwise90(bytes);
@@ -183,7 +168,7 @@ public class FilesHandler {
                 return mat;
             }
             /** Preparing Warp Perspective Dimensions **/
-            warpedMat = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+            return ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
         }
         catch (Exception ex){
             Log.d("Error", "Failed to warp perspective");
@@ -193,11 +178,8 @@ public class FilesHandler {
             if(mat != null){
                 mat.release();
             }
-
         }
-        return warpedMat;
     }
-
 
     public static Mat GetRotatedBillMat(String billFullName) throws IOException {
         byte[] bytes = ImageTxtFile2ByteArray(billFullName);
@@ -296,5 +278,19 @@ public class FilesHandler {
             e.printStackTrace();
         }
         return byteBuffer.array();
+    }
+
+    public static boolean SaveMatToPNGFile(Mat mat, String path){
+        Bitmap bmp = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mat, bmp);
+        try {
+            return SaveToPNGFile(bmp, path);
+        }
+        catch (Exception e){
+            return false;
+        }
+        finally {
+            bmp.recycle();
+        }
     }
 }
