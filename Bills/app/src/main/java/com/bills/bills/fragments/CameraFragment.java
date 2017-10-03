@@ -209,14 +209,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
 
         String fileFullName = Constants.IMAGES_PATH + "/ocrBytes" + ".txt";
         Bitmap bitmapBill = null;
-        Mat matBill = null;
-        BillAreaDetector areaDetector = new BillAreaDetector();
-        Point topLeft = new Point();
-        Point topRight = new Point();
-        Point buttomRight = new Point();
-        Point buttomLeft = new Point();
         Mat warpedMat = null;
-        Mat warpedMatCopy = null;
+        Mat warpedMatCopy1 = null;
+        Mat warpedMatCopy2 = null;
         Bitmap processedBillBitmap = null;
         TemplateMatcher templateMatcher;
         int numOfItems;        
@@ -230,27 +225,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         }
 
         try {
-            matBill = FilesHandler.GetRotatedBillMat(bytes);
-            bitmapBill = Bitmap.createBitmap(matBill.width(), matBill.height(), Bitmap.Config.ARGB_8888);
-            FilesHandler.SaveToTXTFile(bytes, fileFullName);
-
-            if (!areaDetector.GetBillCorners(matBill, topLeft, topRight, buttomRight, buttomLeft)) {
-                //TODO: add drag rect view here
-                Log.d(Tag, "Failed\n");
-                BillsLog.Log(LogLevel.Error, "Failed to get bill corners.");
-                throw new Exception();
-            }
-
-            BillsLog.Log(LogLevel.Info, "Got bill corners: " +
-                    "Top Left: " + topLeft +
-                    "; Top Right: " + topRight +
-                    "; Buttom Right: " + buttomRight +
-                    "; Buttom Left: " + buttomLeft);
-
-
             try {
-                warpedMat = ImageProcessingLib.WarpPerspective(matBill, topLeft, topRight, buttomRight, buttomLeft);
-                warpedMatCopy = warpedMat.clone();
+                warpedMat = FilesHandler.GetWarpedBillMat(bytes);
+                warpedMatCopy1 = warpedMat.clone();
+                warpedMatCopy2 = warpedMat.clone();
             } catch (Exception e) {
                 e.printStackTrace();
                 BillsLog.Log(LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage());
@@ -260,9 +238,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
 
             BillsLog.Log(LogLevel.Info, "Warped perspective successfully.");
 
-            processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-            ImageProcessingLib.PreprocessingForTM(warpedMat);
-            Utils.matToBitmap(warpedMat, processedBillBitmap);
+            processedBillBitmap = Bitmap.createBitmap(warpedMatCopy1.width(), warpedMatCopy1.height(), Bitmap.Config.ARGB_8888);
+            ImageProcessingLib.PreprocessingForTM(warpedMatCopy1);
+            Utils.matToBitmap(warpedMatCopy1, processedBillBitmap);
 
             templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
             try {
@@ -273,12 +251,12 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 e.printStackTrace();
             }
 
-            ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
+            ImageProcessingLib.PreprocessingForParsing(warpedMatCopy2);
             numOfItems = templateMatcher.priceAndQuantity.size();
 
             /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
             /***** Out Of Memory when running 4 threads parallel                                      *****/
-            Utils.matToBitmap(warpedMatCopy, processedBillBitmap);
+            Utils.matToBitmap(warpedMatCopy2, processedBillBitmap);
             templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
             templateMatcher.Parsing(numOfItems);
 
@@ -291,24 +269,27 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 rows.add(new BillRow(price, quantity, index, item));
                 index++;
             }
-            Utils.matToBitmap(matBill, bitmapBill);
+
+            bitmapBill = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
+            FilesHandler.SaveToTXTFile(bytes, fileFullName);
+            Utils.matToBitmap(warpedMat, bitmapBill);
             mListener.StartSummarizerFragment(rows, bitmapBill, mPassCode, mRelativeDbAndStoragePath);
             BillsLog.Log(LogLevel.Info, "Parsing finished");
         }catch (Exception ex){
             mListener.StartWelcomeFragment(bitmapBill);
         }
         finally {
-            if(null != matBill){
-                matBill.release();
+            if(null != warpedMat){
+                warpedMat.release();
             }
             if(null != processedBillBitmap){
                 processedBillBitmap.recycle();
             }
-            if(null != warpedMat){
-                warpedMat.release();
+            if(null != warpedMatCopy1){
+                warpedMatCopy1.release();
             }
-            if(null != warpedMatCopy){
-                warpedMatCopy.release();
+            if(null != warpedMatCopy2){
+                warpedMatCopy2.release();
             }
         }
     }

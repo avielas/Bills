@@ -92,7 +92,6 @@ public class FilesHandler {
         }
     }
 
-
     public static boolean SaveToTXTFile(byte[] image, String fileFullName){
         try {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(fileFullName));
@@ -105,19 +104,6 @@ public class FilesHandler {
             e.printStackTrace();
         }
         return true;
-    }
-
-    public static byte[] BitmapToByteArray(Bitmap bitmap) throws IOException {
-        int size = bitmap.getRowBytes() * bitmap.getHeight();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
-        try {
-            bitmap.copyPixelsToBuffer(byteBuffer);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        return byteBuffer.array();
     }
 
     public static Bitmap ByteArrayToBitmap(byte[] bytes){
@@ -173,13 +159,6 @@ public class FilesHandler {
         return lines;
     }
 
-    public static Bitmap GetRotatedBill(String billFullName) throws IOException {
-        byte[] bytes = ImageTxtFile2ByteArray(billFullName);
-        Bitmap bitmap = ByteArrayToBitmap(bytes);
-        bitmap = FilesHandler.Rotating(bitmap);
-        return bitmap;
-    }
-
     public static Mat GetWarpedBillMat(String billFullName) throws IOException {
         Mat mat;
         mat = GetRotatedBillMat(billFullName);
@@ -197,20 +176,49 @@ public class FilesHandler {
             return mat;
         }
         /** Preparing Warp Perspective Dimensions **/
-        Mat warpedMatReturned;
+        Mat warpedMat;
         try{
-            warpedMatReturned = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+            warpedMat = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
         }
         catch (Exception ex){
             Log.d("Error", "Failed to warp perspective");
             return mat;
         }
-        return warpedMatReturned;
+        return warpedMat;
     }
+
+    public static Mat GetWarpedBillMat(byte[] bytes) throws IOException {
+        Mat mat;
+        mat = GetRotatedBillMat(bytes);
+        BillAreaDetector areaDetector = new BillAreaDetector();
+        Point mTopLeft = new Point();
+        Point mTopRight = new Point();
+        Point mButtomLeft = new Point();
+        Point mButtomRight = new Point();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(Tag, "Failed to initialize OpenCV.");
+            return null;
+        }
+        if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+            Log.d("Error", "Failed ot get bounding rectangle automatically.");
+            return mat;
+        }
+        /** Preparing Warp Perspective Dimensions **/
+        Mat warpedMat;
+        try{
+            warpedMat = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+        }
+        catch (Exception ex){
+            Log.d("Error", "Failed to warp perspective");
+            return mat;
+        }
+        return warpedMat;
+    }
+
 
     public static Mat GetRotatedBillMat(String billFullName) throws IOException {
         byte[] bytes = ImageTxtFile2ByteArray(billFullName);
-        Mat src = BytesToMat(bytes);
+        Mat src = Bytes2Mat(bytes);
         Mat dst = new Mat(src.height(), src.width(), src.type());
         RotateClockwise90(src, dst);
         src.release();
@@ -218,14 +226,14 @@ public class FilesHandler {
     }
 
     public static Mat GetRotatedBillMat(byte[] bytes) throws IOException {
-        Mat src = BytesToMat(bytes);
+        Mat src = Bytes2Mat(bytes);
         Mat dst = new Mat(src.height(), src.width(), src.type());
         RotateClockwise90(src, dst);
         src.release();
         return dst;
     }
 
-    public static Mat BytesToMat(byte[] bytes) {
+    public static Mat Bytes2Mat(byte[] bytes) {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
@@ -307,7 +315,7 @@ public class FilesHandler {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
-        Mat src = FilesHandler.BytesToMat(bytes);
+        Mat src = FilesHandler.Bytes2Mat(bytes);
         Mat dst = new Mat(src.height(), src.width(), src.type());
         try{
             FilesHandler.RotateClockwise90(src, dst);
@@ -320,5 +328,25 @@ public class FilesHandler {
             src.release();
             dst.release();
         }
+    }
+
+    public static Bitmap GetRotatedBill(String billFullName) throws IOException {
+        byte[] bytes = ImageTxtFile2ByteArray(billFullName);
+        Bitmap bitmap = ByteArrayToBitmap(bytes);
+        bitmap = FilesHandler.Rotating(bitmap);
+        return bitmap;
+    }
+
+    public static byte[] BitmapToByteArray(Bitmap bitmap) throws IOException {
+        int size = bitmap.getRowBytes() * bitmap.getHeight();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
+        try {
+            bitmap.copyPixelsToBuffer(byteBuffer);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return byteBuffer.array();
     }
 }

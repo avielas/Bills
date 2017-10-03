@@ -3,6 +3,8 @@ package com.bills.billslib.Core;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.bills.billslib.Contracts.Enums.LogLevel;
+
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -181,6 +183,11 @@ public class BillAreaDetector {
                         buttomRight.y = points.get(2).y;
                     }
                 }
+                BillsLog.Log(LogLevel.Info, "Got bill corners: " +
+                    "Top Left: " + topLeft +
+                    "; Top Right: " + topRight +
+                    "; Buttom Right: " + buttomRight +
+                    "; Buttom Left: " + buttomLeft);
                 return true;
             }
         }

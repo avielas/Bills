@@ -119,7 +119,7 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
         Camera.Parameters p = _camera.getParameters();
         /*** set capture to max resolution ***/
         List<Camera.Size> listSize = p.getSupportedPictureSizes();
-        p.setPictureFormat(ImageFormat.NV21);
+        p.setPictureFormat(ImageFormat.JPEG);
         Camera.Size size = GetMaxCameraResolution(listSize);
         p.setPictureSize(size.width, size.height);
         /*********** end ***********/
