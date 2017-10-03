@@ -160,57 +160,40 @@ public class FilesHandler {
     }
 
     public static Mat GetWarpedBillMat(String billFullName) throws IOException {
-        Mat mat;
-        mat = GetRotatedBillMat(billFullName);
-        BillAreaDetector areaDetector = new BillAreaDetector();
-        Point mTopLeft = new Point();
-        Point mTopRight = new Point();
-        Point mButtomLeft = new Point();
-        Point mButtomRight = new Point();
-        if (!OpenCVLoader.initDebug()) {
-            Log.d(Tag, "Failed to initialize OpenCV.");
-            return null;
-        }
-        if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
-            Log.d("Error", "Failed ot get bounding rectangle automatically.");
-            return mat;
-        }
-        /** Preparing Warp Perspective Dimensions **/
-        Mat warpedMat;
-        try{
-            warpedMat = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
-        }
-        catch (Exception ex){
-            Log.d("Error", "Failed to warp perspective");
-            return mat;
-        }
-        return warpedMat;
+        byte[] bytes = ImageTxtFile2ByteArray(billFullName);
+        return GetWarpedBillMat(bytes);
     }
 
     public static Mat GetWarpedBillMat(byte[] bytes) throws IOException {
-        Mat mat;
-        mat = GetRotatedBillMat(bytes);
-        BillAreaDetector areaDetector = new BillAreaDetector();
-        Point mTopLeft = new Point();
-        Point mTopRight = new Point();
-        Point mButtomLeft = new Point();
-        Point mButtomRight = new Point();
-        if (!OpenCVLoader.initDebug()) {
-            Log.d(Tag, "Failed to initialize OpenCV.");
-            return null;
-        }
-        if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
-            Log.d("Error", "Failed ot get bounding rectangle automatically.");
-            return mat;
-        }
-        /** Preparing Warp Perspective Dimensions **/
-        Mat warpedMat;
+        Mat warpedMat = null;
+        Mat mat = null;
         try{
+            mat = Bytes2MatAndRotateClockwise90(bytes);
+            BillAreaDetector areaDetector = new BillAreaDetector();
+            Point mTopLeft = new Point();
+            Point mTopRight = new Point();
+            Point mButtomLeft = new Point();
+            Point mButtomRight = new Point();
+            if (!OpenCVLoader.initDebug()) {
+                Log.d(Tag, "Failed to initialize OpenCV.");
+                return null;
+            }
+            if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+                Log.d("Error", "Failed ot get bounding rectangle automatically.");
+                return mat;
+            }
+            /** Preparing Warp Perspective Dimensions **/
             warpedMat = ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
         }
         catch (Exception ex){
             Log.d("Error", "Failed to warp perspective");
-            return mat;
+            return null;
+        }
+        finally {
+            if(mat != null){
+                mat.release();
+            }
+
         }
         return warpedMat;
     }
@@ -218,33 +201,23 @@ public class FilesHandler {
 
     public static Mat GetRotatedBillMat(String billFullName) throws IOException {
         byte[] bytes = ImageTxtFile2ByteArray(billFullName);
-        Mat src = Bytes2Mat(bytes);
-        Mat dst = new Mat(src.height(), src.width(), src.type());
-        RotateClockwise90(src, dst);
-        src.release();
-        return dst;
+        return Bytes2MatAndRotateClockwise90(bytes);
     }
 
-    public static Mat GetRotatedBillMat(byte[] bytes) throws IOException {
-        Mat src = Bytes2Mat(bytes);
-        Mat dst = new Mat(src.height(), src.width(), src.type());
-        RotateClockwise90(src, dst);
-        src.release();
-        return dst;
-    }
-
-    public static Mat Bytes2Mat(byte[] bytes) {
+    public static Mat Bytes2MatAndRotateClockwise90(byte[] bytes) {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
-        Mat bgrMat;
+        Mat bgrMat = null;
         MatOfByte matOfByte = new MatOfByte(bytes);
         Mat jpegData = new Mat(1, bytes.length, CvType.CV_8UC1);
         try{
             jpegData.put(0, 0, bytes);
             bgrMat = Imgcodecs.imdecode(jpegData, Imgcodecs.IMREAD_COLOR);
             Imgproc.cvtColor(bgrMat, bgrMat, Imgproc.COLOR_RGB2BGRA, 4);
-            return bgrMat;
+            Mat dst = new Mat(bgrMat.height(), bgrMat.width(), bgrMat.type());
+            Core.flip(bgrMat.t(), dst, 1);
+            return dst;
         }
         catch (Exception e){
             return null;
@@ -252,14 +225,8 @@ public class FilesHandler {
         finally{
             matOfByte.release();
             jpegData.release();
+            bgrMat.release();
         }
-    }
-
-    public static void RotateClockwise90(Mat src, Mat dest) {
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
-        Core.flip(src.t(), dest, 1);
     }
 
     /**
@@ -309,25 +276,6 @@ public class FilesHandler {
         Bitmap commonItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
         commonItemBitmap.copyPixelsFromBuffer(buffer);
         return commonItemBitmap;
-    }
-
-    public static void BytesToMatAndRotation(byte[] bytes) {
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
-        Mat src = FilesHandler.Bytes2Mat(bytes);
-        Mat dst = new Mat(src.height(), src.width(), src.type());
-        try{
-            FilesHandler.RotateClockwise90(src, dst);
-            FilesHandler.SaveMatToPNGFile(dst, Constants.CAMERA_CAPTURED_JPG_PHOTO_PATH);
-        }
-        catch (Exception e){
-
-        }
-        finally{
-            src.release();
-            dst.release();
-        }
     }
 
     public static Bitmap GetRotatedBill(String billFullName) throws IOException {
