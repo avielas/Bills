@@ -1,5 +1,7 @@
 package com.bills.bills.firebase;
 
+import android.util.Log;
+
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Contracts.Interfaces.ILogger;
 import com.google.firebase.database.DataSnapshot;
@@ -37,12 +39,28 @@ public class FirebaseLogger implements ILogger {
     }
 
     @Override
-    public void Log(final String Tag, final LogLevel logLevel, final String message) {
+    public void Log(final String tag, final LogLevel logLevel, final String message) {
+        //print to Logcat
+        switch (logLevel){
+            case Error:
+                Log.e(tag, message);
+                break;
+            case Warning:
+                Log.w(tag, message);
+                break;
+            case Info:
+                Log.i(tag, message);
+                break;
+            default:
+                Log.v(tag, "this LogLevel enum doesn't exists: " + message);
+        }
+
+        //print to FireBase log
         mFirebaseLogReference.runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
                 synchronized (mLock) {
-                    mutableData.child(Integer.toString(mRowCount++)).setValue(logLevel.toString() + ": " + message);
+                    mutableData.child(Integer.toString(mRowCount++)).setValue(logLevel.toString() + ": " + tag + ": " + message);
                     return Transaction.success(mutableData);
                 }
             }
