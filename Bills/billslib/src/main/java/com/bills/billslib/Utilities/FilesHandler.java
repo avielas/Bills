@@ -145,42 +145,6 @@ public class FilesHandler {
         return lines;
     }
 
-    public static Mat GetWarpedBillMat(String billFullName) throws IOException {
-        byte[] bytes = ImageTxtFile2ByteArray(billFullName);
-        return GetWarpedBillMat(bytes);
-    }
-
-    public static Mat GetWarpedBillMat(byte[] bytes) throws IOException {
-        Mat mat = null;
-        try{
-            mat = Bytes2MatAndRotateClockwise90(bytes);
-            BillAreaDetector areaDetector = new BillAreaDetector();
-            Point mTopLeft = new Point();
-            Point mTopRight = new Point();
-            Point mButtomLeft = new Point();
-            Point mButtomRight = new Point();
-            if (!OpenCVLoader.initDebug()) {
-                Log.d(Tag, "Failed to initialize OpenCV.");
-                return null;
-            }
-            if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
-                Log.d("Error", "Failed ot get bounding rectangle automatically.");
-                return null;
-            }
-            /** Preparing Warp Perspective Dimensions **/
-            return ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
-        }
-        catch (Exception ex){
-            Log.d("Error", "Failed to warp perspective");
-            return null;
-        }
-        finally {
-            if(mat != null){
-                mat.release();
-            }
-        }
-    }
-
     public static Mat GetRotatedBillMat(String billFullName) throws IOException {
         byte[] bytes = ImageTxtFile2ByteArray(billFullName);
         return Bytes2MatAndRotateClockwise90(bytes);

@@ -6,6 +6,9 @@ import android.util.Pair;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
+import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Core.BillAreaDetector;
+import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
@@ -15,6 +18,7 @@ import com.bills.billslib.Utilities.TestsHelper;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -61,32 +65,50 @@ public class TestBill extends Thread{
             TesseractOCREngine tesseractOCREngine;
             tesseractOCREngine = new TesseractOCREngine();
             String expectedTxtFileName = _restaurant.toString() + ".txt";
+            BillAreaDetector areaDetector = new BillAreaDetector();
+            Point topLeft = new Point();
+            Point topRight = new Point();
+            Point buttomLeft = new Point();
+            Point buttomRight = new Point();
             List<String> expectedBillTextLines = null;
 
             if (!OpenCVLoader.initDebug()) {
                 Log.d(Tag, "Failed to initialize OpenCV.");
                 return;
             }
-            Mat warpedMat = new Mat();
-            Mat warpedMatCopy = new Mat();
+            Mat billMat = new Mat();
+            Mat billMatCopy = new Mat();
 
             try {
                 _results.append(System.getProperty("line.separator") + "Test of " + _billFullName + System.getProperty("line.separator"));
                 tesseractOCREngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
                 expectedBillTextLines = FilesHandler.ReadTxtFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
-                warpedMat = FilesHandler.GetWarpedBillMat(_billFullName);
-                warpedMatCopy = warpedMat.clone();
+                byte[] bytes = FilesHandler.ImageTxtFile2ByteArray(_billFullName);
+                billMat = FilesHandler.Bytes2MatAndRotateClockwise90(bytes);
+                if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
+                    BillsLog.Log(Tag, LogLevel.Error, "Failed to get bill corners.");
+                    throw new Exception();
+                }
+
+                try {
+                    billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
+                    billMatCopy = billMat.clone();
+                } catch (Exception e) {
+                    BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage());
+                    //TODO: decide what to do. Retake the picture? crash the app?
+                    throw new Exception();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            Bitmap processedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-            ImageProcessingLib.PreprocessingForTM(warpedMat);
-            Utils.matToBitmap(warpedMat, processedBillBitmap);
+            Bitmap processedBillBitmap = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
+            ImageProcessingLib.PreprocessingForTM(billMat);
+            Utils.matToBitmap(billMat, processedBillBitmap);
 
             /********* the following prints resd lines on bill and save it *********/
-//            Bitmap warpedBillBitmap = Bitmap.createBitmap(warpedMat.width(), warpedMat.height(), Bitmap.Config.ARGB_8888);
-//            Utils.matToBitmap(warpedMatCopy, warpedBillBitmap);
+//            Bitmap warpedBillBitmap = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(billMatCopy, warpedBillBitmap);
 //            Bitmap printWordsRectsbill = TestsHelper.PrintWordsRects(tesseractOCREngine, warpedBillBitmap, processedBillBitmap,
 //                                                                                                            this.getClass().getSimpleName());
 //            String pathToSavePrintRects = Constants.PRINTED_RECTS_IMAGES_PATH + "/" +_key + ".jpg";
@@ -113,23 +135,23 @@ public class TestBill extends Thread{
             if (_isRunJustTM) {
                 HandlingTMResults(numOfItems, expectedBillTextLines.size());
                 processedBillBitmap.recycle();
-                warpedMat.release();
-                warpedMatCopy.release();
+                billMat.release();
+                billMatCopy.release();
                 tesseractOCREngine.End();
                 return;
             }
 
-            ImageProcessingLib.PreprocessingForParsing(warpedMatCopy);
+            ImageProcessingLib.PreprocessingForParsing(billMatCopy);
             /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
             /***** Out Of Memory when running 4 threads parallel                                      *****/
-            Utils.matToBitmap(warpedMatCopy, processedBillBitmap);
+            Utils.matToBitmap(billMatCopy, processedBillBitmap);
             templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
             templateMatcher.Parsing(numOfItems);
             LinkedHashMap ocrResultCroppedBill = GetOcrResults(templateMatcher);
             CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);
             processedBillBitmap.recycle();
-            warpedMat.release();
-            warpedMatCopy.release();
+            billMat.release();
+            billMatCopy.release();
             tesseractOCREngine.End();
             _passedResultsQueue.add(new Pair(_key, _results));
         }

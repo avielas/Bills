@@ -64,6 +64,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         ELLIPTICAL,
         CROSS_SHAPED
     }
+    private String Tag = this.getClass().getSimpleName();
     TesseractOCREngine tesseractOCREngine;
     String _restaurantName;
     String _brandAndModelPath;
@@ -162,7 +163,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             _processedBillMat = new Mat();
 
             String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
-            _warpedBillMat = FilesHandler.GetWarpedBillMat(lastCapturedBillPath);
+            _warpedBillMat = GetWarpedBillMat(lastCapturedBillPath);
             _warpedBill = Bitmap.createBitmap(_warpedBillMat.width(), _warpedBillMat.height(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(_warpedBillMat, _warpedBill);
             _billWithPrintedRedLines = _warpedBill.copy(_warpedBill.getConfig(), true);
@@ -533,6 +534,42 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 }
             }
         });
+    }
+
+    public Mat GetWarpedBillMat(String billFullName) throws IOException {
+        byte[] bytes = FilesHandler.ImageTxtFile2ByteArray(billFullName);
+        return GetWarpedBillMat(bytes);
+    }
+
+    public Mat GetWarpedBillMat(byte[] bytes) throws IOException {
+        Mat mat = null;
+        try{
+            mat = FilesHandler.Bytes2MatAndRotateClockwise90(bytes);
+            BillAreaDetector areaDetector = new BillAreaDetector();
+            Point mTopLeft = new Point();
+            Point mTopRight = new Point();
+            Point mButtomLeft = new Point();
+            Point mButtomRight = new Point();
+            if (!OpenCVLoader.initDebug()) {
+                Log.d(Tag, "Failed to initialize OpenCV.");
+                return null;
+            }
+            if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+                Log.d("Error", "Failed ot get bounding rectangle automatically.");
+                return null;
+            }
+            /** Preparing Warp Perspective Dimensions **/
+            return ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
+        }
+        catch (Exception ex){
+            Log.d("Error", "Failed to warp perspective");
+            return null;
+        }
+        finally {
+            if(mat != null){
+                mat.release();
+            }
+        }
     }
 
     private void RunBillsMainFlow(int requestCode) {
