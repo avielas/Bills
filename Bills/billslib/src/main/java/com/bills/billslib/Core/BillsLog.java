@@ -15,10 +15,10 @@ public class BillsLog {
         mLogger = logger;
     }
 
-    public static void Log(LogLevel logLevel, String message){
+    public static void Log(String tag, LogLevel logLevel, String message){
         if(mLogger == null){
             throw new ExceptionInInitializerError("BillsLog was not initialized.");
         }
-        mLogger.Log(logLevel, message);
+        mLogger.Log(tag,logLevel, message);
     }
 }

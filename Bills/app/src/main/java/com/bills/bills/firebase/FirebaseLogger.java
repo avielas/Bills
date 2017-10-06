@@ -37,7 +37,7 @@ public class FirebaseLogger implements ILogger {
     }
 
     @Override
-    public void Log(final LogLevel logLevel, final String message) {
+    public void Log(final String Tag, final LogLevel logLevel, final String message) {
         mFirebaseLogReference.runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {

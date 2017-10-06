@@ -203,7 +203,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         if (!OpenCVLoader.initDebug()) {
             String message = "Failed to initialize OpenCV.";
             Log.d(Tag, message);
-            BillsLog.Log(LogLevel.Error, message);
+            BillsLog.Log(Tag, LogLevel.Error, message);
             mListener.Finish();
         }
 
@@ -231,12 +231,12 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 warpedMatCopy2 = warpedMat.clone();
             } catch (Exception e) {
                 e.printStackTrace();
-                BillsLog.Log(LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage());
+                BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage());
                 //TODO: decide what to do. Retake the picture? crash the app?
                 throw new Exception();
             }
 
-            BillsLog.Log(LogLevel.Info, "Warped perspective successfully.");
+            BillsLog.Log(Tag, LogLevel.Info, "Warped perspective successfully.");
 
             processedBillBitmap = Bitmap.createBitmap(warpedMatCopy1.width(), warpedMatCopy1.height(), Bitmap.Config.ARGB_8888);
             ImageProcessingLib.PreprocessingForTM(warpedMatCopy1);
@@ -245,9 +245,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
             templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
             try {
                 templateMatcher.Match();
-                BillsLog.Log(LogLevel.Info, "Template matcher succeed.");
+                BillsLog.Log(Tag, LogLevel.Info, "Template matcher succeed.");
             } catch (Exception e) {
-                BillsLog.Log(LogLevel.Error, "Template matcher threw an exception: " + e.getMessage());
+                BillsLog.Log(Tag, LogLevel.Error, "Template matcher threw an exception: " + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -274,7 +274,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
             FilesHandler.SaveToTXTFile(bytes, fileFullName);
             Utils.matToBitmap(warpedMat, bitmapBill);
             mListener.StartSummarizerFragment(rows, bitmapBill, mPassCode, mRelativeDbAndStoragePath);
-            BillsLog.Log(LogLevel.Info, "Parsing finished");
+            BillsLog.Log(Tag, LogLevel.Info, "Parsing finished");
         }catch (Exception ex){
             mListener.StartWelcomeFragment(bitmapBill);
         }

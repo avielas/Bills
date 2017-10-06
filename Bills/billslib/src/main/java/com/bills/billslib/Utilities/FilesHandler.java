@@ -165,7 +165,7 @@ public class FilesHandler {
             }
             if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
                 Log.d("Error", "Failed ot get bounding rectangle automatically.");
-                return mat;
+                return null;
             }
             /** Preparing Warp Perspective Dimensions **/
             return ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);

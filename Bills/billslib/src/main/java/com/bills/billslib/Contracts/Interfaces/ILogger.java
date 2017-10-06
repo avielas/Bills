@@ -7,5 +7,5 @@ import com.bills.billslib.Contracts.Enums.LogLevel;
  */
 
 public interface ILogger {
-    public void Log(LogLevel logLevel, String message);
+    public void Log(String tag, LogLevel logLevel, String message);
 }

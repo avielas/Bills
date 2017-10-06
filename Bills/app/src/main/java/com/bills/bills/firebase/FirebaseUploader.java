@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FirebaseUploader {
     Activity mActivity;
-
+    private String Tag = this.getClass().getSimpleName();
     private FirebaseDatabase mFirebseDatabase;
     private DatabaseReference mUsersDatabaseReference;
 
@@ -86,11 +86,11 @@ public class FirebaseUploader {
         storageFullBillRef.putBytes(fullBillData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                BillsLog.Log(LogLevel.Info, "Uploaded full bill image");
+                BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image");
                 storageFullBillRef.updateMetadata(ocrBytesMetadata).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        BillsLog.Log(LogLevel.Info, "Uploaded full bill image MetaData");
+                        BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image MetaData");
                     }
                 });
             }
@@ -168,18 +168,18 @@ public class FirebaseUploader {
         storageFullBillRef.putBytes(fullBillData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                BillsLog.Log(LogLevel.Info, "Uploaded full bill image");
+                BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image");
                 storageFullBillRef.updateMetadata(ocrBytesMetadata).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        BillsLog.Log(LogLevel.Info, "Uploaded full bill image MetaData");
+                        BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image MetaData");
                     }
                 });
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                BillsLog.Log(LogLevel.Error, "Failed to upload full bill image");
+                BillsLog.Log(Tag, LogLevel.Error, "Failed to upload full bill image");
             }
         });
     }

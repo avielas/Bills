@@ -6,9 +6,13 @@ import android.support.test.espresso.core.deps.guava.base.Predicate;
 import android.support.test.espresso.core.deps.guava.base.Predicates;
 import android.support.test.espresso.core.deps.guava.collect.Collections2;
 import android.support.test.espresso.core.deps.guava.collect.ObjectArrays;
+import android.util.Log;
 import android.util.Pair;
 
 import com.bills.billslib.Contracts.Constants;
+import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Interfaces.ILogger;
+import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Utilities.FilesHandler;
 
 import org.junit.Test;
@@ -43,6 +47,7 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
  * Created by avielavr on 11/4/2016.
  */
 public class TestBench {
+    private String Tag = this.getClass().getSimpleName();
     private static final int TEST_EMULATOR = 1;
     private static final int TEST_PHONE = 3;
     Context _context;
@@ -82,9 +87,10 @@ public class TestBench {
     @Test
     public void begin() throws Exception {
         _context = getInstrumentation().getContext();
+        InitBillsLog();
         _timeMs = System.currentTimeMillis();
         String sourceDirectory;
-        _isRunJustTM = true;
+        _isRunJustTM = false;
         //copy images to internal memory
         //if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
         //{
@@ -115,6 +121,27 @@ public class TestBench {
             default:
                 throw new Exception("Unknown case !!!");
         }
+    }
+
+    private void InitBillsLog() {
+        BillsLog.Init(new ILogger() {
+            @Override
+            public void Log(String tag, LogLevel logLevel, String message) {
+                switch (logLevel){
+                    case Error:
+                        Log.i(tag, message);
+                        break;
+                    case Warning:
+                        Log.i(tag, message);
+                        break;
+                    case Info:
+                        Log.i(tag, message);
+                        break;
+                    default:
+                        Log.v(tag, "this LogLevel enum doesn't exists: " + message);
+                }
+            }
+        });
     }
 
     /**
