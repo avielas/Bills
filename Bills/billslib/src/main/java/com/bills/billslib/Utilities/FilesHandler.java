@@ -145,14 +145,15 @@ public class FilesHandler {
         return lines;
     }
 
-    public static Mat GetRotatedBillMat(String billFullName) throws IOException {
+    public static Mat GetRotatedBillMat(String billFullName) throws Exception {
         byte[] bytes = ImageTxtFile2ByteArray(billFullName);
         return Bytes2MatAndRotateClockwise90(bytes);
     }
 
-    public static Mat Bytes2MatAndRotateClockwise90(byte[] bytes) {
+    public static Mat Bytes2MatAndRotateClockwise90(byte[] bytes) throws Exception {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
+            throw new Exception("Failed to initialize OpenCVLoader");
         }
         Mat bgrMat = null;
         MatOfByte matOfByte = new MatOfByte(bytes);
@@ -166,7 +167,7 @@ public class FilesHandler {
             return dst;
         }
         catch (Exception e){
-            return null;
+            throw e;
         }
         finally{
             matOfByte.release();

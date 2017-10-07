@@ -230,8 +230,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
             billMat = FilesHandler.Bytes2MatAndRotateClockwise90(bytes);
             bitmapBill = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(billMat, bitmapBill);
-//            String fileFullName = Constants.IMAGES_PATH + "/ocrBytes" + ".txt";
-//            FilesHandler.SaveToTXTFile(bytes, fileFullName);
             if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
                 BillsLog.Log(Tag, LogLevel.Error, "Failed to get bill corners.");
                 throw new Exception();
