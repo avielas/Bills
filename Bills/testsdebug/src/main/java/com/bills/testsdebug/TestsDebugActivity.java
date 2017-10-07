@@ -626,7 +626,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                     _warpedBill = Bitmap.createBitmap(warpedBillMat.width(), warpedBillMat.height(), Bitmap.Config.ARGB_8888);
                     Utils.matToBitmap(warpedBillMat, _warpedBill);
                     _warpedBillMat = warpedBillMat.clone();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 finally {
