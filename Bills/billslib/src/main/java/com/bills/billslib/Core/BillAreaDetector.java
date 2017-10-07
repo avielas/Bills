@@ -77,7 +77,7 @@ public class BillAreaDetector {
             int thresh = GetThresholdIndex(hist, _histSizeNum) * _bucketSize;
 
             Log.d(Tag, "Threshold for area detection: " + thresh);
-            Imgproc.threshold(newImage, newImage, thresh, 255, Imgproc.THRESH_BINARY);
+            RemoveGlare(newImage, thresh);
 
             Imgproc.dilate(newImage, newImage,
                     Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10,10)),
@@ -274,5 +274,90 @@ public class BillAreaDetector {
         double dx2 = pt2.x - pt0.x;
         double dy2 = pt2.y - pt0.y;
         return (dx1 * dx2 + dy1 * dy2) / Math.sqrt((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2) + 1e-10);
+    }
+
+    private static void RemoveGlare(Mat grayscaleMat, int threshold){
+        Mat resizedImageMat = new Mat();
+        Size newSize = new Size(grayscaleMat.width()/4, grayscaleMat.height()/4);
+        Imgproc.resize(grayscaleMat, resizedImageMat, newSize);
+
+        Mat binaryGlareVerticalKernelImageMat = new Mat();
+        Mat binaryGlareHorizontalKernelImageMat = new Mat();
+
+
+        Mat dilateHorizontalKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(resizedImageMat.width()/2, 10));
+        Mat erodeHorizontalKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+
+        Mat dilateVerticalKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10, resizedImageMat.width()/2));
+        Mat erodeVerticalKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+
+        Mat verticalMask = new Mat(resizedImageMat.rows(), resizedImageMat.cols(), binaryGlareHorizontalKernelImageMat.type(), Scalar.all(255));
+        Mat horizontalMask = new Mat(resizedImageMat.rows(), resizedImageMat.cols(), binaryGlareHorizontalKernelImageMat.type(), Scalar.all(255));
+
+        Mat binaryGlareImageMat = new Mat();
+
+        try {
+            Imgproc.threshold(resizedImageMat, binaryGlareVerticalKernelImageMat, 229, 255, Imgproc.THRESH_BINARY);
+            Imgproc.threshold(resizedImageMat, binaryGlareHorizontalKernelImageMat, 229, 255, Imgproc.THRESH_BINARY);
+
+            //create masks for horizontal and vertical kernels for the glare image erosion and dilation
+            List<MatOfPoint> horizontalBounds = new ArrayList<>();
+            List<MatOfPoint> verticalBounds = new ArrayList<>();
+            Point topLeftPoint = new Point(0, 0);
+            Point topRightPoint = new Point(resizedImageMat.width() - 1, 0);
+            Point buttomLeftPoint = new Point(0, resizedImageMat.height());
+            Point buttomRightPoint = new Point(resizedImageMat.width(), resizedImageMat.height());
+            Point center = new Point(resizedImageMat.width() / 2, resizedImageMat.height() / 2);
+
+            //create bounds for horizontal and vertical kernel masks
+            verticalBounds.add(new MatOfPoint(topLeftPoint, topRightPoint, center));
+            verticalBounds.add(new MatOfPoint(center, buttomRightPoint, buttomLeftPoint));
+
+            Imgproc.fillPoly(verticalMask, verticalBounds, new Scalar(0));
+            Imgproc.threshold(verticalMask, verticalMask, 100, 255, Imgproc.THRESH_BINARY);
+
+            horizontalBounds.add(new MatOfPoint(topLeftPoint, center, buttomLeftPoint));
+            horizontalBounds.add(new MatOfPoint(topRightPoint, buttomRightPoint, center));
+
+            Imgproc.fillPoly(horizontalMask, horizontalBounds, new Scalar(0));
+            Imgproc.threshold(horizontalMask, horizontalMask, 100, 255, Imgproc.THRESH_BINARY);
+
+            //get vertical and horizontal kernel glare images
+            Core.bitwise_and(horizontalMask, binaryGlareHorizontalKernelImageMat, binaryGlareHorizontalKernelImageMat);
+            Core.bitwise_and(verticalMask, binaryGlareVerticalKernelImageMat, binaryGlareVerticalKernelImageMat);
+
+            Imgproc.erode(binaryGlareVerticalKernelImageMat, binaryGlareVerticalKernelImageMat, erodeVerticalKernel, new Point(-1, -1), 3);
+            Imgproc.dilate(binaryGlareVerticalKernelImageMat, binaryGlareVerticalKernelImageMat, dilateVerticalKernel, new Point(-1, -1), 3);
+
+            Imgproc.erode(binaryGlareHorizontalKernelImageMat, binaryGlareHorizontalKernelImageMat, erodeHorizontalKernel, new Point(-1, -1), 3);
+            Imgproc.dilate(binaryGlareHorizontalKernelImageMat, binaryGlareHorizontalKernelImageMat, dilateHorizontalKernel, new Point(-1, -1), 3);
+
+            Core.add(binaryGlareHorizontalKernelImageMat, binaryGlareVerticalKernelImageMat, binaryGlareImageMat);
+
+            Imgproc.erode(binaryGlareImageMat, binaryGlareImageMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10, 10)), new Point(-1, -1), 1);
+            Imgproc.dilate(binaryGlareImageMat, binaryGlareImageMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10, 10)), new Point(-1, -1), 3);
+
+            Imgproc.erode(binaryGlareImageMat, binaryGlareImageMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5)), new Point(-1, -1), 1);
+            Imgproc.dilate(binaryGlareImageMat, binaryGlareImageMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5)), new Point(-1, -1), 3);
+
+            Imgproc.threshold(resizedImageMat, resizedImageMat, threshold, 255, Imgproc.THRESH_BINARY);
+
+            Core.subtract(resizedImageMat, binaryGlareImageMat, resizedImageMat);
+
+            Imgproc.resize(resizedImageMat, grayscaleMat, new Size(grayscaleMat.width(), grayscaleMat.height()));
+
+        }catch (Exception ex){
+            throw ex;
+        }finally {
+            binaryGlareVerticalKernelImageMat.release();
+            binaryGlareHorizontalKernelImageMat.release();
+            dilateHorizontalKernel.release();
+            erodeHorizontalKernel.release();
+            dilateVerticalKernel.release();
+            erodeVerticalKernel.release();
+            verticalMask.release();
+            horizontalMask.release();
+            binaryGlareImageMat.release();
+        }
     }
 }
