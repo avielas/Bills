@@ -28,7 +28,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import com.bills.billslib.Contracts.*;
 import com.bills.billslib.Contracts.Enums.Language;
+import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Interfaces.ILogger;
 import com.bills.billslib.Core.BillAreaDetector;
+import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.MainActivityBase;
 import com.bills.billslib.Core.TemplateMatcher;
@@ -162,6 +165,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             _warpedBillMat = new Mat();
             _processedBillMat = new Mat();
 
+            InitBillsLogToLogcat();
             String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
             _warpedBillMat = GetWarpedBillMat(lastCapturedBillPath);
             _warpedBill = Bitmap.createBitmap(_warpedBillMat.width(), _warpedBillMat.height(), Bitmap.Config.ARGB_8888);
@@ -614,6 +618,28 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         alertDialogAndroid.show();
     }
 
+    private void InitBillsLogToLogcat() {
+        BillsLog.Init(new ILogger() {
+            @Override
+            public void Log(String tag, LogLevel logLevel, String message) {
+                switch (logLevel){
+                    case Error:
+                        Log.e(tag, message);
+                        break;
+                    case Warning:
+                        Log.w(tag, message);
+                        break;
+                    case Info:
+                        Log.i(tag, message);
+                        break;
+                    default:
+                        Log.v(tag, "this LogLevel enum doesn't exists: " + message);
+                }
+            }
+        });
+    }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         switch (resultCode) {
@@ -688,24 +714,27 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     public void onClick(View v) {
 
         if(v == _userCropFinished){
-            double stretchFactorX = (1.0 * _warpedBill.getWidth()) / _dragRectView.getBackground().getBounds().width();
-            double stretchFactorY = (1.0 * _warpedBill.getHeight()) / _dragRectView.getBackground().getBounds().height();
 
-            double x = _dragRectView.TopLeft.x * stretchFactorX;
-            double y = _dragRectView.TopLeft.y * stretchFactorY ;
-            _topLeft = new Point(x,y);
-
-            x = _dragRectView.TopRight.x * stretchFactorX;
-            y = _dragRectView.TopRight.y * stretchFactorY;
-            _topRight = new Point(x,y);
-
-            x = _dragRectView.ButtomLeft.x * stretchFactorX;
-            y = _dragRectView.ButtomLeft.y * stretchFactorY;
-            _buttomLeft = new Point(x,y);
-
-            x = _dragRectView.ButtomRight.x * stretchFactorX;
-            y = _dragRectView.ButtomRight.y * stretchFactorY;
-            _buttomRight = new Point(x,y);
+            //TODO - I removed this code to disable changes at DragRectView due to the following bug:
+            // TODO - #55 disable DragRectView at TestsDebug due to bad double conversion. user shouldn't change the identified corners
+//            double stretchFactorX = (1.0 * _warpedBill.getWidth()) / _dragRectView.getBackground().getBounds().width();
+//            double stretchFactorY = (1.0 * _warpedBill.getHeight()) / _dragRectView.getBackground().getBounds().height();
+//
+//            double x = _dragRectView.TopLeft.x * stretchFactorX;
+//            double y = _dragRectView.TopLeft.y * stretchFactorY ;
+//            _topLeft = new Point(x,y);
+//
+//            x = _dragRectView.TopRight.x * stretchFactorX;
+//            y = _dragRectView.TopRight.y * stretchFactorY;
+//            _topRight = new Point(x,y);
+//
+//            x = _dragRectView.ButtomLeft.x * stretchFactorX;
+//            y = _dragRectView.ButtomLeft.y * stretchFactorY;
+//            _buttomLeft = new Point(x,y);
+//
+//            x = _dragRectView.ButtomRight.x * stretchFactorX;
+//            y = _dragRectView.ButtomRight.y * stretchFactorY;
+//            _buttomRight = new Point(x,y);
 
             /** Preparing Warp Perspective Dimensions **/
             try{
