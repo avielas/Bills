@@ -48,7 +48,7 @@ INSTRUCTIONS
        -. exit
        -. exit
     *. pull from sdcard to pc:
-       ./adb pull /data/local/tmp/TesseractSample/TestsOutput.txt ~/Desktop/BS
+       ./adb pull /data/local/tmp/TesseractSample/TestsOutput.txt /data/local/tmp/TesseractSample/FailedTestsOutput.txt  ~/Desktop/BS
 
 -. How to use tests?
     *. read Tests Configuration at the begin of OCRWrapperTest.java

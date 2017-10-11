@@ -82,7 +82,7 @@ public class TestBench {
         InitBillsLogToLogcat();
         _timeMs = System.currentTimeMillis();
         String sourceDirectory;
-        _isRunJustTM = false;
+        _isRunJustTM = true;
         //copy images to internal memory
         //if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
         //{
@@ -102,10 +102,11 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList("sinta1", "sinta2", "pastaMarket1", "pastaMarket2",
-                        "iza1",
-                        "dovrin1", "dovrin2"/**/ /*, "dovrin3"*/,
-                        "nola1", "nola2", "nola3", "nola4"/**/);
+                _restaurantsNamesTestFilter = Arrays.asList("sinta1", "sinta2",
+                                                            "pastaMarket1", "pastaMarket2",
+                                                            "iza1",
+                                                            "dovrin1", "dovrin2", "dovrin3",
+                                                            "nola1", "nola2", "nola3", "nola4");
                 _billsTestFilter = Arrays.asList(/*"ocrBytes.txt", "ocrBytes1.txt", "ocrBytes2.txt", "ocrBytes3.txt", "ocrBytes4.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);
