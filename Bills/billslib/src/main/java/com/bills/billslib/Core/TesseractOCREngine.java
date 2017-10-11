@@ -23,7 +23,7 @@ public class TesseractOCREngine implements IOcrEngine {
     private TessBaseAPI _tessBaseAPI = new TessBaseAPI();
     private final String EngLanguage = "eng";
     private final String HebLanguage = "heb";
-    private final String NumbersOnlyWhiteList = "1234567890.";
+    private final String NumbersOnlyWhiteList = "1234567890.-";
     private static final Double DefinedEdgePercent = 0.02;
 
     private Rect _curRectangle = null;
