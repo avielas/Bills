@@ -82,7 +82,7 @@ public class TestBench {
         InitBillsLogToLogcat();
         _timeMs = System.currentTimeMillis();
         String sourceDirectory;
-        _isRunJustTM = true;
+        _isRunJustTM = false;
         //copy images to internal memory
         //if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
         //{
@@ -91,8 +91,8 @@ public class TestBench {
         switch(_testToRun)
         {
             case TEST_EMULATOR:
-                _restaurantsNamesTestFilter = Arrays.asList( "dovrin"/*, "nili", "zanzara"*/);
-                _billsTestFilter = Arrays.asList("29112016_2246_croppedCenter.jpg");
+                _restaurantsNamesTestFilter = Arrays.asList("sinta1", "sinta2"/**/);
+                _billsTestFilter = Arrays.asList(/*"ocrBytes.txt"*/);
                 _brandModelDirectoriesTestFilter = Arrays.asList("samsung_GT-I9300"/*, "samsung_GT-I9070"*/);
 
                 //in case it's empty, test run on all phone directories. it get all names from assets
