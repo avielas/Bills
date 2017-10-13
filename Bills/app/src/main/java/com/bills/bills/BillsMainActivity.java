@@ -31,7 +31,7 @@ public class BillsMainActivity extends MainActivityBase implements
         BillSummarizerFragment.OnFragmentInteractionListener,
         CameraFragment.OnFragmentInteractionListener{
 
-    private String Tag = this.getClass().getSimpleName();
+    private String Tag = BillsMainActivity.class.getName();
     private static final int RC_SIGN_IN = 123;
     private static final int REQUEST_CAMERA_PERMISSION = 101;
 
@@ -196,7 +196,7 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void StartSummarizerFragment(final List<BillRow> rows, final Bitmap image,
+    public void StartSummarizerFragment(final List<BillRow> rows, final byte[] image,
                                         final Integer passCode, final String relativeDbAndStoragePath) {
 
                 mBillSummarizerFragment.Init(BillsMainActivity.this.getApplicationContext(), passCode,
@@ -207,14 +207,11 @@ public class BillsMainActivity extends MainActivityBase implements
         uploader.UploadRows(rows, image, new FirebaseUploader.IFirebaseUploaderCallback() {
 
             @Override
-            public void OnSuccess() {
-                image.recycle();
-            }
+            public void OnSuccess() {}
 
             @Override
             public void OnFail(String message) {
                 Log.e(Tag, "Error accured while uploading bill rows. Error: " + message);
-                image.recycle();
                 StartWelcomeScreen();
             }
         });
@@ -234,7 +231,7 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void StartWelcomeFragment(final Bitmap image) {
+    public void StartWelcomeFragment(final byte[] image) {
         mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback(){
             @Override
             public void OnPassCodeResovled(final Integer passCode, final String relativeDbAndStoragePath) {

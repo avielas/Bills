@@ -44,7 +44,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 
 
 public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListener {
-    private static final String TAG = "CameraRenderer";
+    private static final String TAG = CameraRenderer.class.getName();
     private static final int EGL_OPENGL_ES2_BIT = 4;
     private static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
     private static final int DRAW_INTERVAL = 1000 / 30;

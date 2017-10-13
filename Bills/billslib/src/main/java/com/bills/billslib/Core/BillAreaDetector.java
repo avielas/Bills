@@ -31,7 +31,7 @@ import java.util.List;
  */
 
 public class BillAreaDetector {
-    private String Tag = this.getClass().getSimpleName();
+    private String Tag = BillAreaDetector.class.getName();;
 
     private static int _histSizeNum = 64;
     private static int _bucketSize = 256 / _histSizeNum;
@@ -77,7 +77,8 @@ public class BillAreaDetector {
             int thresh = GetThresholdIndex(hist, _histSizeNum) * _bucketSize;
 
             Log.d(Tag, "Threshold for area detection: " + thresh);
-            RemoveGlare(newImage, thresh);
+            Imgproc.threshold(newImage, newImage, thresh, 255, Imgproc.THRESH_BINARY);
+//            RemoveGlare(newImage, thresh);
 
             Imgproc.dilate(newImage, newImage,
                     Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10,10)),
@@ -193,8 +194,7 @@ public class BillAreaDetector {
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
-            Log.d(Tag, "An exception accured while trying to find bill corners. Error: " + ex.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "An exception accured while trying to find bill corners. Error: " + ex.getMessage());
         }
         finally {
             if(newImage != null) {
@@ -226,7 +226,6 @@ public class BillAreaDetector {
             }
         }
         return false;
-
     }
 
     private int GetThresholdIndex(float[] hist, int histSizeNum) {

@@ -6,7 +6,9 @@ import android.graphics.Matrix;
 import android.util.Log;
 
 import com.bills.billslib.Contracts.Constants;
+import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Core.BillAreaDetector;
+import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.ImageProcessingLib;
 
 import org.opencv.android.OpenCVLoader;
@@ -42,7 +44,7 @@ import java.util.List;
  */
 
 public class FilesHandler {
-    private static String Tag = "FilesHandler";
+    private static String Tag = FilesHandler.class.getName();
 
     public static boolean SaveToPNGFile(Bitmap bmp, String path){
         FileOutputStream out = null;
@@ -51,20 +53,24 @@ public class FilesHandler {
             if(file.exists()){
                 file.delete();
             }
+
             File folder = new File(file.getParent());
             if(!folder.exists())
             {
                 Boolean isSuccess = folder.mkdirs();
-                if(!isSuccess)
-                    throw new Exception("Can't create directory(ies)");
+                if(!isSuccess) {
+                    BillsLog.Log(Tag, LogLevel.Error, "Can't create directory(ies)");
+                    return false;
+                }
             }
             out = new FileOutputStream(path);
 
             // bmp is your Bitmap instance, PNG is a lossless format, the compression factor (100) is ignored
             bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+            BillsLog.Log(Tag, LogLevel.Info, "SaveToPNGFile success!");
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            BillsLog.Log(Tag, LogLevel.Error, e.getMessage());
             return false;
         } finally {
             try {
@@ -72,58 +78,54 @@ public class FilesHandler {
                     out.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                BillsLog.Log(Tag, LogLevel.Error, "Can't free output stream: " + e.getMessage());
                 return false;
             }
         }
     }
 
     public static boolean SaveToTXTFile(byte[] image, String fileFullName){
+        BufferedOutputStream bos = null;
         try {
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(fileFullName));
+            bos = new BufferedOutputStream(new FileOutputStream(fileFullName));
             bos.write(image);
             bos.flush();
             bos.close();
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            BillsLog.Log(Tag, LogLevel.Error, "Can't create directory(ies): " + e.getMessage());
+            return false;
+        }finally {
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    BillsLog.Log(Tag, LogLevel.Error, "Can't free allocated buffer: " + e.getMessage());
+                    return false;
+                }
+            }
         }
         return true;
-    }
-
-    public static Bitmap ByteArrayToBitmap(byte[] bytes){
-        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-        bitmapOptions.inMutable = true;
-        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        Bitmap bitmap = null;
-        try{
-            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, bitmapOptions);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        return bitmap;
     }
 
     public static byte[] ImageTxtFile2ByteArray(String path) throws IOException {
         File file = new File(path);
         int size = (int) file.length();
         byte[] image = new byte[size];
-        BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-        bis.read(image);
-        bis.close();
+        BufferedInputStream bis = null;
+        try{
+            bis = new BufferedInputStream(new FileInputStream(file));
+            bis.read(image);
+        }catch (Exception e){
+            BillsLog.Log(Tag, LogLevel.Error, "failed to read input stream: " + e.getMessage());
+            return null;
+        }finally {
+            if(bis != null){
+                bis.close();
+            }
+        }
         return image;
-    }
-
-    public static Bitmap Rotating(Bitmap image) {
-        //rotating bitmap due to Samsung camera bug
-        Matrix matrix = new Matrix();
-        matrix.postRotate(90);
-        Bitmap rotated = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
-        image.recycle();
-        return rotated;
     }
 
     /**
@@ -223,26 +225,6 @@ public class FilesHandler {
         Bitmap commonItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
         commonItemBitmap.copyPixelsFromBuffer(buffer);
         return commonItemBitmap;
-    }
-
-    public static Bitmap GetRotatedBill(String billFullName) throws IOException {
-        byte[] bytes = ImageTxtFile2ByteArray(billFullName);
-        Bitmap bitmap = ByteArrayToBitmap(bytes);
-        bitmap = FilesHandler.Rotating(bitmap);
-        return bitmap;
-    }
-
-    public static byte[] BitmapToByteArray(Bitmap bitmap) throws IOException {
-        int size = bitmap.getRowBytes() * bitmap.getHeight();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
-        try {
-            bitmap.copyPixelsToBuffer(byteBuffer);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        return byteBuffer.array();
     }
 
     public static boolean SaveMatToPNGFile(Mat mat, String path){

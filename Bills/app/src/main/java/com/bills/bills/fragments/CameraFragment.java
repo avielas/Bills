@@ -69,7 +69,7 @@ import static android.view.View.GONE;
  * to handle interaction events.
  */
 public class CameraFragment extends Fragment implements View.OnClickListener, IOnCameraFinished {
-    private String Tag = this.getClass().getSimpleName();
+    private String Tag = CameraFragment.class.getName();
 
     //Camera Renderer
     private CameraRenderer mRenderer;
@@ -198,7 +198,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     }
 
     @Override
-    public void OnCameraFinished(byte[] bytes) {
+    public void OnCameraFinished(byte[] image) {
 
         if (!OpenCVLoader.initDebug()) {
             String message = "Failed to initialize OpenCV.";
@@ -206,7 +206,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
             BillsLog.Log(Tag, LogLevel.Error, message);
             mListener.Finish();
         }
-        Bitmap bitmapBill = null;
         Mat billMat = null;
         Mat billMatCopy = null;
         Bitmap processedBillBitmap = null;
@@ -227,9 +226,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         }
 
         try {
-            billMat = FilesHandler.Bytes2MatAndRotateClockwise90(bytes);
-            bitmapBill = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(billMat, bitmapBill);
+            billMat = FilesHandler.Bytes2MatAndRotateClockwise90(image);
             if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
                 BillsLog.Log(Tag, LogLevel.Error, "Failed to get bill corners.");
                 throw new Exception();
@@ -278,10 +275,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 index++;
             }
 
-            mListener.StartSummarizerFragment(rows, bitmapBill, mPassCode, mRelativeDbAndStoragePath);
+            mListener.StartSummarizerFragment(rows, image, mPassCode, mRelativeDbAndStoragePath);
             BillsLog.Log(Tag, LogLevel.Info, "Parsing finished");
         }catch (Exception ex){
-            mListener.StartWelcomeFragment(bitmapBill);
+            mListener.StartWelcomeFragment(image);
         }
         finally {
             if(null != billMat){
@@ -308,9 +305,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        void StartSummarizerFragment(List<BillRow> rows, Bitmap image, Integer passCode, String relativeDbAndStoragePath);
+        void StartSummarizerFragment(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath);
         void StartWelcomeFragment();
         void Finish();
-        void StartWelcomeFragment(Bitmap image);
+        void StartWelcomeFragment(byte[] image);
     }
 }

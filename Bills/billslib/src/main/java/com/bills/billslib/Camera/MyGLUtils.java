@@ -31,7 +31,7 @@ import java.io.InputStream;
 import javax.microedition.khronos.opengles.GL10;
 
 public class MyGLUtils {
-    private static final String TAG = "MyGLUtils";
+    private static final String TAG = MyGLUtils.class.getName();
 
     public static int genTexture() {
         return genTexture(GLES20.GL_TEXTURE_2D);

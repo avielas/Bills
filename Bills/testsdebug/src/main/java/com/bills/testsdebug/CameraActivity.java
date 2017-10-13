@@ -133,8 +133,6 @@ public class CameraActivity extends AppCompatActivity implements IOnCameraFinish
         String now = sdf.format(date);
         String fileFullName = Constants.IMAGES_PATH + "/ocrBytes_" + now + ".txt";
         FilesHandler.SaveToTXTFile(bytes, fileFullName);
-        //TODO - dont delete! using for debugging
-//        FilesHandler.BytesToMatAndRotation(bytes);
         FinishActivity();
     }
 }

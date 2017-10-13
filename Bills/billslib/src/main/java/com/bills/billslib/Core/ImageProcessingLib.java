@@ -29,7 +29,7 @@ import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
  */
 
 public class ImageProcessingLib {
-    private static final String Tag = "ImageProcessingLib";
+    private static final String Tag = ImageProcessingLib.class.getName();;
     private enum StructureElement {
         NONE,
         HORIZONTAL_LINE,

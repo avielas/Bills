@@ -15,7 +15,7 @@ import java.io.OutputStream;
  */
 
 public class PreparingEnvironmentUtil {
-    private static final String TAG = "PreparingEnvironment";
+    private static final String TAG = PreparingEnvironmentUtil.class.getName();;
 
     public static void PrepareTesseract(Context context) {
         try {

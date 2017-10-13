@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 public class PassCodeResolver {
-    private final String Tag = this.getClass().getSimpleName();
+    private final String Tag = PassCodeResolver.class.getName();
 
     private DatabaseReference mUserIdsDatabaseReference;
     private FirebaseDatabase mFirebaseDatabase;

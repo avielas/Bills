@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FirebaseUploader {
     Activity mActivity;
-    private String Tag = this.getClass().getSimpleName();
+    private String Tag = FirebaseUploader.class.getName();
     private FirebaseDatabase mFirebseDatabase;
     private DatabaseReference mUsersDatabaseReference;
 
@@ -62,28 +62,17 @@ public class FirebaseUploader {
         mActivity = activity;
     }
 
-    public void UploadRows(final List<BillRow> rows, Bitmap fullBillImage, final IFirebaseUploaderCallback callback) {
+    public void UploadRows(final List<BillRow> rows, byte[] fullBillImage, final IFirebaseUploaderCallback callback) {
         mUploadFailed.set(false);
         mUplodedRowsCounter.set(0);
         //Upload full bill image
-        Buffer fullBillBuffer = ByteBuffer.allocate(fullBillImage.getByteCount());
-        fullBillImage.copyPixelsToBuffer(fullBillBuffer);
-        byte[] fullBillData = new byte[0];
-        try {
-            fullBillData = FilesHandler.ImageTxtFile2ByteArray (Constants.IMAGES_PATH + "/ocrBytes.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         final StorageMetadata ocrBytesMetadata = new StorageMetadata.Builder()
                 .setContentType("text/plain")
-                .setCustomMetadata(ImageWidth, Integer.toString(fullBillImage.getWidth()))
-                .setCustomMetadata(ImageHeight, Integer.toString(fullBillImage.getHeight()))
                 .build();
 
         final StorageReference storageFullBillRef = mBillsPerUserStorageReference.child("ocrBytes.txt");
 
-        storageFullBillRef.putBytes(fullBillData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        storageFullBillRef.putBytes(fullBillImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image");
@@ -146,26 +135,15 @@ public class FirebaseUploader {
         mUsersDatabaseReference.updateChildren(dbItems);
     }
 
-    public void UploadFullBillImage(Bitmap fullBillImage) {
+    public void UploadFullBillImage(byte[] fullBillImage) {
         //Upload full bill image
-        Buffer fullBillBuffer = ByteBuffer.allocate(fullBillImage.getByteCount());
-        fullBillImage.copyPixelsToBuffer(fullBillBuffer);
-        byte[] fullBillData = new byte[0];
-        try {
-            fullBillData = FilesHandler.ImageTxtFile2ByteArray (Constants.IMAGES_PATH + "/ocrBytes.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         final StorageMetadata ocrBytesMetadata = new StorageMetadata.Builder()
                 .setContentType("text/plain")
-                .setCustomMetadata(ImageWidth, Integer.toString(fullBillImage.getWidth()))
-                .setCustomMetadata(ImageHeight, Integer.toString(fullBillImage.getHeight()))
                 .build();
 
         final StorageReference storageFullBillRef = mBillsPerUserStorageReference.child("ocrBytes.txt");
 
-        storageFullBillRef.putBytes(fullBillData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        storageFullBillRef.putBytes(fullBillImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image");
