@@ -134,28 +134,42 @@ public class FilesHandler {
      * @return list of string with file lines
      * @throws IOException
      */
-    public static List<String> ReadTxtFile(String fileFullName) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(fileFullName));
-        // do reading, usually loop until end of file reading
+    public static List<String> ReadTextFile(String fileFullName) throws IOException {
+        BufferedReader bufferedReader = null;
         List<String> lines = new ArrayList<>();
-        String line = bufferedReader.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = bufferedReader.readLine();
+        try{
+            bufferedReader = new BufferedReader(new FileReader(fileFullName));
+            // do reading, usually loop until end of file reading
+            String line = bufferedReader.readLine();
+            while (line != null) {
+                lines.add(line);
+                line = bufferedReader.readLine();
+            }
         }
-        bufferedReader.close();
+        catch (Exception e){
+            BillsLog.Log(Tag, LogLevel.Error, "failed to read text file: " + e.getMessage());
+            return null;
+        }
+        finally {
+            if(bufferedReader != null) {
+                bufferedReader.close();
+            }
+        }
         return lines;
     }
 
     public static Mat GetRotatedBillMat(String billFullName) throws Exception {
         byte[] bytes = ImageTxtFile2ByteArray(billFullName);
+        if(bytes == null){
+            throw new Exception();
+        }
         return Bytes2MatAndRotateClockwise90(bytes);
     }
 
     public static Mat Bytes2MatAndRotateClockwise90(byte[] bytes) throws Exception {
         if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-            throw new Exception("Failed to initialize OpenCVLoader");
+            BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCVLoader.");
+            return null;
         }
         Mat bgrMat = null;
         MatOfByte matOfByte = new MatOfByte(bytes);
@@ -169,12 +183,19 @@ public class FilesHandler {
             return dst;
         }
         catch (Exception e){
-            throw e;
+            BillsLog.Log(Tag, LogLevel.Error, "Failed to convert bytes to mat: " + e.getMessage());
+            return null;
         }
         finally{
-            matOfByte.release();
-            jpegData.release();
-            bgrMat.release();
+            if(matOfByte != null) {
+                matOfByte.release();
+            }
+            if(jpegData != null) {
+                jpegData.release();
+            }
+            if(bgrMat != null) {
+                bgrMat.release();
+            }
         }
     }
 
@@ -188,35 +209,46 @@ public class FilesHandler {
         PrintStream printStreamToFile = null;
         try {
             printStreamToFile = new PrintStream(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            BillsLog.Log(Tag, LogLevel.Error, "Failed to convert bytes to mat: " + e.getMessage());
+            return;
         }
         System.setOut(printStreamToFile);
     }
 
     public static String GetLastCapturedBillPath() {
         File f = new File(Constants.IMAGES_PATH);
-        File[] listFiles = f.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                String fileName = file.getName();
-                return fileName.startsWith("ocrBytes") && fileName.endsWith(".txt");
-            }
-        });
+        File[] listFiles = null;
 
-        //sorting to take the last capture which took by Bills app
-        Arrays.sort( listFiles, new Comparator()
-        {
-            public int compare(Object o1, Object o2) {
-                if (((File)o1).lastModified() > ((File)o2).lastModified()) {
-                    return -1;
-                } else if (((File)o1).lastModified() < ((File)o2).lastModified()) {
-                    return +1;
-                } else {
-                    return 0;
+        try {
+            listFiles = f.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File file) {
+                    String fileName = file.getName();
+                    return fileName.startsWith("ocrBytes") && fileName.endsWith(".txt");
                 }
+            });
+
+            if(listFiles == null || listFiles.length == 0){
+                BillsLog.Log(Tag, LogLevel.Error, "Failed to get files from directory.");
+                return null;
             }
-        });
+            //sorting to take the last capture which took by Bills app
+            Arrays.sort(listFiles, new Comparator() {
+                public int compare(Object o1, Object o2) {
+                    if (((File) o1).lastModified() > ((File) o2).lastModified()) {
+                        return -1;
+                    } else if (((File) o1).lastModified() < ((File) o2).lastModified()) {
+                        return +1;
+                    } else {
+                        return 0;
+                    }
+                }
+            });
+        }
+        catch (Exception e){
+            BillsLog.Log(Tag, LogLevel.Error, "GetLastCapturedBillPath Failed: " + e.getMessage());
+        }
         return listFiles[0].getPath();
     }
 
@@ -234,6 +266,7 @@ public class FilesHandler {
             return SaveToPNGFile(bmp, path);
         }
         catch (Exception e){
+            BillsLog.Log(Tag, LogLevel.Error, "SaveMatToPNGFile Failed: " + e.getMessage());
             return false;
         }
         finally {

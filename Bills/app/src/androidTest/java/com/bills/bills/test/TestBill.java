@@ -13,7 +13,6 @@ import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.Utilities.FilesHandler;
-import com.bills.billslib.Utilities.TestsHelper;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -82,11 +81,19 @@ public class TestBill extends Thread{
             try {
                 _results.append(System.getProperty("line.separator") + "Test of " + _billFullName + System.getProperty("line.separator"));
                 tesseractOCREngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
-                expectedBillTextLines = FilesHandler.ReadTxtFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
+                expectedBillTextLines = FilesHandler.ReadTextFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
+                if(expectedBillTextLines == null){
+                    throw new Exception();
+                }
                 byte[] bytes = FilesHandler.ImageTxtFile2ByteArray(_billFullName);
+                if(bytes == null){
+                    throw new Exception();
+                }
                 billMat = FilesHandler.Bytes2MatAndRotateClockwise90(bytes);
+                if(billMat == null){
+                    throw new Exception();
+                }
                 if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
-                    BillsLog.Log(Tag, LogLevel.Error, "Failed to get bill corners.");
                     throw new Exception();
                 }
 

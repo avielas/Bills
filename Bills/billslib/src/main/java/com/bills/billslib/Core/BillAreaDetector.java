@@ -54,7 +54,7 @@ public class BillAreaDetector {
         MatOfFloat ranges = null;
         try {
             if (!OpenCVLoader.initDebug()) {
-                Log.d(Tag, "Failed to initialize OpenCV.");
+                BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCV.");
                 return false;
             }
 
@@ -76,7 +76,6 @@ public class BillAreaDetector {
 
             int thresh = GetThresholdIndex(hist, _histSizeNum) * _bucketSize;
 
-            Log.d(Tag, "Threshold for area detection: " + thresh);
             Imgproc.threshold(newImage, newImage, thresh, 255, Imgproc.THRESH_BINARY);
 //            RemoveGlare(newImage, thresh);
 

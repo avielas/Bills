@@ -227,8 +227,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
 
         try {
             billMat = FilesHandler.Bytes2MatAndRotateClockwise90(image);
+            if(billMat == null){
+                throw new Exception();
+            }
             if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
-                BillsLog.Log(Tag, LogLevel.Error, "Failed to get bill corners.");
                 throw new Exception();
             }
 

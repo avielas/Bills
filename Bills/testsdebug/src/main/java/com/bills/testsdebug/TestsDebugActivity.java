@@ -167,7 +167,13 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
 
             InitBillsLogToLogcat();
             String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
+            if(lastCapturedBillPath == null){
+                throw new Exception();
+            }
             _warpedBillMat = GetWarpedBillMat(lastCapturedBillPath);
+            if(_warpedBillMat == null){
+                throw new Exception();
+            }
             _warpedBill = Bitmap.createBitmap(_warpedBillMat.width(), _warpedBillMat.height(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(_warpedBillMat, _warpedBill);
             _billWithPrintedRedLines = _warpedBill.copy(_warpedBill.getConfig(), true);
@@ -248,7 +254,10 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     }
 
     private void ValidateOcrBillResult(String imageStatus) throws Exception{
-        List<String> expectedBillTextLines = FilesHandler.ReadTxtFile(_brandAndModelPath + "/" +_restaurantName + "/" + _expectedTxtFileName);
+        List<String> expectedBillTextLines = FilesHandler.ReadTextFile(_brandAndModelPath + "/" +_restaurantName + "/" + _expectedTxtFileName);
+        if(expectedBillTextLines == null){
+            throw new Exception();
+        }
         _results.append("Test of " + imageStatus + " " + _restaurantName);
         _results.append(System.getProperty("line.separator"));
         LinkedHashMap ocrResultCroppedBill = GetOcrResults();
@@ -540,8 +549,11 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         });
     }
 
-    public Mat GetWarpedBillMat(String billFullName) throws IOException {
+    public Mat GetWarpedBillMat(String billFullName) throws Exception {
         byte[] bytes = FilesHandler.ImageTxtFile2ByteArray(billFullName);
+        if(bytes == null){
+            throw new Exception();
+        }
         return GetWarpedBillMat(bytes);
     }
 
@@ -549,6 +561,9 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         Mat mat = null;
         try{
             mat = FilesHandler.Bytes2MatAndRotateClockwise90(bytes);
+            if(mat == null){
+                throw new Exception();
+            }
             BillAreaDetector areaDetector = new BillAreaDetector();
             Point mTopLeft = new Point();
             Point mTopRight = new Point();
@@ -559,7 +574,6 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 return null;
             }
             if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
-                Log.d("Error", "Failed ot get bounding rectangle automatically.");
                 return null;
             }
             /** Preparing Warp Perspective Dimensions **/
@@ -647,7 +661,13 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 Mat warpedBillMat = null;
                 try {
                     String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
+                    if(lastCapturedBillPath == null){
+                        throw new Exception();
+                    }
                     warpedBillMat = FilesHandler.GetRotatedBillMat(lastCapturedBillPath);
+                    if(warpedBillMat == null){
+                        throw new Exception();
+                    }
                     _warpedBill.recycle();
                     _warpedBill = Bitmap.createBitmap(warpedBillMat.width(), warpedBillMat.height(), Bitmap.Config.ARGB_8888);
                     Utils.matToBitmap(warpedBillMat, _warpedBill);
@@ -669,7 +689,6 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 }
 
                 if (!areaDetector.GetBillCorners(_warpedBillMat, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
-                    Log.d(this.getClass().getSimpleName(), "Failed ot get bounding rectangle automatically.");
                     _dragRectView.TopLeft = null;
                     _dragRectView.TopRight = null;
                     _dragRectView.ButtomLeft = null;
