@@ -39,6 +39,7 @@ import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.DragRectView;
 import com.bills.billslib.Utilities.FilesHandler;
 import com.bills.billslib.Utilities.TestsHelper;
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.gregacucnik.EditableSeekBar;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -54,7 +55,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import uk.co.senab.photoview.PhotoViewAttacher;
+import com.github.chrisbanes.photoview.PhotoView;
 
 import static android.view.View.GONE;
 
