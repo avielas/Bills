@@ -8,3 +8,9 @@
 /captures
 .externalNativeBuild
 /openCVLibrary330
+/openCVLibrary330/build/intermediates/incremental/mergeDebugAndroidTestResources/compile-file-map.properties
+/.idea/misc.xml
+/openCVLibrary330/build/intermediates/incremental/packageDebugResources/compile-file-map.properties
+/openCVLibrary330/build/intermediates/incremental/packageReleaseResources/compile-file-map.properties
+/openCVLibrary330/build/outputs/aar/openCVLibrary330-debug.aar
+/openCVLibrary330/build/outputs/aar/openCVLibrary330-release.aar
