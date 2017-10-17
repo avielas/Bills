@@ -82,7 +82,7 @@ public class TestBench {
         InitBillsLogToLogcat();
         _timeMs = System.currentTimeMillis();
         String sourceDirectory;
-        _isRunJustTM = true;
+        _isRunJustTM = false;
         //copy images to internal memory
         //if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
         //{
