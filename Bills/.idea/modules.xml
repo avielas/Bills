@@ -7,7 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/billslib/billslib.iml" filepath="$PROJECT_DIR$/billslib/billslib.iml" />
       <module fileurl="file://$PROJECT_DIR$/deleteme/deleteme.iml" filepath="$PROJECT_DIR$/deleteme/deleteme.iml" />
       <module fileurl="file://$PROJECT_DIR$/fetchstorage/fetchstorage.iml" filepath="$PROJECT_DIR$/fetchstorage/fetchstorage.iml" />
-      <module fileurl="file://$PROJECT_DIR$/openCVLibrary320/openCVLibrary320.iml" filepath="$PROJECT_DIR$/openCVLibrary320/openCVLibrary320.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openCVLibrary330/openCVLibrary330.iml" filepath="$PROJECT_DIR$/openCVLibrary330/openCVLibrary330.iml" />
       <module fileurl="file://$PROJECT_DIR$/testsdebug/testsdebug.iml" filepath="$PROJECT_DIR$/testsdebug/testsdebug.iml" />
     </modules>
   </component>

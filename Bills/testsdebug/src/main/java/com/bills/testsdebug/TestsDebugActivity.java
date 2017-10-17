@@ -172,6 +172,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 throw new Exception();
             }
             _warpedBillMat = GetWarpedBillMat(lastCapturedBillPath);
+
             if(_warpedBillMat == null){
                 throw new Exception();
             }
@@ -577,6 +578,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
                 return null;
             }
+
             /** Preparing Warp Perspective Dimensions **/
             return ImageProcessingLib.WarpPerspective(mat, mTopLeft, mTopRight, mButtomRight, mButtomLeft);
         }

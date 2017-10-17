@@ -33,5 +33,5 @@ dependencies {
     compile 'com.github.chrisbanes:PhotoView:2.0.0'
     compile 'com.gregacucnik:editableseekbar:1.2'
     compile project(':billslib')
-    compile project(':openCVLibrary320')
+    compile project(':openCVLibrary330')
 }
