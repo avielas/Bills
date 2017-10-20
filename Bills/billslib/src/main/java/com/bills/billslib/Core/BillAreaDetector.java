@@ -54,12 +54,12 @@ public class BillAreaDetector {
         MatOfFloat ranges = null;
         try {
             if (!OpenCVLoader.initDebug()) {
-                BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCV.");
+                Log.d(Tag, "Failed to initialize OpenCV.");
                 return false;
             }
 
-            newImage = new Mat(source.rows(), source.cols(), source.type());
-            Imgproc.cvtColor(source, newImage, Imgproc.COLOR_RGBA2GRAY);
+            newImage = source.clone();
+            Imgproc.cvtColor(newImage, newImage, Imgproc.COLOR_RGBA2GRAY);
 
             List<Mat> listOfMat = new ArrayList<Mat>();
             listOfMat.add(newImage);
@@ -76,8 +76,24 @@ public class BillAreaDetector {
 
             int thresh = GetThresholdIndex(hist, _histSizeNum) * _bucketSize;
 
-            Imgproc.threshold(newImage, newImage, thresh, 255, Imgproc.THRESH_BINARY);
-//            RemoveGlare(newImage, thresh);
+            Log.d(Tag, "Threshold for area detection: " + thresh);
+
+            int totalShades = 0;
+            int glareShades = 0;
+
+            for(int i = 0; i < hist.length; i++){
+                totalShades += hist[i];
+            }
+
+            for(int i = hist.length - 7; i < hist.length; i++){
+                glareShades += hist[i];
+            }
+
+            if(glareShades < 0.03 * totalShades) {
+                Imgproc.threshold(newImage, newImage, thresh, 255, Imgproc.THRESH_BINARY);
+            }else{
+                RemoveGlare(newImage, thresh);
+            }
 
             Imgproc.dilate(newImage, newImage,
                     Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10,10)),
@@ -283,10 +299,10 @@ public class BillAreaDetector {
         Mat binaryGlareHorizontalKernelImageMat = new Mat();
 
 
-        Mat dilateHorizontalKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(resizedImageMat.width()/2, 10));
+        Mat dilateHorizontalKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(resizedImageMat.width()/2, 5));
         Mat erodeHorizontalKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
 
-        Mat dilateVerticalKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(10, resizedImageMat.width()/2));
+        Mat dilateVerticalKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, resizedImageMat.height()/2));
         Mat erodeVerticalKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
 
         Mat verticalMask = new Mat(resizedImageMat.rows(), resizedImageMat.cols(), binaryGlareHorizontalKernelImageMat.type(), Scalar.all(255));
@@ -305,17 +321,20 @@ public class BillAreaDetector {
             Point topRightPoint = new Point(resizedImageMat.width() - 1, 0);
             Point buttomLeftPoint = new Point(0, resizedImageMat.height());
             Point buttomRightPoint = new Point(resizedImageMat.width(), resizedImageMat.height());
-            Point center = new Point(resizedImageMat.width() / 2, resizedImageMat.height() / 2);
+            Point center1 = new Point(resizedImageMat.width() / 3, resizedImageMat.height() / 3);
+            Point center2 = new Point(resizedImageMat.width() / 3 * 2, resizedImageMat.height() / 3);
+            Point center3 = new Point(resizedImageMat.width() / 3 * 2, resizedImageMat.height() / 3 * 2);
+            Point center4 = new Point(resizedImageMat.width() / 3, resizedImageMat.height() / 3 * 2);
 
             //create bounds for horizontal and vertical kernel masks
-            verticalBounds.add(new MatOfPoint(topLeftPoint, topRightPoint, center));
-            verticalBounds.add(new MatOfPoint(center, buttomRightPoint, buttomLeftPoint));
+            verticalBounds.add(new MatOfPoint(topLeftPoint, topRightPoint, center1, center2));
+            verticalBounds.add(new MatOfPoint(center4, center3, buttomRightPoint, buttomLeftPoint));
 
             Imgproc.fillPoly(verticalMask, verticalBounds, new Scalar(0));
             Imgproc.threshold(verticalMask, verticalMask, 100, 255, Imgproc.THRESH_BINARY);
 
-            horizontalBounds.add(new MatOfPoint(topLeftPoint, center, buttomLeftPoint));
-            horizontalBounds.add(new MatOfPoint(topRightPoint, buttomRightPoint, center));
+            horizontalBounds.add(new MatOfPoint(topLeftPoint, center1, center4, buttomLeftPoint));
+            horizontalBounds.add(new MatOfPoint(topRightPoint, buttomRightPoint, center3, center2));
 
             Imgproc.fillPoly(horizontalMask, horizontalBounds, new Scalar(0));
             Imgproc.threshold(horizontalMask, horizontalMask, 100, 255, Imgproc.THRESH_BINARY);
