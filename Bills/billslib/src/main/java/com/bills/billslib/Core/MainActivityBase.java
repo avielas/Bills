@@ -6,17 +6,9 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bills.billslib.Camera.CameraRenderer;
-import com.bills.billslib.Contracts.Constants;
-import com.bills.billslib.Contracts.Enums.Language;
 import com.bills.billslib.Contracts.PreparingEnvironmentUtil;
-
-import static android.view.View.GONE;
 
 /**
  * Created by avielavr on 6/10/2017.

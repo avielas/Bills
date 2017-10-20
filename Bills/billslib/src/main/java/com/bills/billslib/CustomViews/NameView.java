@@ -1,7 +1,6 @@
 package com.bills.billslib.CustomViews;
 
 import android.content.Context;
-import android.widget.TextView;
 
 /**
  * Created by mvalersh on 10/7/2016.

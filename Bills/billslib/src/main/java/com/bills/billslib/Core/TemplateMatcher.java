@@ -1,27 +1,18 @@
 package com.bills.billslib.Core;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Interfaces.IOcrEngine;
-import com.bills.billslib.Utilities.FilesHandler;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.FileHandler;
 
 /**
  * Created by mvalersh on 12/2/2016.

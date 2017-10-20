@@ -2,8 +2,6 @@ package com.bills.billslib.Contracts;
 
 import android.graphics.Bitmap;
 
-import com.bills.billslib.Core.BillAreaDetector;
-
 /**
  * Created by michaelvalershtein on 01/08/2017.
  */

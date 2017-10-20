@@ -1,7 +1,6 @@
 package com.bills.bills.fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,8 +13,6 @@ import android.widget.TextView;
 import com.bills.bills.R;
 import com.bills.bills.firebase.UiUpdater;
 import com.bills.billslib.Contracts.BillRow;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 

@@ -3,10 +3,8 @@ package com.bills.billslib.Core;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.MutableBoolean;
-import com.bills.billslib.Utilities.FilesHandler;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;

@@ -1,15 +1,10 @@
 package com.bills.billslib.Utilities;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.util.Log;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
-import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.BillsLog;
-import com.bills.billslib.Core.ImageProcessingLib;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -17,7 +12,6 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
