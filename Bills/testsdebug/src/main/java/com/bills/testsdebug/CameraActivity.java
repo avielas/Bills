@@ -3,7 +3,6 @@ package com.bills.testsdebug;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -19,9 +18,6 @@ import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Camera.IOnCameraFinished;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Utilities.FilesHandler;
-
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

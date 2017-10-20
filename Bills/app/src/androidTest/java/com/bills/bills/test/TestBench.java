@@ -2,8 +2,9 @@ package com.bills.bills.test;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.test.espresso.core.deps.guava.base.Predicate;
-import android.support.test.espresso.core.deps.guava.collect.Collections2;
+import android.support.test.espresso.core.internal.deps.guava.base.Predicate;
+import android.support.test.espresso.core.internal.deps.guava.collect.Collections2;
+import android.support.test.espresso.core.internal.deps.guava.collect.Iterables;
 import android.util.Log;
 import android.util.Pair;
 
@@ -82,7 +83,7 @@ public class TestBench {
         InitBillsLogToLogcat();
         _timeMs = System.currentTimeMillis();
         String sourceDirectory;
-        _isRunJustTM = false;
+        _isRunJustTM = true;
         //copy images to internal memory
         //if(PreparingEnvironmentUtil.IsRunningOnEmulator(Build.MANUFACTURER, Build.MODEL))
         //{
@@ -102,9 +103,9 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList("sinta1", "sinta2",
+                _restaurantsNamesTestFilter = Arrays.asList("sinta1" , "sinta2",
                                                             "pastaMarket1", "pastaMarket2",
-                                                            "iza1", /*"iza2",*/
+                                                            "iza1",/*"iza2",*/
                                                             "dovrin1", "dovrin2", "dovrin3",
                                                             "nola1", "nola2", "nola3", "nola4"/**/);
                 _billsTestFilter = Arrays.asList(/*"ocrBytes.txt", "ocrBytes1.txt", "ocrBytes2.txt", "ocrBytes3.txt", "ocrBytes4.txt"*/);
@@ -247,21 +248,22 @@ public class TestBench {
     private void CalculateAndPrintStatistics(List<Object> accuracyPercentList, FileOutputStream stream) throws IOException {
         Collections.sort(_restaurantsNamesTestFilter);
         for(final String restaurantName : _restaurantsNamesTestFilter){
-            Collection<Object> currAccuracies = Collections2.filter(accuracyPercentList, new Predicate<Object>() {
+            Iterable<Object> currAccuracies = Iterables.filter(accuracyPercentList, new Predicate<Object>() {
                 @Override
                 public boolean apply(Object pair) {
                     return ((Pair)pair).first.toString().startsWith(restaurantName);
                 }
             });
-
+            Integer counter = 0;
             Double sum = 0.0;
             for (Object obj : currAccuracies){
                 sum += (Double)(((Pair)obj).second);
                 String formattedTotalAccuracyPercent = String.format("%.02f", (Double)(((Pair)obj).second));
-                stream.write(("\n" + (String)(((Pair)obj).first) + " " + formattedTotalAccuracyPercent + "%").getBytes());
+                stream.write(("\n" + (((Pair)obj).first) + " " + formattedTotalAccuracyPercent + "%").getBytes());
+                counter++;
             }
 
-            Double totalAccuracyPercent = sum/currAccuracies.size();
+            Double totalAccuracyPercent = counter == 0 ? 0 : sum/counter;
             String formattedTotalAccuracyPercent = String.format("%.02f", totalAccuracyPercent);
             stream.write(("\n |-----> " + restaurantName + " " + formattedTotalAccuracyPercent + "%").getBytes());
         }

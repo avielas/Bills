@@ -26,7 +26,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import com.bills.billslib.Contracts.*;
+
+import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Contracts.Interfaces.ILogger;
@@ -41,6 +42,7 @@ import com.bills.billslib.Utilities.FilesHandler;
 import com.bills.billslib.Utilities.TestsHelper;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.gregacucnik.EditableSeekBar;
+
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -54,8 +56,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-
-import com.github.chrisbanes.photoview.PhotoView;
 
 import static android.view.View.GONE;
 
@@ -172,6 +172,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 throw new Exception();
             }
             _warpedBillMat = GetWarpedBillMat(lastCapturedBillPath);
+//            FilesHandler.SaveMatToPNGFile(_warpedBillMat, Constants.WARPED_PNG_PHOTO_PATH);
 
             if(_warpedBillMat == null){
                 throw new Exception();
@@ -563,6 +564,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         Mat mat = null;
         try{
             mat = FilesHandler.Bytes2MatAndRotateClockwise90(bytes);
+//            FilesHandler.SaveMatToPNGFile(mat, Constants.CAMERA_CAPTURED_PNG_PHOTO_PATH);
             if(mat == null){
                 throw new Exception();
             }

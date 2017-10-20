@@ -1,19 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion compile_sdk_version
+    buildToolsVersion build_tools_version
 
     defaultConfig {
         applicationId "com.bills.testsdebug"
-        minSdkVersion 16
-        targetSdkVersion 26
+        minSdkVersion min_sdk_version
+        targetSdkVersion target_sdk_version
         versionCode 1
         versionName "1.0"
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
+        testInstrumentationRunner android_support_test_runner_AndroidJUnitRunner
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -24,14 +23,14 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestCompile(android_support_test_espresso_core, {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    testCompile 'junit:junit:4.12'
+    compile support_appcompat_v7
+    compile android_support_constraint_layout
+    testCompile junit
     compile 'com.github.chrisbanes:PhotoView:2.0.0'
     compile 'com.gregacucnik:editableseekbar:1.2'
     compile project(':billslib')
-    compile project(':openCVLibrary330')
+    compile project(openCVLibrary)
 }

@@ -16,6 +16,32 @@ allprojects {
         maven { url "https://jitpack.io" } //just for PhotoView
         maven { url "https://maven.google.com" }
     }
+    //Constants for buiild.gradle files
+    project.ext {
+        //SDK Versions
+        compile_sdk_version = 26
+        min_sdk_version = 16
+        target_sdk_version = 26
+        build_tools_version = "26.0.2"
+        //Externals
+        tess_two = 'com.rmtheis:tess-two:8.0.0'
+        openCVLibrary = ':openCVLibrary330'
+        //Firebase
+        firebase_database = 'com.google.firebase:firebase-database:11.4.2'
+        firebase_storage = 'com.google.firebase:firebase-storage:11.4.2'
+        firebase_messaging = 'com.google.firebase:firebase-messaging:11.4.2'
+        //Tests
+        junit = 'junit:junit:4.12'
+        android_support_test_espresso_core = 'com.android.support.test.espresso:espresso-core:3.0.1'
+        android_support_test_runner = 'com.android.support.test:runner:1.0.1'
+        android_support_test_runner_AndroidJUnitRunner = "android.support.test.runner.AndroidJUnitRunner"
+        //Others
+        firebase_ui_auth = 'com.firebaseui:firebase-ui-auth:3.0.0'
+        support_appcompat_v7 = 'com.android.support:appcompat-v7:26.1.0'
+        google_play_services_auth = 'com.google.android.gms:play-services-auth:11.4.2'
+        android_support_v4 = 'com.android.support:support-v4:26.0.1'
+        android_support_constraint_layout = 'com.android.support.constraint:constraint-layout:1.0.2'
+    }
 }
 task clean(type: Delete) {
     delete rootProject.buildDir
