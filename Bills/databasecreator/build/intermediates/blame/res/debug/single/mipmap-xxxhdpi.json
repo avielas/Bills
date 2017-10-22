@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/databasecreator/build/intermediates/res/merged/debug/mipmap-xxxhdpi/ic_launcher_round.png",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/databasecreator/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "/home/aviel/AndroidStudioProjects/bills/Bills/databasecreator/build/intermediates/res/merged/debug/mipmap-xxxhdpi/ic_launcher.png",
+        "source": "/home/aviel/AndroidStudioProjects/bills/Bills/databasecreator/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
+    }
+]
