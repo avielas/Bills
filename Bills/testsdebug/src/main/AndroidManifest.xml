@@ -12,12 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:largeHeap="true">
-        <activity android:name=".CameraActivity">
-            <intent-filter>
-                <action android:name=".CameraActivity" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
         <activity android:name=".TestsDebugActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
