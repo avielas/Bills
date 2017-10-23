@@ -1,4 +1,4 @@
-package com.bills.testsdebug;
+package com.bills.testslib;
 
 import android.Manifest;
 import android.content.Intent;

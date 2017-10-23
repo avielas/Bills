@@ -26,11 +26,11 @@ dependencies {
     androidTestCompile(android_support_test_espresso_core, {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile support_appcompat_v7
-    compile android_support_constraint_layout
-    testCompile junit
-    compile 'com.github.chrisbanes:PhotoView:2.0.0'
-    compile 'com.gregacucnik:editableseekbar:1.2'
-    compile project(':billslib')
-    compile project(openCVLibrary)
+    compile support_appcompat_v7;
+    compile android_support_constraint_layout;
+    testCompile junit;
+    compile 'com.github.chrisbanes:PhotoView:2.0.0';
+    compile 'com.gregacucnik:editableseekbar:1.2';
+    compile project(':billslib');
+    compile project(':testslib');
 }

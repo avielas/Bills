@@ -40,6 +40,7 @@ import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.DragRectView;
 import com.bills.billslib.Utilities.FilesHandler;
 import com.bills.billslib.Utilities.TestsHelper;
+import com.bills.testslib.CameraActivity;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.gregacucnik.EditableSeekBar;
 

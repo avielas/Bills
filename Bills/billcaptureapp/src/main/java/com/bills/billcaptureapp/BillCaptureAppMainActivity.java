@@ -3,7 +3,9 @@ package com.bills.billcaptureapp;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class BillCaptureAppMainActivity extends AppCompatActivity {
+import com.bills.billslib.Core.MainActivityBase;
+
+public class BillCaptureAppMainActivity extends MainActivityBase {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
