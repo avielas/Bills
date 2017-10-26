@@ -12,7 +12,7 @@ import com.bills.bills.firebase.FirebaseLogger;
 import com.bills.bills.firebase.FirebaseUploader;
 import com.bills.bills.firebase.PassCodeResolver;
 import com.bills.bills.fragments.BillSummarizerFragment;
-import com.bills.bills.fragments.CameraFragment;
+import com.bills.billslib.Fragments.CameraFragment;
 import com.bills.bills.fragments.WelcomeScreenFragment;
 import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Core.BillsLog;

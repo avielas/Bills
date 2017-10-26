@@ -29,10 +29,7 @@ import android.widget.TextView;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
-import com.bills.billslib.Contracts.Enums.LogLevel;
-import com.bills.billslib.Contracts.Interfaces.ILogger;
 import com.bills.billslib.Core.BillAreaDetector;
-import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.MainActivityBase;
 import com.bills.billslib.Core.TemplateMatcher;
@@ -41,6 +38,7 @@ import com.bills.billslib.CustomViews.DragRectView;
 import com.bills.billslib.Utilities.FilesHandler;
 import com.bills.billslib.Utilities.TestsHelper;
 import com.bills.testslib.CameraActivity;
+import com.bills.testslib.TestsUtilities;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.gregacucnik.EditableSeekBar;
 
@@ -167,7 +165,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             _warpedBillMat = new Mat();
             _processedBillMat = new Mat();
 
-            InitBillsLogToLogcat();
+            TestsUtilities.InitBillsLogToLogcat();
             String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
             if(lastCapturedBillPath == null){
                 throw new Exception();
@@ -637,28 +635,6 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
         AlertDialog alertDialogAndroid = alertDialogBuilderUserInput.create();
         alertDialogAndroid.show();
     }
-
-    private void InitBillsLogToLogcat() {
-        BillsLog.Init(new ILogger() {
-            @Override
-            public void Log(String tag, LogLevel logLevel, String message) {
-                switch (logLevel){
-                    case Error:
-                        Log.e(tag, message);
-                        break;
-                    case Warning:
-                        Log.w(tag, message);
-                        break;
-                    case Info:
-                        Log.i(tag, message);
-                        break;
-                    default:
-                        Log.v(tag, "this LogLevel enum doesn't exists: " + message);
-                }
-            }
-        });
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){

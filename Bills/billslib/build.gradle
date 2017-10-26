@@ -34,4 +34,5 @@ dependencies {
     compile support_appcompat_v7
     testCompile junit
     compile project(openCVLibrary)
+    compile android_support_card_view
 }

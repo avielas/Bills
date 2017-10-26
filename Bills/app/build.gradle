@@ -112,7 +112,7 @@ dependencies {
     compile google_play_services_auth
     compile firebase_storage
     compile firebase_messaging
-    compile android_support_v4
+    compile android_support_card_view
     testCompile junit
 }
 apply plugin: 'com.google.gms.google-services'

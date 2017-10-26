@@ -1,4 +1,4 @@
-package com.bills.bills.fragments;
+package com.bills.billslib.Fragments;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.bills.bills.R;
+import com.bills.billslib.R;
 import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Camera.IOnCameraFinished;
 import com.bills.billslib.Contracts.BillRow;
@@ -43,7 +43,7 @@ import java.util.List;
  * to handle interaction events.
  */
 public class CameraFragment extends Fragment implements View.OnClickListener, IOnCameraFinished {
-    private String Tag = CameraFragment.class.getName();
+    protected String Tag = CameraFragment.class.getName();
 
     //Camera Renderer
     private CameraRenderer mRenderer;
@@ -56,12 +56,12 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     private Button mCameraFlashMode = null;
     private Integer mCurrentFlashMode = R.drawable.camera_screen_flash_auto;
 
-    private OnFragmentInteractionListener mListener;
+    protected OnFragmentInteractionListener mListener;
 
-    private IOcrEngine mOcrEngine;
+    protected IOcrEngine mOcrEngine;
 
-    private Integer mPassCode;
-    private String mRelativeDbAndStoragePath;
+    protected Integer mPassCode;
+    protected String mRelativeDbAndStoragePath;
 
     public CameraFragment() {
         // Required empty public constructor
@@ -268,7 +268,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
             }
         }
     }
-
 
     /**
      * This interface must be implemented by activities that contain this
