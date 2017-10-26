@@ -15,11 +15,11 @@ import com.bills.billslib.Core.BillsLog;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link WelcomeScreenFragment.OnFragmentInteractionListener} interface
+ * {@link StartScreenFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  */
-public class WelcomeScreenFragment extends Fragment implements View.OnClickListener{
-    private String Tag = WelcomeScreenFragment.class.getName();
+public class StartScreenFragment extends Fragment implements View.OnClickListener{
+    private String Tag = StartScreenFragment.class.getName();
     Button _clickToSimpleCapture;
     Button _clickToRightCapture;
     Button _clickToLeftCapture;
@@ -27,7 +27,7 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
     Button _clickToStraightCapture;
     private OnFragmentInteractionListener mListener;
 
-    public WelcomeScreenFragment() {
+    public StartScreenFragment() {
         // Required empty public constructor
     }
 

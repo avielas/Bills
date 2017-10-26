@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Bills.iml" filepath="$PROJECT_DIR$/Bills.iml" />
+      <module fileurl="file://$PROJECT_DIR$/animatedloadingindicator/animatedloadingindicator.iml" filepath="$PROJECT_DIR$/animatedloadingindicator/animatedloadingindicator.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/billcaptureapp/billcaptureapp.iml" filepath="$PROJECT_DIR$/billcaptureapp/billcaptureapp.iml" />
       <module fileurl="file://$PROJECT_DIR$/billslib/billslib.iml" filepath="$PROJECT_DIR$/billslib/billslib.iml" />

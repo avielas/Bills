@@ -1,9 +1,14 @@
 package com.bills.billcaptureapp;
 
+import android.app.Dialog;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import com.bills.billcaptureapp.fragments.WelcomeScreenFragment;
+import android.view.Window;
+
+import com.bills.billcaptureapp.fragments.StartScreenFragment;
 import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Core.BillsLog;
@@ -15,11 +20,13 @@ import java.util.List;
 
 public class BillCaptureAppMainActivity extends MainActivityBase implements
         com.bills.billslib.Fragments.CameraFragment.OnFragmentInteractionListener,
-        com.bills.billcaptureapp.fragments.WelcomeScreenFragment.OnFragmentInteractionListener{
+        StartScreenFragment.OnFragmentInteractionListener{
     private String Tag = BillCaptureAppMainActivity.class.getName();
     private CameraFragment mCameraFragment;
-    private WelcomeScreenFragment mWelcomScreenFragment;
+    private StartScreenFragment mStartScreenFragment;
     private Fragment mCurrentFragment;
+    private Handler mHandler;
+    Dialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +34,9 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
         setContentView(R.layout.activity_bill_capture_app_main);
         TestsUtilities.InitBillsLogToLogcat();
         mCameraFragment = new CameraFragment();
-        mWelcomScreenFragment = new WelcomeScreenFragment();
+        mStartScreenFragment = new StartScreenFragment();
+        progressDialog = new Dialog(this);
+        mHandler = new Handler();
         StartWelcomeFragment(null);
     }
 
@@ -53,7 +62,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
 
     @Override
     public void onBackPressed(){
-        if(mCurrentFragment == mCameraFragment || mCurrentFragment == mWelcomScreenFragment){
+        if(mCurrentFragment == mCameraFragment || mCurrentFragment == mStartScreenFragment){
             StartWelcomeFragment();
         }else{
             super.onBackPressed();
@@ -74,17 +83,18 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     public void StartWelcomeFragment(final byte[] image) {
         try {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, mWelcomScreenFragment);
+            transaction.replace(R.id.fragment_container, mStartScreenFragment);
             transaction.addToBackStack(null);
-
             // Commit the transaction
             transaction.commit();
-            mCurrentFragment = mWelcomScreenFragment;
+            mCurrentFragment = mStartScreenFragment;
             if (null != image) {
                 Thread t = new Thread() {
                 public void run() {
                     try {
+                        mHandler.post(mShowProgressDialog);
                         FilesHandler.toDelete(image);
+                        mHandler.post(mHideProgressDialog);
                     } catch (Exception e) {
                         BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                     }
@@ -96,4 +106,26 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
             BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
         }
     }
+
+    // Create runnable for posting
+    final Runnable mHideProgressDialog = new Runnable() {
+        public void run() {
+            if(progressDialog != null)
+            {
+                progressDialog.cancel();
+                progressDialog.hide();
+            }
+        }
+    };
+
+    // Create runnable for posting
+    final Runnable mShowProgressDialog = new Runnable() {
+        public void run() {
+            progressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            progressDialog.setContentView(R.layout.custom_dialog_progress);
+            progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+    };
 }

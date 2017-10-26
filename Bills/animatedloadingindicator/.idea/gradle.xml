@@ -8,15 +8,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/animatedloadingindicator" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/billcaptureapp" />
-            <option value="$PROJECT_DIR$/billslib" />
-            <option value="$PROJECT_DIR$/deleteme" />
-            <option value="$PROJECT_DIR$/fetchstorage" />
-            <option value="$PROJECT_DIR$/openCVLibrary330" />
-            <option value="$PROJECT_DIR$/testsdebug" />
-            <option value="$PROJECT_DIR$/testslib" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
