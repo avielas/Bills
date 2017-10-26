@@ -10,6 +10,7 @@ import android.view.Window;
 
 import com.bills.billcaptureapp.fragments.StartScreenFragment;
 import com.bills.billslib.Contracts.BillRow;
+import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.MainActivityBase;
@@ -26,6 +27,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     private StartScreenFragment mStartScreenFragment;
     private Fragment mCurrentFragment;
     private Handler mHandler;
+    private String currFileNameToSave;
     Dialog progressDialog;
 
     @Override
@@ -45,6 +47,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
             mCameraFragment.Init(0, "");
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, mCameraFragment);
+            //addToBackStack because of the back button
             transaction.addToBackStack(null);
 
             // Commit the transaction
@@ -52,6 +55,30 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
             mCurrentFragment = mCameraFragment;
         } catch (Exception e) {
             BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void NotifyClickedButton(StartScreenFragment.CaptureType captureType) {
+        switch (captureType){
+
+            case SIMPLE:
+                currFileNameToSave = Constants.IMAGES_PATH + "/ocrBytes.txt";
+                break;
+            case RIGHT:
+                currFileNameToSave = Constants.IMAGES_PATH + "/ocrBytes1.txt";
+                break;
+            case LEFT:
+                currFileNameToSave = Constants.IMAGES_PATH + "/ocrBytes2.txt";
+                break;
+            case REMOTLY:
+                currFileNameToSave = Constants.IMAGES_PATH + "/ocrBytes3.txt";
+                break;
+            case STRAIGHT:
+                currFileNameToSave = Constants.IMAGES_PATH + "/ocrBytes4.txt";
+                break;
+            default:
+                throw new UnsupportedOperationException(Tag + ": NotifyClickedButton");
         }
     }
 
@@ -88,12 +115,13 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
             // Commit the transaction
             transaction.commit();
             mCurrentFragment = mStartScreenFragment;
+            progressDialog = new Dialog(this);
             if (null != image) {
                 Thread t = new Thread() {
                 public void run() {
                     try {
                         mHandler.post(mShowProgressDialog);
-                        FilesHandler.toDelete(image);
+                        FilesHandler.SaveToTXTFile(image, currFileNameToSave);
                         mHandler.post(mHideProgressDialog);
                     } catch (Exception e) {
                         BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());

@@ -26,6 +26,13 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
     Button _clickToRemotlyCapture;
     Button _clickToStraightCapture;
     private OnFragmentInteractionListener mListener;
+    public enum CaptureType{
+        SIMPLE,
+        RIGHT,
+        LEFT,
+        REMOTLY,
+        STRAIGHT
+    }
 
     public StartScreenFragment() {
         // Required empty public constructor
@@ -66,6 +73,12 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        BillsLog.Log(Tag, LogLevel.Info, "onDestroyView");
+    }
+
+    @Override
     public void onClick(View v) {}
 
     @Override
@@ -89,6 +102,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
             public void onClick(View arg0) {
                 try {
                     mListener.StartCameraFragment();
+                    mListener.NotifyClickedButton(CaptureType.SIMPLE);
                 } catch (Exception e) {
                     BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                 }
@@ -102,6 +116,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
             public void onClick(View arg0) {
                 try {
                     mListener.StartCameraFragment();
+                    mListener.NotifyClickedButton(CaptureType.RIGHT);
                 } catch (Exception e) {
                     BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                 }
@@ -115,6 +130,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
             public void onClick(View arg0) {
                 try {
                     mListener.StartCameraFragment();
+                    mListener.NotifyClickedButton(CaptureType.LEFT);
                 } catch (Exception e) {
                     BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                 }
@@ -128,6 +144,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
             public void onClick(View arg0) {
                 try {
                     mListener.StartCameraFragment();
+                    mListener.NotifyClickedButton(CaptureType.REMOTLY);
                 } catch (Exception e) {
                     BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                 }
@@ -141,6 +158,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
             public void onClick(View arg0) {
                 try {
                     mListener.StartCameraFragment();
+                    mListener.NotifyClickedButton(CaptureType.STRAIGHT);
                 } catch (Exception e) {
                     BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                 }
@@ -160,5 +178,6 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
      */
     public interface OnFragmentInteractionListener {
         void StartCameraFragment();
+        void NotifyClickedButton(CaptureType captureType);
     }
 }

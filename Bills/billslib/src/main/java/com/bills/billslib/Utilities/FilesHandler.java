@@ -267,13 +267,4 @@ public class FilesHandler {
             bmp.recycle();
         }
     }
-
-    public static void toDelete(byte[] image) throws Exception {
-        if (!OpenCVLoader.initDebug()) {
-            BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCVLoader.");
-            return;
-        }
-        Mat bill = FilesHandler.Bytes2MatAndRotateClockwise90(image);
-        FilesHandler.SaveMatToPNGFile(bill, Constants.STORAGE_DIRECTORY + "/TesseractSample/imgs" +"/bill.png");
-    }
 }
