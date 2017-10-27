@@ -2,6 +2,7 @@ package com.bills.billcaptureapp;
 
 import android.app.Dialog;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -28,7 +29,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     private Fragment mCurrentFragment;
     private Handler mHandler;
     private String currFileNameToSave;
-    Dialog progressDialog;
+    Dialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +38,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
         TestsUtilities.InitBillsLogToLogcat();
         mCameraFragment = new CameraFragment();
         mStartScreenFragment = new StartScreenFragment();
-        progressDialog = new Dialog(this);
+        mProgressDialog = new Dialog(this);
         mHandler = new Handler();
         StartWelcomeFragment(null);
     }
@@ -59,23 +60,24 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void NotifyClickedButton(StartScreenFragment.CaptureType captureType) {
+    public void NotifyClickedButton(StartScreenFragment.CaptureType captureType, String restaurantName) {
+        String folderToSaveOn = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL + "/" + restaurantName;
         switch (captureType){
-
             case SIMPLE:
-                currFileNameToSave = Constants.IMAGES_PATH + "/ocrBytes.txt";
+
+                currFileNameToSave = folderToSaveOn + "/ocrBytes.txt";
                 break;
             case RIGHT:
-                currFileNameToSave = Constants.IMAGES_PATH + "/ocrBytes1.txt";
+                currFileNameToSave = folderToSaveOn + "/ocrBytes1.txt";
                 break;
             case LEFT:
-                currFileNameToSave = Constants.IMAGES_PATH + "/ocrBytes2.txt";
+                currFileNameToSave = folderToSaveOn + "/ocrBytes2.txt";
                 break;
             case REMOTLY:
-                currFileNameToSave = Constants.IMAGES_PATH + "/ocrBytes3.txt";
+                currFileNameToSave = folderToSaveOn + "/ocrBytes3.txt";
                 break;
             case STRAIGHT:
-                currFileNameToSave = Constants.IMAGES_PATH + "/ocrBytes4.txt";
+                currFileNameToSave = folderToSaveOn + "/ocrBytes4.txt";
                 break;
             default:
                 throw new UnsupportedOperationException(Tag + ": NotifyClickedButton");
@@ -115,7 +117,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
             // Commit the transaction
             transaction.commit();
             mCurrentFragment = mStartScreenFragment;
-            progressDialog = new Dialog(this);
+            mProgressDialog = new Dialog(this);
             if (null != image) {
                 Thread t = new Thread() {
                 public void run() {
@@ -138,10 +140,10 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     // Create runnable for posting
     final Runnable mHideProgressDialog = new Runnable() {
         public void run() {
-            if(progressDialog != null)
+            if(mProgressDialog != null)
             {
-                progressDialog.cancel();
-                progressDialog.hide();
+                mProgressDialog.cancel();
+                mProgressDialog.hide();
             }
         }
     };
@@ -149,11 +151,11 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     // Create runnable for posting
     final Runnable mShowProgressDialog = new Runnable() {
         public void run() {
-            progressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            progressDialog.setContentView(R.layout.custom_dialog_progress);
-            progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-            progressDialog.setCancelable(false);
-            progressDialog.show();
+            mProgressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            mProgressDialog.setContentView(R.layout.custom_dialog_progress);
+            mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
         }
     };
 }

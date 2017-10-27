@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
+import com.bills.billslib.Utilities.FilesHandler;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,24 +21,11 @@ public class PreparingEnvironmentUtil {
 
     public static void PrepareTesseract(Context context) {
         try {
-            CreateDirectory(Constants.IMAGES_PATH);
+            FilesHandler.CreateDirectory(Constants.IMAGES_PATH);
         } catch (Exception e) {
             e.printStackTrace();
         }
         copyAssetFolder(context.getAssets(), Constants.TESSDATA, Constants.TESSERACT_SAMPLE_DIRECTORY + Constants.TESSDATA);
-    }
-
-    public static void CreateDirectory(String path) {
-
-        File dir = new File(path);
-
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                Log.e(TAG, "ERROR: Creation of directory " + path + " failed, check does Android Manifest have permission to write to external storage.");
-            }
-        } else {
-            Log.i(TAG, "Created directory " + path);
-        }
     }
 
     public static boolean IsRunningOnEmulator(String buildManufacturer, String buildModel) {

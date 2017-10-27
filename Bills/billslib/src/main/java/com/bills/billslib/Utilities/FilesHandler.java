@@ -1,6 +1,7 @@
 package com.bills.billslib.Utilities;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
@@ -265,6 +266,33 @@ public class FilesHandler {
         }
         finally {
             bmp.recycle();
+        }
+    }
+
+    public static boolean CreateDirectory(String path) {
+        try{
+        File dir = new File(path);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                Log.d("AAA", "failure");
+//                BillsLog.Log(Tag, LogLevel.Error, "Creation of directory " + path + " failed, check does Android Manifest have permission to write to external storage.");
+                return false;
+            }
+            else {
+                Log.d("AAA", "succeed");
+//                BillsLog.Log(Tag, LogLevel.Info, "Creation of directory " + path + " succeed");
+                return true;
+            }
+        } else {
+            Log.d("AAA", "exist");
+//            BillsLog.Log(Tag, LogLevel.Info, "Directory " + path + " already exists!");
+            return false;
+        }
+        }
+        catch (Exception e){
+            Log.d("AAA", e.getMessage());
+//            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+            return false;
         }
     }
 }

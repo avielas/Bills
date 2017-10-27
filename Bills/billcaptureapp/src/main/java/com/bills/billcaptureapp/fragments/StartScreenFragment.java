@@ -1,16 +1,25 @@
 package com.bills.billcaptureapp.fragments;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bills.billcaptureapp.R;
+import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Core.BillsLog;
+import com.bills.billslib.Utilities.FilesHandler;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,6 +34,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
     Button _clickToLeftCapture;
     Button _clickToRemotlyCapture;
     Button _clickToStraightCapture;
+    String mRestaurantName;
     private OnFragmentInteractionListener mListener;
     public enum CaptureType{
         SIMPLE,
@@ -82,27 +92,73 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
     public void onClick(View v) {}
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState)     {
+    public void onViewCreated(final View view, Bundle savedInstanceState)     {
         //Initialize parameters
         _clickToSimpleCapture = view.findViewById(R.id.simpleCaptureButton);
         _clickToRightCapture = view.findViewById(R.id.rightCaptureButton);
         _clickToLeftCapture = view.findViewById(R.id.leftCaptureButton);
         _clickToRemotlyCapture = view.findViewById(R.id.remotlyCaptureButton);
         _clickToStraightCapture = view.findViewById(R.id.straightCaptureButton);
-        AddListenerToSimpleCaptureButton();
-        AddListenerToRightCaptureButton();
-        AddListenerToLeftCaptureButton();
-        AddListenerToRemotlyCaptureButton();
-        AddListenerToStraightCaptureButton();
+        SetOnClickListenerSimpleCaptureButton();
+        SetOnClickListenerRightCaptureButton();
+        SetOnClickListenerLeftCaptureButton();
+        SetOnClickListenerRemotlyCaptureButton();
+        SetOnClickListenerStraightCaptureButton();
+        SetOnEditorActionListener(view);
     }
 
-    public void AddListenerToSimpleCaptureButton() {
+    private void SetOnEditorActionListener(final View view) {
+        ((EditText)view.findViewById(R.id.restaurantName)).setOnEditorActionListener(
+                new EditText.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                                actionId == EditorInfo.IME_ACTION_DONE ||
+                                (null != event &&
+                                 event.getAction() == KeyEvent.ACTION_DOWN &&
+                                 event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                            mRestaurantName = v.getText().toString();
+                            String folderToCreate = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL + "/" + mRestaurantName;
+                            if (null != event && !event.isShiftPressed()) {
+                                boolean isFolderCreated = FilesHandler.CreateDirectory(folderToCreate);
+                                HideSoftKeyboard(view);
+                                String toToast = isFolderCreated ?
+                                        "Folder "+ folderToCreate + " created" :
+                                        "Folder "+ folderToCreate + " already exists!";
+                                Toast.makeText(view.getContext(), toToast, Toast.LENGTH_LONG).show();
+                                return true; // consume.
+                            }else if(null == event &&
+                                     actionId == EditorInfo.IME_ACTION_DONE){
+                                boolean isFolderCreated = FilesHandler.CreateDirectory(folderToCreate);
+                                HideSoftKeyboard(view);
+                                String toToast = isFolderCreated ?
+                                         "Folder "+ folderToCreate + " created" :
+                                         "Folder "+ folderToCreate + " already exists!";
+                                Toast.makeText(view.getContext(), toToast, Toast.LENGTH_LONG).show();
+                                return true;
+                            }
+                        }
+                        return false; // pass on to other listeners.
+                    }
+                });
+    }
+
+    void HideSoftKeyboard(View view){
+        InputMethodManager inputManager =
+                (InputMethodManager) view.getContext().
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(
+                view.getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    public void SetOnClickListenerSimpleCaptureButton() {
         _clickToSimpleCapture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 try {
                     mListener.StartCameraFragment();
-                    mListener.NotifyClickedButton(CaptureType.SIMPLE);
+                    mListener.NotifyClickedButton(CaptureType.SIMPLE, mRestaurantName);
                 } catch (Exception e) {
                     BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                 }
@@ -110,13 +166,13 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
         });
     }
 
-    public void AddListenerToRightCaptureButton() {
+    public void SetOnClickListenerRightCaptureButton() {
         _clickToRightCapture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 try {
                     mListener.StartCameraFragment();
-                    mListener.NotifyClickedButton(CaptureType.RIGHT);
+                    mListener.NotifyClickedButton(CaptureType.RIGHT, mRestaurantName);
                 } catch (Exception e) {
                     BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                 }
@@ -124,13 +180,13 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
         });
     }
 
-    public void AddListenerToLeftCaptureButton() {
+    public void SetOnClickListenerLeftCaptureButton() {
         _clickToLeftCapture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 try {
                     mListener.StartCameraFragment();
-                    mListener.NotifyClickedButton(CaptureType.LEFT);
+                    mListener.NotifyClickedButton(CaptureType.LEFT, mRestaurantName);
                 } catch (Exception e) {
                     BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                 }
@@ -138,13 +194,13 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
         });
     }
 
-    public void AddListenerToRemotlyCaptureButton() {
+    public void SetOnClickListenerRemotlyCaptureButton() {
         _clickToRemotlyCapture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 try {
                     mListener.StartCameraFragment();
-                    mListener.NotifyClickedButton(CaptureType.REMOTLY);
+                    mListener.NotifyClickedButton(CaptureType.REMOTLY, mRestaurantName);
                 } catch (Exception e) {
                     BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                 }
@@ -152,13 +208,13 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
         });
     }
 
-    public void AddListenerToStraightCaptureButton() {
+    public void SetOnClickListenerStraightCaptureButton() {
         _clickToStraightCapture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 try {
                     mListener.StartCameraFragment();
-                    mListener.NotifyClickedButton(CaptureType.STRAIGHT);
+                    mListener.NotifyClickedButton(CaptureType.STRAIGHT, mRestaurantName);
                 } catch (Exception e) {
                     BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                 }
@@ -178,6 +234,6 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
      */
     public interface OnFragmentInteractionListener {
         void StartCameraFragment();
-        void NotifyClickedButton(CaptureType captureType);
+        void NotifyClickedButton(CaptureType captureType, String mRestaurantName);
     }
 }
