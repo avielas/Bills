@@ -295,4 +295,20 @@ public class FilesHandler {
             return false;
         }
     }
+
+    public static void SaveBytesToPNGFile(byte[] image, String fileFullName){
+        Mat mat = null;
+        try {
+            mat = Bytes2MatAndRotateClockwise90(image);
+            SaveMatToPNGFile(mat, fileFullName);
+        } catch (Exception e) {
+            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+        }
+        finally {
+            if(mat != null){
+                mat.release();
+            }
+        }
+
+    }
 }

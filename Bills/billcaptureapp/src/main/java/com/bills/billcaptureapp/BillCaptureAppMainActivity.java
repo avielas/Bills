@@ -64,7 +64,6 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
         String folderToSaveOn = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL + "/" + restaurantName;
         switch (captureType){
             case SIMPLE:
-
                 currFileNameToSave = folderToSaveOn + "/ocrBytes.txt";
                 break;
             case RIGHT:
@@ -123,6 +122,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
                 public void run() {
                     try {
                         mHandler.post(mShowProgressDialog);
+//                        FilesHandler.SaveBytesToPNGFile(image, currFileNameToSave);
                         FilesHandler.SaveToTXTFile(image, currFileNameToSave);
                         mHandler.post(mHideProgressDialog);
                     } catch (Exception e) {
