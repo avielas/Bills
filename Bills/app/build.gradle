@@ -13,8 +13,8 @@ android {
         applicationId "com.bills.bills"
         minSdkVersion min_sdk_version
         targetSdkVersion target_sdk_version
-        versionCode 15
-        versionName "0.011"
+        versionCode version_code
+        versionName version_name
         testInstrumentationRunner android_support_test_runner_AndroidJUnitRunner
         externalNativeBuild {
             cmake {

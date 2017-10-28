@@ -8,8 +8,8 @@ android {
         applicationId "com.bills.testsdebug"
         minSdkVersion min_sdk_version
         targetSdkVersion target_sdk_version
-        versionCode 1
-        versionName "1.0"
+        versionCode version_code
+        versionName version_name
         testInstrumentationRunner android_support_test_runner_AndroidJUnitRunner
     }
 

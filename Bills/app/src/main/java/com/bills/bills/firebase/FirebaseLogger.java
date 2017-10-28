@@ -67,7 +67,7 @@ public class FirebaseLogger implements ILogger {
 
             @Override
             public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
+                Log.v(tag, "enter onComplete");
             }
         });
     }
