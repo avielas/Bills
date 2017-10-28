@@ -27,12 +27,13 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile tess_two
     androidTestCompile(android_support_test_espresso_core, {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    compile tess_two
     compile support_appcompat_v7
     testCompile junit
-    compile project(openCVLibrary)
     compile android_support_card_view
+    compile project(animatedLoadingIndicator)
+    compile project(openCVLibrary)
 }

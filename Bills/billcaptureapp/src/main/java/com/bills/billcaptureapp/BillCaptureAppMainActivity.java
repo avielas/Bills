@@ -45,7 +45,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
 
     public void StartCameraFragment() {
         try {
-            mCameraFragment.Init(0, "");
+            mCameraFragment.Init(this, 0, "");
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, mCameraFragment);
             //addToBackStack because of the back button

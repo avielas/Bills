@@ -42,6 +42,7 @@ allprojects {
         //Externals
         tess_two = 'com.rmtheis:tess-two:8.0.0'
         openCVLibrary = ':openCVLibrary330'
+        animatedLoadingIndicator = ':animatedloadingindicator'
         //Firebase
         firebase_database = 'com.google.firebase:firebase-database:11.4.2'
         firebase_storage = 'com.google.firebase:firebase-storage:11.4.2'

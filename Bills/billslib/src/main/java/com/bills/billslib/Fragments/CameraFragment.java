@@ -1,9 +1,12 @@
 package com.bills.billslib.Fragments;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 
 import com.bills.billslib.R;
@@ -44,6 +48,9 @@ import java.util.List;
  */
 public class CameraFragment extends Fragment implements View.OnClickListener, IOnCameraFinished {
     protected String Tag = CameraFragment.class.getName();
+    private Handler mHandler;
+    private Dialog mProgressDialog;
+    private Context mContext;
 
     //Camera Renderer
     private CameraRenderer mRenderer;
@@ -67,9 +74,11 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         // Required empty public constructor
     }
 
-    public void Init(Integer passCode, String relativeDbAndStoragePath){
+    public void Init(Context context, Integer passCode, String relativeDbAndStoragePath){
+        mContext = context;
         mPassCode = passCode;
         mRelativeDbAndStoragePath = relativeDbAndStoragePath;
+        mHandler = new Handler();
     }
 
     @Override
@@ -100,6 +109,22 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        mContext = null;
+        mPassCode = null;
+        mRelativeDbAndStoragePath = null;
+        mHandler = null;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mListener = null;
+        mContext = null;
+        mPassCode = null;
+        mRelativeDbAndStoragePath = null;
+        mHandler = null;
+        mProgressDialog = null;
+        BillsLog.Log(Tag, LogLevel.Info, "onDestroyView");
     }
 
     @Override
@@ -172,101 +197,112 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     }
 
     @Override
-    public void OnCameraFinished(byte[] image) {
+    public void OnCameraFinished(final byte[] image) {
+        mProgressDialog = new Dialog(mContext);
+        Thread t = new Thread() {
+            public void run() {
+                try {
+                    mHandler.post(mShowProgressDialog);
+                    if (!OpenCVLoader.initDebug()) {
+                        String message = "Failed to initialize OpenCV.";
+                        Log.d(Tag, message);
+                        BillsLog.Log(Tag, LogLevel.Error, message);
+                        mListener.Finish();
+                    }
+                    Mat billMat = null;
+                    Mat billMatCopy = null;
+                    Bitmap processedBillBitmap = null;
+                    TemplateMatcher templateMatcher;
+                    int numOfItems;
+                    BillAreaDetector areaDetector = new BillAreaDetector();
+                    Point topLeft = new Point();
+                    Point topRight = new Point();
+                    Point buttomLeft = new Point();
+                    Point buttomRight = new Point();
 
-        if (!OpenCVLoader.initDebug()) {
-            String message = "Failed to initialize OpenCV.";
-            Log.d(Tag, message);
-            BillsLog.Log(Tag, LogLevel.Error, message);
-            mListener.Finish();
-        }
-        Mat billMat = null;
-        Mat billMatCopy = null;
-        Bitmap processedBillBitmap = null;
-        TemplateMatcher templateMatcher;
-        int numOfItems;
-        BillAreaDetector areaDetector = new BillAreaDetector();
-        Point topLeft = new Point();
-        Point topRight = new Point();
-        Point buttomLeft = new Point();
-        Point buttomRight = new Point();
+                    while (!mOcrEngine.Initialized()) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
 
-        while (!mOcrEngine.Initialized()) {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                    try {
+                        billMat = FilesHandler.Bytes2MatAndRotateClockwise90(image);
+                        if(billMat == null){
+                            throw new Exception();
+                        }
+                        if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
+                            throw new Exception();
+                        }
+
+                        try {
+                            billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
+                            billMatCopy = billMat.clone();
+                        } catch (Exception e) {
+                            BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage());
+                            //TODO: decide what to do. Retake the picture? crash the app?
+                            throw new Exception();
+                        }
+
+                        BillsLog.Log(Tag, LogLevel.Info, "Warped perspective successfully.");
+
+                        processedBillBitmap = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
+                        ImageProcessingLib.PreprocessingForTM(billMat);
+                        Utils.matToBitmap(billMat, processedBillBitmap);
+
+                        templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
+                        try {
+                            templateMatcher.Match();
+                            BillsLog.Log(Tag, LogLevel.Info, "Template matcher succeed.");
+                        } catch (Exception e) {
+                            BillsLog.Log(Tag, LogLevel.Error, "Template matcher threw an exception: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+
+                        ImageProcessingLib.PreprocessingForParsing(billMatCopy);
+                        numOfItems = templateMatcher.priceAndQuantity.size();
+
+                        /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
+                        /***** Out Of Memory when running 4 threads parallel                                      *****/
+                        Utils.matToBitmap(billMatCopy, processedBillBitmap);
+                        templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
+                        templateMatcher.Parsing(numOfItems);
+
+                        List<BillRow> rows = new ArrayList<>();
+                        int index = 0;
+                        for (Double[] row : templateMatcher.priceAndQuantity) {
+                            Bitmap item = templateMatcher.itemLocationsByteArray.get(index);
+                            Double price = row[0];
+                            Integer quantity = row[1].intValue();
+                            rows.add(new BillRow(price, quantity, index, item));
+                            index++;
+                        }
+                        mListener.StartSummarizerFragment(rows, image, mPassCode, mRelativeDbAndStoragePath);
+                        BillsLog.Log(Tag, LogLevel.Info, "Parsing finished");
+                    }catch (Exception ex){
+                        mListener.StartWelcomeFragment(image);
+                    }
+                    finally {
+                        if(null != billMat){
+                            billMat.release();
+                        }
+                        if(null != processedBillBitmap){
+                            processedBillBitmap.recycle();
+                        }
+                        if(null != billMatCopy){
+                            billMatCopy.release();
+                        }
+                        mHandler.post(mHideProgressDialog);
+                    }
+                } catch (Exception e) {
+                    mHandler.post(mHideProgressDialog);
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+                }
             }
-        }
-
-        try {
-            billMat = FilesHandler.Bytes2MatAndRotateClockwise90(image);
-            if(billMat == null){
-                throw new Exception();
-            }
-            if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
-                throw new Exception();
-            }
-
-            try {
-                billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
-                billMatCopy = billMat.clone();
-            } catch (Exception e) {
-                BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage());
-                //TODO: decide what to do. Retake the picture? crash the app?
-                throw new Exception();
-            }
-
-            BillsLog.Log(Tag, LogLevel.Info, "Warped perspective successfully.");
-
-            processedBillBitmap = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
-            ImageProcessingLib.PreprocessingForTM(billMat);
-            Utils.matToBitmap(billMat, processedBillBitmap);
-
-            templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
-            try {
-                templateMatcher.Match();
-                BillsLog.Log(Tag, LogLevel.Info, "Template matcher succeed.");
-            } catch (Exception e) {
-                BillsLog.Log(Tag, LogLevel.Error, "Template matcher threw an exception: " + e.getMessage());
-                e.printStackTrace();
-            }
-
-            ImageProcessingLib.PreprocessingForParsing(billMatCopy);
-            numOfItems = templateMatcher.priceAndQuantity.size();
-
-            /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
-            /***** Out Of Memory when running 4 threads parallel                                      *****/
-            Utils.matToBitmap(billMatCopy, processedBillBitmap);
-            templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
-            templateMatcher.Parsing(numOfItems);
-
-            List<BillRow> rows = new ArrayList<>();
-            int index = 0;
-            for (Double[] row : templateMatcher.priceAndQuantity) {
-                Bitmap item = templateMatcher.itemLocationsByteArray.get(index);
-                Double price = row[0];
-                Integer quantity = row[1].intValue();
-                rows.add(new BillRow(price, quantity, index, item));
-                index++;
-            }
-
-            mListener.StartSummarizerFragment(rows, image, mPassCode, mRelativeDbAndStoragePath);
-            BillsLog.Log(Tag, LogLevel.Info, "Parsing finished");
-        }catch (Exception ex){
-            mListener.StartWelcomeFragment(image);
-        }
-        finally {
-            if(null != billMat){
-                billMat.release();
-            }
-            if(null != processedBillBitmap){
-                processedBillBitmap.recycle();
-            }
-            if(null != billMatCopy){
-                billMatCopy.release();
-            }
-        }
+        };
+        t.start();
     }
 
     /**
@@ -285,4 +321,26 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         void Finish();
         void StartWelcomeFragment(byte[] image);
     }
+
+    // Create runnable for posting
+    final Runnable mHideProgressDialog = new Runnable() {
+        public void run() {
+            if(mProgressDialog != null)
+            {
+                mProgressDialog.cancel();
+                mProgressDialog.hide();
+            }
+        }
+    };
+
+    // Create runnable for posting
+    final Runnable mShowProgressDialog = new Runnable() {
+        public void run() {
+            mProgressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            mProgressDialog.setContentView(R.layout.custom_dialog_progress);
+            mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+        }
+    };
 }

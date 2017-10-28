@@ -1,5 +1,6 @@
 package com.bills.bills;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -37,7 +38,7 @@ public class BillsMainActivity extends MainActivityBase implements
     private static final String BillsPerUserDbKey = "BillsPerUser";
     private final String RowsDbKey = "Rows";
     private String mUid;
-
+    private Context mContext;
     //Fragments
     private BillSummarizerFragment mBillSummarizerFragment;
     private WelcomeScreenFragment mWelcomeFragment;
@@ -54,7 +55,7 @@ public class BillsMainActivity extends MainActivityBase implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mContext = this;
         setContentView(R.layout.activity_bills_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
@@ -142,7 +143,7 @@ public class BillsMainActivity extends MainActivityBase implements
             @Override
             public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath) {
 
-                mCameraFragment.Init(passCode, relativeDbAndStoragePath);
+                mCameraFragment.Init(mContext, passCode, relativeDbAndStoragePath);
                 BillsLog.Init(new FirebaseLogger("users/" + relativeDbAndStoragePath));
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 

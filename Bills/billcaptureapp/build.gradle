@@ -31,5 +31,5 @@ dependencies {
     compile android_support_constraint_layout
     testCompile junit
     compile project(':testslib')
-    compile project(':animatedloadingindicator')
+    compile project(animatedLoadingIndicator)
 }
