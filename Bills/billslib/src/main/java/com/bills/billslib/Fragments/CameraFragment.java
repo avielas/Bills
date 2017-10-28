@@ -116,18 +116,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        mListener = null;
-        mContext = null;
-        mPassCode = null;
-        mRelativeDbAndStoragePath = null;
-        mHandler = null;
-        mProgressDialog = null;
-        BillsLog.Log(Tag, LogLevel.Info, "onDestroyView");
-    }
-
-    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mRenderer = new CameraRenderer(getContext());
         mRenderer.SetOnCameraFinishedListener(this);
@@ -204,10 +192,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 try {
                     mHandler.post(mShowProgressDialog);
                     if (!OpenCVLoader.initDebug()) {
-                        String message = "Failed to initialize OpenCV.";
-                        Log.d(Tag, message);
-                        BillsLog.Log(Tag, LogLevel.Error, message);
+                        BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCV.");
                         mListener.Finish();
+                        mHandler.post(mHideProgressDialog);
+                        throw new Exception();
                     }
                     Mat billMat = null;
                     Mat billMatCopy = null;
@@ -224,16 +212,19 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         try {
                             Thread.sleep(200);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            mHandler.post(mHideProgressDialog);
+                            throw new Exception();
                         }
                     }
 
                     try {
                         billMat = FilesHandler.Bytes2MatAndRotateClockwise90(image);
                         if(billMat == null){
+                            mHandler.post(mHideProgressDialog);
                             throw new Exception();
                         }
                         if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
+                            mHandler.post(mHideProgressDialog);
                             throw new Exception();
                         }
 
@@ -241,6 +232,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
                             billMatCopy = billMat.clone();
                         } catch (Exception e) {
+                            mHandler.post(mHideProgressDialog);
                             BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage());
                             //TODO: decide what to do. Retake the picture? crash the app?
                             throw new Exception();
@@ -257,8 +249,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             templateMatcher.Match();
                             BillsLog.Log(Tag, LogLevel.Info, "Template matcher succeed.");
                         } catch (Exception e) {
+                            mHandler.post(mHideProgressDialog);
                             BillsLog.Log(Tag, LogLevel.Error, "Template matcher threw an exception: " + e.getMessage());
-                            e.printStackTrace();
+                            throw new Exception();
                         }
 
                         ImageProcessingLib.PreprocessingForParsing(billMatCopy);
@@ -282,6 +275,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         mListener.StartSummarizerFragment(rows, image, mPassCode, mRelativeDbAndStoragePath);
                         BillsLog.Log(Tag, LogLevel.Info, "Parsing finished");
                     }catch (Exception ex){
+                        mHandler.post(mHideProgressDialog);
                         mListener.StartWelcomeFragment(image);
                     }
                     finally {
