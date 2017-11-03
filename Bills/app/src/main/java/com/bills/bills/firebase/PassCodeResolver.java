@@ -51,7 +51,7 @@ public class PassCodeResolver {
             public Transaction.Result doTransaction(final MutableData mutableData) {
                 if (mutableData.hasChild(mUid)) {
                     HashMap<String, Object> value = (HashMap<String, Object>)mutableData.child(mUid).getValue();
-                    DateFormat sdf = new SimpleDateFormat("yyyy_MM_dd___HH_mm_ss");
+                    DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy__HH_mm_ss");
                     Date date = new Date();
                     String now = sdf.format(date);
 
@@ -72,7 +72,7 @@ public class PassCodeResolver {
                     //find an unused pass code
                     for (int i = 0; i < 10000; i++) {
                         if (!usedPassCodes.contains(i)) {
-                            DateFormat sdf = new SimpleDateFormat("yyyy_MM_dd___HH_mm_ss");
+                            DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy__HH_mm_ss");
                             Date date = new Date();
                             String now = sdf.format(date);
 
@@ -103,7 +103,7 @@ public class PassCodeResolver {
                     return;
                 }
                 mNewPassCodeRetrieved.set(true);
-                callback.OnPassCodeResovled(newPassCode.get(), (String) mPassCodes.get(mUid).get(mRelativePathDbKey));
+                callback.OnPassCodeResovled(newPassCode.get(), (String) mPassCodes.get(mUid).get(mRelativePathDbKey), mUid);
             }
         });
     }
@@ -151,7 +151,7 @@ public class PassCodeResolver {
                         HashMap<String, Object> value = (HashMap<String, Object>)child.getValue();
                         int curPassCode = ((Long)value.get(mPassCodeDbKey)).intValue();
                         if(curPassCode == passCode) {
-                            callback.OnPassCodeResovled(curPassCode, (String) value.get(mRelativePathDbKey));
+                            callback.OnPassCodeResovled(curPassCode, (String) value.get(mRelativePathDbKey), mUid);
                         }
                     }catch (Exception ex){}
                 }
@@ -161,7 +161,7 @@ public class PassCodeResolver {
     }
 
     public interface IPassCodeResolverCallback{
-        void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath);
+        void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath, String userUid);
         void OnPassCodeResolveFail(String error);
     }
 }

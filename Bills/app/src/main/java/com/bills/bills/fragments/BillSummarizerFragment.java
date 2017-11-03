@@ -13,6 +13,8 @@ import android.widget.TextView;
 import com.bills.bills.R;
 import com.bills.bills.firebase.UiUpdater;
 import com.bills.billslib.Contracts.BillRow;
+import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Core.BillsLog;
 
 import java.util.List;
 
@@ -23,7 +25,7 @@ import java.util.List;
  * to handle interaction events.
  */
 public class BillSummarizerFragment extends Fragment {
-
+    private static String Tag = BillSummarizerFragment.class.getName();
     private int mPassCode;
     private String mDbPath;
     private String mStoragePath;
@@ -69,6 +71,9 @@ public class BillSummarizerFragment extends Fragment {
         mMyItemsArea = (LinearLayout)getView().findViewById(R.id.my_items_area_linearlayout);
         mTotalSumView = (TextView)getView().findViewById(R.id.my_total_sum_edittext);
         mTipView = (EditText)getView().findViewById(R.id.tip_edittext);
+        // TODO: to remove setEnabled(false)!
+        // TODO: I added it just for debugging usages
+        mTipView.setEnabled(false);
         mPassCodeView = (TextView)getView().findViewById(R.id.passcode_textview);
 
         if(mMainUserMode){
@@ -101,8 +106,8 @@ public class BillSummarizerFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+            BillsLog.Log(Tag, LogLevel.Error, context.toString() + " must implement OnFragmentInteractionListener");
+            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
         }
     }
 

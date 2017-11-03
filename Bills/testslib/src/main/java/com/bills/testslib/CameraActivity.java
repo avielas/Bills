@@ -124,7 +124,7 @@ public class CameraActivity extends AppCompatActivity implements IOnCameraFinish
 
     @Override
     public void OnCameraFinished(byte[] bytes){
-        DateFormat sdf = new SimpleDateFormat("yyyy_MM_dd___HH_mm_ss");
+        DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy__HH_mm_ss");
         Date date = new Date();
         String now = sdf.format(date);
         String fileFullName = Constants.IMAGES_PATH + "/ocrBytes_" + now + ".txt";

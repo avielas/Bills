@@ -63,13 +63,13 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)     {
-        ((Button)view.findViewById(R.id.start_camera_button)).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.start_camera_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mListener.StartCameraFragment();
             }
         });
-        ((Button)view.findViewById(R.id.check_pass_code_button)).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.check_pass_code_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
@@ -98,6 +98,7 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
         void StartCameraFragment();
 
         void StartSummarizerFragment(int passCode);
+
 
     }
 }

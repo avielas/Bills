@@ -141,10 +141,10 @@ public class BillsMainActivity extends MainActivityBase implements
     public void StartCameraFragment() {
         mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback() {
             @Override
-            public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath) {
+            public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath, String userUid) {
 
                 mCameraFragment.Init(mContext, passCode, relativeDbAndStoragePath);
-                BillsLog.Init(new FirebaseLogger("users/" + relativeDbAndStoragePath));
+                BillsLog.Init(new FirebaseLogger("users/" + relativeDbAndStoragePath, userUid));
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
                 // Replace whatever is in the fragment_container view with this fragment,
@@ -170,12 +170,12 @@ public class BillsMainActivity extends MainActivityBase implements
 
         mPassCodeResolver.GetRelativePath(passCode, new PassCodeResolver.IPassCodeResolverCallback() {
             @Override
-            public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath) {
+            public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath, String userUid) {
                 mBillSummarizerFragment.Init(BillsMainActivity.this.getApplicationContext(),
                         passCode,
                         "users/" + relativeDbAndStoragePath + "/" + RowsDbKey,
                         "BillsPerUser/" + relativeDbAndStoragePath);
-
+                BillsLog.Init(new FirebaseLogger("users/" + relativeDbAndStoragePath, userUid));
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container, mBillSummarizerFragment);
                 transaction.addToBackStack(null);
@@ -233,7 +233,7 @@ public class BillsMainActivity extends MainActivityBase implements
     public void StartWelcomeFragment(final byte[] image) {
         mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback(){
             @Override
-            public void OnPassCodeResovled(final Integer passCode, final String relativeDbAndStoragePath) {
+            public void OnPassCodeResovled(final Integer passCode, final String relativeDbAndStoragePath, final String userUid) {
                 FirebaseUploader uploader = new FirebaseUploader(UsersDbKey + "/" + relativeDbAndStoragePath,
                         BillsPerUserDbKey + "/" + relativeDbAndStoragePath, BillsMainActivity.this);
                 uploader.UploadFullBillImage(image);

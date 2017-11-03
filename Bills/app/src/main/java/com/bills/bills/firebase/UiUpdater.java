@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import com.bills.bills.R;
 import com.bills.billslib.Contracts.BillRow;
+import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Utilities.FilesHandler;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
@@ -36,7 +38,7 @@ import static android.view.View.GONE;
  */
 
 public class UiUpdater implements View.OnClickListener {
-
+    private static String Tag = UiUpdater.class.getName();
     private final String ImageType = "image/jpg";
     private final String ImageWidth = "width";
     private final String ImageHeight = "height";
@@ -159,6 +161,7 @@ public class UiUpdater implements View.OnClickListener {
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
+        BillsLog.Log(Tag, LogLevel.Info, "StartMainUser succeeded!");
     }
 
     public void StartSecondaryUser(final Context context,
@@ -182,14 +185,14 @@ public class UiUpdater implements View.OnClickListener {
                     int newTip = Integer.parseInt(s.toString());
                     if (newTip < 0 || newTip > 100) {
                         mBillSummarizerTipView.setText(curTip);
+                        BillsLog.Log(Tag, LogLevel.Info, "Tip setted to " + curTip);
                     } else {
                         curTip = s.toString();
                         mTip = (1.0*newTip)/100;
                         mBillSummarizerTotalSumView.setText(Double.toString(mMyTotalSum *(1+mTip)));
-
+                        BillsLog.Log(Tag, LogLevel.Info, "Tip setted to " + Double.toString(mMyTotalSum *(1+mTip)));
                     }
                 }
-
             }
 
             public void beforeTextChanged(CharSequence s, int start,
@@ -229,7 +232,7 @@ public class UiUpdater implements View.OnClickListener {
                             itemHeight = Integer.parseInt(storageMetadata.getCustomMetadata(ImageHeight));
                             itemWidth = Integer.parseInt(storageMetadata.getCustomMetadata(ImageWidth));
                         }catch (Exception e){
-                            Log.d("","");
+                            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
                             return;
                         }
                         curLineStorageReference.getBytes(3 * ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
@@ -333,7 +336,7 @@ public class UiUpdater implements View.OnClickListener {
 
             }
         });
-
+        BillsLog.Log(Tag, LogLevel.Info, "StartSecondaryUser succeeded!");
     }
 
     private int GetRowUiIndex(Integer newRowIndex) {
@@ -419,9 +422,11 @@ public class UiUpdater implements View.OnClickListener {
                         mMyLineNumToLineView.get(index).setVisibility(GONE);
                         mMyLineToQuantityMapper.put(index, 0);
                         mMyLineNumberToQuantityView.get(index).setText("0");
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " removed from My view and added to Common view");
                     }else if(mMyLineToQuantityMapper.get(index) > 1){ //Line should be moved to common view
                         mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) - 1);
                         mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " moved from My to Common view (in case of quantity > 1)");
                     }
 
                     //Line in common view should be updated
@@ -429,10 +434,12 @@ public class UiUpdater implements View.OnClickListener {
                         mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index ) + 1);
                         mCommonLineNumberToQuantityView.get(index).setText(""+mCommonLineToQuantityMapper.get(index));
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + ", in Common view, updated");
                     }else{ //Line in common view shlould be added
                         mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mCommonLineNumberToQuantityView.get(index).setText("1");
                         mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) + 1);
+                        BillsLog.Log(Tag, LogLevel.Info, "Added line " + index + " to Common view");
                     }
 
                     mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));
@@ -453,9 +460,11 @@ public class UiUpdater implements View.OnClickListener {
                         mCommonLineNumToLineView.get(index).setVisibility(GONE);
                         mCommonLineToQuantityMapper.put(index, 0);
                         mCommonLineNumberToQuantityView.get(index).setText("0");
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " removed from Common view and added to My view");
                     }else{ //Line should be moved to my view
                         mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) - 1);
                         mCommonLineNumberToQuantityView.get(index).setText(""+mCommonLineToQuantityMapper.get(index));
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " moved from Common to My view (in case of quantity > 1)");
                     }
 
                     //Line in my view should be updated
@@ -463,10 +472,12 @@ public class UiUpdater implements View.OnClickListener {
                         mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index ) + 1);
                         mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + ", in My view, updated");
                     }else{ //Line in My view shlould be added
                         mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mMyLineNumberToQuantityView.get(index).setText("1");
                         mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) + 1);
+                        BillsLog.Log(Tag, LogLevel.Info, "Added line " + index + " to My view");
                     }
 
                     mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));

@@ -67,7 +67,7 @@
         android:background="@android:color/transparent"
         android:ems="10"
         android:hint="Tip"
-        android:inputType="number" />
+        android:inputType="number"/>
 
     <ScrollView
         android:layout_width="match_parent"

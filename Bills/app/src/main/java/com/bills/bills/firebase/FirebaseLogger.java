@@ -11,6 +11,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,7 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FirebaseLogger implements ILogger {
 
-    private DatabaseReference mFirebaseLogReference;
+    private static String Tag = FirebaseLogger.class.getName();
+    private DatabaseReference mFirebaseLogReferenceApp;
+    private String mUserUid;
 
     private int mRowCount = 0;
     private AtomicInteger mCurEntryCount = new AtomicInteger(0);
@@ -33,9 +38,10 @@ public class FirebaseLogger implements ILogger {
 
     private ConcurrentLinkedQueue<LogEntry> mLogEntries = new ConcurrentLinkedQueue<>();
 
-    public FirebaseLogger(String firebaseLogReference){
-        mFirebaseLogReference = FirebaseDatabase.getInstance().getReference().child(firebaseLogReference + "/Logs");
-        mFirebaseLogReference.keepSynced(true);
+    public FirebaseLogger(String firebaseLogReferenceApp, String userUid){
+        mUserUid = userUid;
+        mFirebaseLogReferenceApp = FirebaseDatabase.getInstance().getReference().child(firebaseLogReferenceApp + "/Logs");
+        mFirebaseLogReferenceApp.keepSynced(true);
     }
 
     @Override
@@ -56,11 +62,15 @@ public class FirebaseLogger implements ILogger {
         }
 
         //print to FireBase log
-        mFirebaseLogReference.runTransaction(new Transaction.Handler() {
+        mFirebaseLogReferenceApp.runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
                 synchronized (mLock) {
-                    mutableData.child(Integer.toString(mRowCount++)).setValue(logLevel.toString() + ": " + tag + ": " + message);
+                    DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy HH:mm:ss_SSS");
+                    Date date = new Date();
+                    String now = sdf.format(date);
+                    mutableData.child("(" + now + " ," + mUserUid + ")").setValue(/*TODO: How to add it on new line ?? +*/
+                                                                                   mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
                     return Transaction.success(mutableData);
                 }
             }
@@ -68,6 +78,10 @@ public class FirebaseLogger implements ILogger {
             @Override
             public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
                 Log.v(tag, "enter onComplete");
+                if(databaseError != null &&
+                  (databaseError.toString().length() == 0 || databaseError.toString().isEmpty())){
+                    Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails());
+                }
             }
         });
     }
@@ -109,7 +123,7 @@ public class FirebaseLogger implements ILogger {
 //
 //                        mTransactionInProgress.set(true);
 //                        final LogEntry logEntry = logEntries.poll();
-//                        mFirebaseLogReference.runTransaction(new Transaction.Handler() {
+//                        mFirebaseLogReferenceApp.runTransaction(new Transaction.Handler() {
 //                            @Override
 //                            public Transaction.Result doTransaction(MutableData mutableData) {
 //                                if (mutableData == null || mutableData.getKey() == null) {
