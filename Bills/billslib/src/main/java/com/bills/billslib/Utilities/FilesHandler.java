@@ -28,9 +28,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 
@@ -294,6 +297,12 @@ public class FilesHandler {
 //            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
             return false;
         }
+    }
+
+    public static String GetCurrDateAndTime() {
+        DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy HH:mm:ss_SSS");
+        Date date = new Date();
+        return sdf.format(date);
     }
 
     public static void SaveBytesToPNGFile(byte[] image, String fileFullName){

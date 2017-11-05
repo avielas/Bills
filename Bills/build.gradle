@@ -4,7 +4,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0'
         classpath 'com.google.gms:google-services:3.1.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -38,7 +38,7 @@ allprojects {
         //There are a few other known examples that are influenced by this value and that list is likely to only increase over time.
         //For all practical purposes, most apps are going to want to set targetSdkVersion to the latest released version of the API.
         //This will ensure your app looks as good as possible on the most recent Android devices. If you do not specify the targetSdkVersion, it defaults to the minSdkVersion.
-        build_tools_version = "26.0.2"
+        build_tools_version = "27.0.0"
         //Externals
         tess_two = 'com.rmtheis:tess-two:8.0.0'
         openCVLibrary = ':openCVLibrary330'

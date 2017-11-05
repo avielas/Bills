@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Contracts.Interfaces.ILogger;
+import com.bills.billslib.Utilities.FilesHandler;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -11,9 +12,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,8 +23,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FirebaseLogger implements ILogger {
 
     private static String Tag = FirebaseLogger.class.getName();
-    private DatabaseReference mFirebaseLogReferenceApp;
     private String mUserUid;
+    private DatabaseReference mMyFirebaseLogReference;
+    private DatabaseReference mFirebaseLogReferenceApp;
+    private String mNow;
 
     private int mRowCount = 0;
     private AtomicInteger mCurEntryCount = new AtomicInteger(0);
@@ -38,9 +38,12 @@ public class FirebaseLogger implements ILogger {
 
     private ConcurrentLinkedQueue<LogEntry> mLogEntries = new ConcurrentLinkedQueue<>();
 
-    public FirebaseLogger(String firebaseLogReferenceApp, String userUid){
+    public FirebaseLogger(String userUid, String firebaseDBCurrUserReference, String firebaseDBMainUserReference){
         mUserUid = userUid;
-        mFirebaseLogReferenceApp = FirebaseDatabase.getInstance().getReference().child(firebaseLogReferenceApp + "/Logs");
+        mNow = FilesHandler.GetCurrDateAndTime();
+        mMyFirebaseLogReference  = FirebaseDatabase.getInstance().getReference().child(firebaseDBCurrUserReference + "/Logs/" + mNow);
+        mMyFirebaseLogReference.keepSynced(true);
+        mFirebaseLogReferenceApp = FirebaseDatabase.getInstance().getReference().child(firebaseDBMainUserReference + "/Logs");
         mFirebaseLogReferenceApp.keepSynced(true);
     }
 
@@ -61,14 +64,12 @@ public class FirebaseLogger implements ILogger {
                 Log.v(tag, "this LogLevel enum doesn't exists: " + message);
         }
 
-        //print to FireBase log
+        //print to FireBase main user(application Logs folder) log
         mFirebaseLogReferenceApp.runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
                 synchronized (mLock) {
-                    DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy HH:mm:ss_SSS");
-                    Date date = new Date();
-                    String now = sdf.format(date);
+                    String now = FilesHandler.GetCurrDateAndTime();
                     mutableData.child("(" + now + " ," + mUserUid + ")").setValue(/*TODO: How to add it on new line ?? +*/
                                                                                    mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
                     return Transaction.success(mutableData);
@@ -80,6 +81,28 @@ public class FirebaseLogger implements ILogger {
                 Log.v(tag, "enter onComplete");
                 if(databaseError != null &&
                   (databaseError.toString().length() == 0 || databaseError.toString().isEmpty())){
+                    Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails());
+                }
+            }
+        });
+
+        //print to FireBase current user log
+        mMyFirebaseLogReference.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                synchronized (mLock) {
+                    String mNow = FilesHandler.GetCurrDateAndTime();
+                    mutableData.child(mNow).setValue(/*TODO: How to add it on new line ?? +*/
+                            mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
+                    return Transaction.success(mutableData);
+                }
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                Log.v(tag, "enter onComplete");
+                if(databaseError != null &&
+                        (databaseError.toString().length() == 0 || databaseError.toString().isEmpty())){
                     Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails());
                 }
             }

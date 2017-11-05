@@ -144,7 +144,7 @@ public class BillsMainActivity extends MainActivityBase implements
             public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath, String userUid) {
 
                 mCameraFragment.Init(mContext, passCode, relativeDbAndStoragePath);
-                BillsLog.Init(new FirebaseLogger("users/" + relativeDbAndStoragePath, userUid));
+                BillsLog.Init(new FirebaseLogger(userUid, "users/" + userUid, "users/" + relativeDbAndStoragePath));
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
                 // Replace whatever is in the fragment_container view with this fragment,
@@ -175,7 +175,7 @@ public class BillsMainActivity extends MainActivityBase implements
                         passCode,
                         "users/" + relativeDbAndStoragePath + "/" + RowsDbKey,
                         "BillsPerUser/" + relativeDbAndStoragePath);
-                BillsLog.Init(new FirebaseLogger("users/" + relativeDbAndStoragePath, userUid));
+                BillsLog.Init(new FirebaseLogger(userUid, "users/" + userUid, "users/" + relativeDbAndStoragePath));
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container, mBillSummarizerFragment);
                 transaction.addToBackStack(null);
