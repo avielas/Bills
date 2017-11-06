@@ -8,7 +8,6 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.TextureView;
@@ -17,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 
+import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
 import com.bills.billslib.R;
 import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Camera.IOnCameraFinished;
@@ -192,7 +192,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 try {
                     mHandler.post(mShowProgressDialog);
                     if (!OpenCVLoader.initDebug()) {
-                        BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCV.");
+                        BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCV.", LogsPathToPrintTo.BothUsers);
                         mListener.Finish();
                         mHandler.post(mHideProgressDialog);
                         throw new Exception();
@@ -233,12 +233,12 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             billMatCopy = billMat.clone();
                         } catch (Exception e) {
                             mHandler.post(mHideProgressDialog);
-                            BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage());
+                            BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                             //TODO: decide what to do. Retake the picture? crash the app?
                             throw new Exception();
                         }
 
-                        BillsLog.Log(Tag, LogLevel.Info, "Warped perspective successfully.");
+                        BillsLog.Log(Tag, LogLevel.Info, "Warped perspective successfully.", LogsPathToPrintTo.BothUsers);
 
                         processedBillBitmap = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
                         ImageProcessingLib.PreprocessingForTM(billMat);
@@ -247,10 +247,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
                         try {
                             templateMatcher.Match();
-                            BillsLog.Log(Tag, LogLevel.Info, "Template matcher succeed.");
+                            BillsLog.Log(Tag, LogLevel.Info, "Template matcher succeed.", LogsPathToPrintTo.BothUsers);
                         } catch (Exception e) {
                             mHandler.post(mHideProgressDialog);
-                            BillsLog.Log(Tag, LogLevel.Error, "Template matcher threw an exception: " + e.getMessage());
+                            BillsLog.Log(Tag, LogLevel.Error, "Template matcher threw an exception: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                             throw new Exception();
                         }
 
@@ -273,7 +273,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             index++;
                         }
                         mListener.StartSummarizerFragment(rows, image, mPassCode, mRelativeDbAndStoragePath);
-                        BillsLog.Log(Tag, LogLevel.Info, "Parsing finished");
+                        BillsLog.Log(Tag, LogLevel.Info, "Parsing finished", LogsPathToPrintTo.BothUsers);
                     }catch (Exception ex){
                         mHandler.post(mHideProgressDialog);
                         mListener.StartWelcomeFragment(image);
@@ -292,7 +292,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                     }
                 } catch (Exception e) {
                     mHandler.post(mHideProgressDialog);
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                 }
             }
         };

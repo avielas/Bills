@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
 import com.bills.billslib.Core.BillsLog;
 
 import org.opencv.android.OpenCVLoader;
@@ -57,7 +58,7 @@ public class FilesHandler {
             {
                 Boolean isSuccess = folder.mkdirs();
                 if(!isSuccess) {
-                    BillsLog.Log(Tag, LogLevel.Error, "Can't create directory(ies)");
+                    BillsLog.Log(Tag, LogLevel.Error, "Can't create directory(ies)", LogsPathToPrintTo.BothUsers);
                     return false;
                 }
             }
@@ -65,10 +66,10 @@ public class FilesHandler {
 
             // bmp is your Bitmap instance, PNG is a lossless format, the compression factor (100) is ignored
             bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
-            BillsLog.Log(Tag, LogLevel.Info, "SaveToPNGFile success!");
+            BillsLog.Log(Tag, LogLevel.Info, "SaveToPNGFile success!", LogsPathToPrintTo.BothUsers);
             return true;
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, e.getMessage(), LogsPathToPrintTo.BothUsers);
             return false;
         } finally {
             try {
@@ -76,7 +77,7 @@ public class FilesHandler {
                     out.close();
                 }
             } catch (IOException e) {
-                BillsLog.Log(Tag, LogLevel.Error, "Can't free output stream: " + e.getMessage());
+                BillsLog.Log(Tag, LogLevel.Error, "Can't free output stream: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                 return false;
             }
         }
@@ -92,14 +93,14 @@ public class FilesHandler {
         }
         catch (Exception e)
         {
-            BillsLog.Log(Tag, LogLevel.Error, "Can't create directory(ies): " + e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "Can't create directory(ies): " + e.getMessage(), LogsPathToPrintTo.BothUsers);
             return false;
         }finally {
             if (bos != null) {
                 try {
                     bos.close();
                 } catch (IOException e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "Can't free allocated buffer: " + e.getMessage());
+                    BillsLog.Log(Tag, LogLevel.Error, "Can't free allocated buffer: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                     return false;
                 }
             }
@@ -116,7 +117,7 @@ public class FilesHandler {
             bis = new BufferedInputStream(new FileInputStream(file));
             bis.read(image);
         }catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "failed to read input stream: " + e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "failed to read input stream: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
             return null;
         }finally {
             if(bis != null){
@@ -145,7 +146,7 @@ public class FilesHandler {
             }
         }
         catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "failed to read text file: " + e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "failed to read text file: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
             return null;
         }
         finally {
@@ -166,7 +167,7 @@ public class FilesHandler {
 
     public static Mat Bytes2MatAndRotateClockwise90(byte[] bytes) throws Exception {
         if (!OpenCVLoader.initDebug()) {
-            BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCVLoader.");
+            BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCVLoader.", LogsPathToPrintTo.BothUsers);
             return null;
         }
         Mat bgrMat = null;
@@ -181,7 +182,7 @@ public class FilesHandler {
             return dst;
         }
         catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "Failed to convert bytes to mat: " + e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "Failed to convert bytes to mat: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
             return null;
         }
         finally{
@@ -208,7 +209,7 @@ public class FilesHandler {
         try {
             printStreamToFile = new PrintStream(file);
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "Failed to convert bytes to mat: " + e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "Failed to convert bytes to mat: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
             return;
         }
         System.setOut(printStreamToFile);
@@ -228,7 +229,7 @@ public class FilesHandler {
             });
 
             if(listFiles == null || listFiles.length == 0){
-                BillsLog.Log(Tag, LogLevel.Error, "Failed to get files from directory.");
+                BillsLog.Log(Tag, LogLevel.Error, "Failed to get files from directory.", LogsPathToPrintTo.BothUsers);
                 return null;
             }
             //sorting to take the last capture which took by Bills app
@@ -245,7 +246,7 @@ public class FilesHandler {
             });
         }
         catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "GetLastCapturedBillPath Failed: " + e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "GetLastCapturedBillPath Failed: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
         }
         return listFiles[0].getPath();
     }
@@ -264,7 +265,7 @@ public class FilesHandler {
             return SaveToPNGFile(bmp, path);
         }
         catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "SaveMatToPNGFile Failed: " + e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "SaveMatToPNGFile Failed: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
             return false;
         }
         finally {
@@ -311,7 +312,7 @@ public class FilesHandler {
             mat = Bytes2MatAndRotateClockwise90(image);
             SaveMatToPNGFile(mat, fileFullName);
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
         }
         finally {
             if(mat != null){

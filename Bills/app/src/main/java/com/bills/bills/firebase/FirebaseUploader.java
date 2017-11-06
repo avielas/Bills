@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
 import com.bills.billslib.Core.BillsLog;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -70,11 +71,11 @@ public class FirebaseUploader {
         storageFullBillRef.putBytes(fullBillImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image");
+                BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image", LogsPathToPrintTo.BothUsers);
                 storageFullBillRef.updateMetadata(ocrBytesMetadata).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image MetaData");
+                        BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image MetaData", LogsPathToPrintTo.BothUsers);
                     }
                 });
             }
@@ -141,18 +142,18 @@ public class FirebaseUploader {
         storageFullBillRef.putBytes(fullBillImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image");
+                BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image", LogsPathToPrintTo.BothUsers);
                 storageFullBillRef.updateMetadata(ocrBytesMetadata).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image MetaData");
+                        BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image MetaData", LogsPathToPrintTo.BothUsers);
                     }
                 });
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                BillsLog.Log(Tag, LogLevel.Error, "Failed to upload full bill image");
+                BillsLog.Log(Tag, LogLevel.Error, "Failed to upload full bill image", LogsPathToPrintTo.BothUsers);
             }
         });
     }

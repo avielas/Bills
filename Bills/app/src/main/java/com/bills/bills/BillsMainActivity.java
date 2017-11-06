@@ -160,7 +160,7 @@ public class BillsMainActivity extends MainActivityBase implements
             @Override
             public void OnPassCodeResolveFail(String error) {
                 Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
-                StartWelcomeScreen();
+                StartCameraFragment();
             }
         });
     }
@@ -188,7 +188,7 @@ public class BillsMainActivity extends MainActivityBase implements
             @Override
             public void OnPassCodeResolveFail(String error) {
                 Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
-                StartWelcomeScreen();
+                StartCameraFragment();
             }
         });
 
@@ -211,7 +211,7 @@ public class BillsMainActivity extends MainActivityBase implements
             @Override
             public void OnFail(String message) {
                 Log.e(Tag, "Error accured while uploading bill rows. Error: " + message);
-                StartWelcomeScreen();
+                StartCameraFragment();
             }
         });
 

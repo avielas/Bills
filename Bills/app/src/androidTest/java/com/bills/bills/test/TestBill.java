@@ -101,7 +101,7 @@ public class TestBill extends Thread{
                     billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
                     billMatCopy = billMat.clone();
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage());
+                    BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                     //TODO: decide what to do. Retake the picture? crash the app?
                     throw new Exception();
                 }

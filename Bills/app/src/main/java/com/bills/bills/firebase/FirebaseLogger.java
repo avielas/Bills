@@ -3,6 +3,7 @@ package com.bills.bills.firebase;
 import android.util.Log;
 
 import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
 import com.bills.billslib.Contracts.Interfaces.ILogger;
 import com.bills.billslib.Utilities.FilesHandler;
 import com.google.firebase.database.DataSnapshot;
@@ -48,7 +49,7 @@ public class FirebaseLogger implements ILogger {
     }
 
     @Override
-    public void Log(final String tag, final LogLevel logLevel, final String message) {
+    public void Log(final String tag, final LogLevel logLevel, final String message, LogsPathToPrintTo logsPathToPrintTo) {
         //print to Logcat
         switch (logLevel){
             case Error:
@@ -64,49 +65,55 @@ public class FirebaseLogger implements ILogger {
                 Log.v(tag, "this LogLevel enum doesn't exists: " + message);
         }
 
-        //print to FireBase main user(application Logs folder) log
-        mFirebaseLogReferenceApp.runTransaction(new Transaction.Handler() {
-            @Override
-            public Transaction.Result doTransaction(MutableData mutableData) {
-                synchronized (mLock) {
-                    String now = FilesHandler.GetCurrDateAndTime();
-                    mutableData.child("(" + now + " ," + mUserUid + ")").setValue(/*TODO: How to add it on new line ?? +*/
-                                                                                   mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
-                    return Transaction.success(mutableData);
+        if (logsPathToPrintTo == LogsPathToPrintTo.BothUsers ||
+            logsPathToPrintTo == LogsPathToPrintTo.MainUser) {
+            //print to main user(application Logs folder) log
+            mFirebaseLogReferenceApp.runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    synchronized (mLock) {
+                        String now = FilesHandler.GetCurrDateAndTime();
+                        mutableData.child("(" + now + " ," + mUserUid + ")").setValue(/*TODO: How to add it on new line ?? +*/
+                                mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
+                        return Transaction.success(mutableData);
+                    }
                 }
-            }
 
-            @Override
-            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                Log.v(tag, "enter onComplete");
-                if(databaseError != null &&
-                  (databaseError.toString().length() == 0 || databaseError.toString().isEmpty())){
-                    Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails());
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                    Log.v(tag, "enter onComplete");
+                    if (databaseError != null &&
+                            (databaseError.toString().length() == 0 || databaseError.toString().isEmpty())) {
+                        Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails(), LogsPathToPrintTo.BothUsers);
+                    }
                 }
-            }
-        });
+            });
+        }
 
-        //print to FireBase current user log
-        mMyFirebaseLogReference.runTransaction(new Transaction.Handler() {
-            @Override
-            public Transaction.Result doTransaction(MutableData mutableData) {
-                synchronized (mLock) {
-                    String mNow = FilesHandler.GetCurrDateAndTime();
-                    mutableData.child(mNow).setValue(/*TODO: How to add it on new line ?? +*/
-                            mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
-                    return Transaction.success(mutableData);
+        if (logsPathToPrintTo == LogsPathToPrintTo.BothUsers ||
+            logsPathToPrintTo == LogsPathToPrintTo.SecondaryUser) {
+            //print to secondary user log
+            mMyFirebaseLogReference.runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    synchronized (mLock) {
+                        String mNow = FilesHandler.GetCurrDateAndTime();
+                        mutableData.child(mNow).setValue(/*TODO: How to add it on new line ?? +*/
+                                mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
+                        return Transaction.success(mutableData);
+                    }
                 }
-            }
 
-            @Override
-            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                Log.v(tag, "enter onComplete");
-                if(databaseError != null &&
-                        (databaseError.toString().length() == 0 || databaseError.toString().isEmpty())){
-                    Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails());
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                    Log.v(tag, "enter onComplete");
+                    if (databaseError != null &&
+                            (databaseError.toString().length() == 0 || databaseError.toString().isEmpty())) {
+                        Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails(), LogsPathToPrintTo.BothUsers);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private class LogEntry{

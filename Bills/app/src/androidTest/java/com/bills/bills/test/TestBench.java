@@ -9,6 +9,7 @@ import android.util.Pair;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
 import com.bills.billslib.Contracts.Interfaces.ILogger;
 import com.bills.billslib.Core.BillsLog;
 
@@ -118,7 +119,7 @@ public class TestBench {
     private void InitBillsLogToLogcat() {
         BillsLog.Init(new ILogger() {
             @Override
-            public void Log(String tag, LogLevel logLevel, String message) {
+            public void Log(String tag, LogLevel logLevel, String message, LogsPathToPrintTo logsPathToPrintTo) {
                 switch (logLevel){
                     case Error:
                         Log.e(tag, message);

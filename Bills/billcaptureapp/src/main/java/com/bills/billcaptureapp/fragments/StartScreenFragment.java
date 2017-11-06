@@ -85,7 +85,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        BillsLog.Log(Tag, LogLevel.Info, "onDestroyView");
+        BillsLog.Log(Tag, LogLevel.Info, "onDestroyView", LogsPathToPrintTo.BothUsers);
     }
 
     @Override
@@ -160,7 +160,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                     mListener.StartCameraFragment();
                     mListener.NotifyClickedButton(CaptureType.SIMPLE, mRestaurantName);
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                 }
             }
         });
@@ -174,7 +174,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                     mListener.StartCameraFragment();
                     mListener.NotifyClickedButton(CaptureType.RIGHT, mRestaurantName);
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                 }
             }
         });
@@ -188,7 +188,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                     mListener.StartCameraFragment();
                     mListener.NotifyClickedButton(CaptureType.LEFT, mRestaurantName);
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                 }
             }
         });
@@ -202,7 +202,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                     mListener.StartCameraFragment();
                     mListener.NotifyClickedButton(CaptureType.REMOTLY, mRestaurantName);
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                 }
             }
         });
@@ -216,7 +216,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                     mListener.StartCameraFragment();
                     mListener.NotifyClickedButton(CaptureType.STRAIGHT, mRestaurantName);
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                 }
             }
         });

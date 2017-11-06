@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -14,6 +13,7 @@ import android.widget.TextView;
 import com.bills.bills.R;
 import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
 import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Utilities.FilesHandler;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -161,7 +161,7 @@ public class UiUpdater implements View.OnClickListener {
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
-        BillsLog.Log(Tag, LogLevel.Info, "StartMainUser succeeded!");
+        BillsLog.Log(Tag, LogLevel.Info, "StartMainUser succeeded!", LogsPathToPrintTo.BothUsers);
     }
 
     public void StartSecondaryUser(final Context context,
@@ -185,12 +185,12 @@ public class UiUpdater implements View.OnClickListener {
                     int newTip = Integer.parseInt(s.toString());
                     if (newTip < 0 || newTip > 100) {
                         mBillSummarizerTipView.setText(curTip);
-                        BillsLog.Log(Tag, LogLevel.Info, "Tip setted to " + curTip);
+                        BillsLog.Log(Tag, LogLevel.Info, "Tip setted to " + curTip, LogsPathToPrintTo.BothUsers);
                     } else {
                         curTip = s.toString();
                         mTip = (1.0*newTip)/100;
                         mBillSummarizerTotalSumView.setText(Double.toString(mMyTotalSum *(1+mTip)));
-                        BillsLog.Log(Tag, LogLevel.Info, "Tip setted to " + Double.toString(mMyTotalSum *(1+mTip)));
+                        BillsLog.Log(Tag, LogLevel.Info, "Tip setted to " + Double.toString(mMyTotalSum *(1+mTip)), LogsPathToPrintTo.BothUsers);
                     }
                 }
             }
@@ -216,87 +216,92 @@ public class UiUpdater implements View.OnClickListener {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 final Integer rowIndex = Integer.parseInt(dataSnapshot.getKey());
                 final StorageReference curLineStorageReference = mBillsPerUserStorageReference.child(Integer.toString(rowIndex));
+                final String rowCurentQuantity = dataSnapshot.getValue().toString();
+                final Integer rowCurQuantityInt = Integer.parseInt(dataSnapshot.getValue().toString());
+                if(rowCurQuantityInt > 0) {
+                    curLineStorageReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                        @Override
+                        public void onSuccess(StorageMetadata storageMetadata) {
 
-                curLineStorageReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-                    @Override
-                    public void onSuccess(StorageMetadata storageMetadata) {
-
-                        final long ONE_MEGABYTE = 1024 * 1024;
-                        final String rowPrice;
-                        final String rowQuantity;
-                        final Integer itemHeight;
-                        final Integer itemWidth;
-                        try {
-                            rowPrice = storageMetadata.getCustomMetadata(Price);
-                            rowQuantity = storageMetadata.getCustomMetadata(Quantity);
-                            itemHeight = Integer.parseInt(storageMetadata.getCustomMetadata(ImageHeight));
-                            itemWidth = Integer.parseInt(storageMetadata.getCustomMetadata(ImageWidth));
-                        }catch (Exception e){
-                            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
-                            return;
-                        }
-                        curLineStorageReference.getBytes(3 * ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                            @Override
-                            public void onSuccess(byte[] bytes) {
-                                LinearLayout commonItemRow = new LinearLayout(mContext);
-                                commonItemRow.setOrientation(LinearLayout.VERTICAL);
-
-                                LinearLayout myItemRow = new LinearLayout(mContext);
-                                myItemRow.setOrientation(LinearLayout.VERTICAL);
-
-                                TextView commonPrice = new TextView(mContext);
-                                commonPrice.setText("" + rowPrice);
-                                commonItemRow.addView(commonPrice);
-
-                                TextView myPrice = new TextView(mContext);
-                                myPrice.setText("" + rowPrice);
-                                myItemRow.addView(myPrice);
-
-                                TextView commonQuantityView = new TextView(mContext);
-                                commonQuantityView.setText("" + rowQuantity);
-                                commonItemRow.addView(commonQuantityView);
-
-                                TextView myQuantityView = new TextView(mContext);
-                                myQuantityView.setText("0");
-                                myItemRow.addView(myQuantityView);
-
-                                Bitmap commonItemBitmap = FilesHandler.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
-                                Bitmap myItemBitmap = FilesHandler.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
-
-                                ImageView commonImageView = new ImageView(mContext);
-                                commonImageView.setImageBitmap(commonItemBitmap);
-                                commonItemRow.addView(commonImageView);
-
-                                ImageView myImageView = new ImageView(mContext);
-                                myImageView.setImageBitmap(myItemBitmap);
-                                myItemRow.addView(myImageView);
-
-                                int rowIndexInUi = GetRowUiIndex(rowIndex);
-                                mCommonItemsArea.addView(commonItemRow, rowIndexInUi);
-
-                                mMyItemsArea.addView(myItemRow, rowIndexInUi );
-                                myItemRow.setVisibility(GONE);
-
-                                Integer rowQuantityPrsed = Integer.parseInt(rowQuantity);
-                                Double rowPriceParsed = Double.parseDouble(rowPrice);
-                                mLineNumToPriceMapper.put(rowIndex, rowPriceParsed);
-
-                                commonItemRow.setOnClickListener(UiUpdater.this);
-
-                                mCommonLineToQuantityMapper.put(rowIndex, rowQuantityPrsed);
-                                mCommonLineNumToLineView.put(rowIndex, commonItemRow);
-                                mCommonLineNumberToQuantityView.put(rowIndex, commonQuantityView);
-
-                                myItemRow.setOnClickListener(UiUpdater.this);
-
-                                mMyLineToQuantityMapper.put(rowIndex, 0);
-                                mMyLineNumToLineView.put(rowIndex, myItemRow);
-                                mMyLineNumberToQuantityView.put(rowIndex, myQuantityView);
+                            final long ONE_MEGABYTE = 1024 * 1024;
+                            final String rowPrice;
+                            final String rowQuantity;
+                            final Integer itemHeight;
+                            final Integer itemWidth;
+                            try {
+                                rowPrice = storageMetadata.getCustomMetadata(Price);
+                                rowQuantity = rowCurentQuantity;
+                                itemHeight = Integer.parseInt(storageMetadata.getCustomMetadata(ImageHeight));
+                                itemWidth = Integer.parseInt(storageMetadata.getCustomMetadata(ImageWidth));
+                            } catch (Exception e) {
+                                BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                                return;
                             }
-                        });
-                    }
-                });
+                            curLineStorageReference.getBytes(3 * ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                @Override
+                                public void onSuccess(byte[] bytes) {
+                                    LinearLayout commonItemRow = new LinearLayout(mContext);
+                                    commonItemRow.setOrientation(LinearLayout.VERTICAL);
 
+                                    LinearLayout myItemRow = new LinearLayout(mContext);
+                                    myItemRow.setOrientation(LinearLayout.VERTICAL);
+
+                                    TextView commonPrice = new TextView(mContext);
+                                    commonPrice.setText("" + rowPrice);
+                                    commonItemRow.addView(commonPrice);
+
+                                    TextView myPrice = new TextView(mContext);
+                                    myPrice.setText("" + rowPrice);
+                                    myItemRow.addView(myPrice);
+
+                                    TextView commonQuantityView = new TextView(mContext);
+                                    commonQuantityView.setText("" + rowQuantity);
+                                    commonItemRow.addView(commonQuantityView);
+
+                                    TextView myQuantityView = new TextView(mContext);
+                                    myQuantityView.setText("0");
+                                    myItemRow.addView(myQuantityView);
+
+                                    Bitmap commonItemBitmap = FilesHandler.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
+                                    Bitmap myItemBitmap = FilesHandler.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
+
+                                    ImageView commonImageView = new ImageView(mContext);
+                                    commonImageView.setImageBitmap(commonItemBitmap);
+                                    commonItemRow.addView(commonImageView);
+
+                                    ImageView myImageView = new ImageView(mContext);
+                                    myImageView.setImageBitmap(myItemBitmap);
+                                    myItemRow.addView(myImageView);
+
+                                    int rowIndexInUi = GetRowUiIndex(rowIndex);
+                                    mCommonItemsArea.addView(commonItemRow, rowIndexInUi);
+
+                                    mMyItemsArea.addView(myItemRow, rowIndexInUi);
+                                    myItemRow.setVisibility(GONE);
+
+                                    Integer rowQuantityPrsed = Integer.parseInt(rowQuantity);
+                                    Double rowPriceParsed = Double.parseDouble(rowPrice);
+                                    mLineNumToPriceMapper.put(rowIndex, rowPriceParsed);
+
+                                    commonItemRow.setOnClickListener(UiUpdater.this);
+
+                                    mCommonLineToQuantityMapper.put(rowIndex, rowQuantityPrsed);
+                                    mCommonLineNumToLineView.put(rowIndex, commonItemRow);
+                                    mCommonLineNumberToQuantityView.put(rowIndex, commonQuantityView);
+
+                                    myItemRow.setOnClickListener(UiUpdater.this);
+
+                                    mMyLineToQuantityMapper.put(rowIndex, 0);
+                                    mMyLineNumToLineView.put(rowIndex, myItemRow);
+                                    mMyLineNumberToQuantityView.put(rowIndex, myQuantityView);
+                                }
+                            });
+                            BillsLog.Log(Tag, LogLevel.Info, "onChildAdded of row " + rowIndex + " succeeded!", LogsPathToPrintTo.SecondaryUser);
+                        }
+                    });
+                }else{
+                    BillsLog.Log(Tag, LogLevel.Info, "onChildAdded of row " + rowIndex + " failed due to quantity "+ rowCurQuantityInt +"!", LogsPathToPrintTo.SecondaryUser);
+                }
             }
 
             @Override
@@ -336,7 +341,7 @@ public class UiUpdater implements View.OnClickListener {
 
             }
         });
-        BillsLog.Log(Tag, LogLevel.Info, "StartSecondaryUser succeeded!");
+        BillsLog.Log(Tag, LogLevel.Info, "StartSecondaryUser succeeded!", LogsPathToPrintTo.BothUsers);
     }
 
     private int GetRowUiIndex(Integer newRowIndex) {
@@ -422,11 +427,11 @@ public class UiUpdater implements View.OnClickListener {
                         mMyLineNumToLineView.get(index).setVisibility(GONE);
                         mMyLineToQuantityMapper.put(index, 0);
                         mMyLineNumberToQuantityView.get(index).setText("0");
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " removed from My view and added to Common view");
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " removed from My view and added to Common view", LogsPathToPrintTo.BothUsers);
                     }else if(mMyLineToQuantityMapper.get(index) > 1){ //Line should be moved to common view
                         mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) - 1);
                         mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " moved from My to Common view (in case of quantity > 1)");
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " moved from My to Common view (in case of quantity > 1)", LogsPathToPrintTo.BothUsers);
                     }
 
                     //Line in common view should be updated
@@ -434,12 +439,12 @@ public class UiUpdater implements View.OnClickListener {
                         mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index ) + 1);
                         mCommonLineNumberToQuantityView.get(index).setText(""+mCommonLineToQuantityMapper.get(index));
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + ", in Common view, updated");
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + ", in Common view, updated", LogsPathToPrintTo.BothUsers);
                     }else{ //Line in common view shlould be added
                         mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mCommonLineNumberToQuantityView.get(index).setText("1");
                         mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) + 1);
-                        BillsLog.Log(Tag, LogLevel.Info, "Added line " + index + " to Common view");
+                        BillsLog.Log(Tag, LogLevel.Info, "Added line " + index + " to Common view", LogsPathToPrintTo.BothUsers);
                     }
 
                     mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));
@@ -460,11 +465,11 @@ public class UiUpdater implements View.OnClickListener {
                         mCommonLineNumToLineView.get(index).setVisibility(GONE);
                         mCommonLineToQuantityMapper.put(index, 0);
                         mCommonLineNumberToQuantityView.get(index).setText("0");
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " removed from Common view and added to My view");
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " removed from Common view and added to My view", LogsPathToPrintTo.BothUsers);
                     }else{ //Line should be moved to my view
                         mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) - 1);
                         mCommonLineNumberToQuantityView.get(index).setText(""+mCommonLineToQuantityMapper.get(index));
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " moved from Common to My view (in case of quantity > 1)");
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " moved from Common to My view (in case of quantity > 1)", LogsPathToPrintTo.BothUsers);
                     }
 
                     //Line in my view should be updated
@@ -472,12 +477,12 @@ public class UiUpdater implements View.OnClickListener {
                         mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index ) + 1);
                         mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + ", in My view, updated");
+                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + ", in My view, updated", LogsPathToPrintTo.BothUsers);
                     }else{ //Line in My view shlould be added
                         mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mMyLineNumberToQuantityView.get(index).setText("1");
                         mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) + 1);
-                        BillsLog.Log(Tag, LogLevel.Info, "Added line " + index + " to My view");
+                        BillsLog.Log(Tag, LogLevel.Info, "Added line " + index + " to My view", LogsPathToPrintTo.BothUsers);
                     }
 
                     mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));

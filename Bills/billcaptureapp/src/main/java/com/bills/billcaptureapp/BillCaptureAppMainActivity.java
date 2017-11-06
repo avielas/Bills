@@ -13,6 +13,7 @@ import com.bills.billcaptureapp.fragments.StartScreenFragment;
 import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
 import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.MainActivityBase;
 import com.bills.billslib.Utilities.FilesHandler;
@@ -55,7 +56,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
             transaction.commit();
             mCurrentFragment = mCameraFragment;
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
         }
     }
 
@@ -126,14 +127,14 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
                         FilesHandler.SaveToTXTFile(image, currFileNameToSave);
                         mHandler.post(mHideProgressDialog);
                     } catch (Exception e) {
-                        BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+                        BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
                     }
                 }
                 };
                 t.start();
             }
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage());
+            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
         }
     }
 
