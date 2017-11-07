@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 
 /**
@@ -302,6 +303,7 @@ public class FilesHandler {
 
     public static String GetCurrDateAndTime() {
         DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy HH:mm:ss_SSS");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Jerusalem"));
         Date date = new Date();
         return sdf.format(date);
     }
