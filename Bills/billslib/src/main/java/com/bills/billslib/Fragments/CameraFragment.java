@@ -198,8 +198,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
                         mListener.Finish();
                         ErrorReporter(logMessage, logMessage);
-                        throw new RuntimeException(logMessage);
-//                        return;
+                        return;
                     }
                     Mat billMat = null;
                     Mat billMatCopy = null;
@@ -219,8 +218,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
                             String toastMessage = "Exception has been thrown. See logs and try again!";
                             ErrorReporter(logMessage, toastMessage);
-                            throw new RuntimeException(e);
-//                            return;
+                            return;
                         }
                     }
 
@@ -230,14 +228,12 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             String logMessage = "failed to convert bytes to mat or rotating the image";
                             String toastMessage = "Failed to convert or rotating image. See logs and try again!";
                             ErrorReporter(logMessage, toastMessage);
-                            throw new RuntimeException(logMessage);
-//                            return;
+                            return;
                         }
                         if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
                             String logMessage = "failed to get bills corners";
                             ErrorReporter(logMessage, logMessage);
-                            throw new RuntimeException(logMessage);
-//                            return;
+                            return;
                         }
 
                         try {
@@ -247,8 +243,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             String logMessage = "Warp perspective has been failed. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
                             String toastMessage = "Warp perspective has been failed. See logs and try again!";
                             ErrorReporter(logMessage, toastMessage);
-                            throw new RuntimeException(e);
-//                            return;
+                            return;
                         }
 
                         BillsLog.Log(Tag, LogLevel.Info, "Warped perspective successfully.", LogsDestination.BothUsers);
@@ -265,8 +260,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             String logMessage = "Template matcher has been threw an exception. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
                             String toastMessage = "Template matcher has been threw an exception. See logs and try again!";
                             ErrorReporter(logMessage, toastMessage);
-                            throw new RuntimeException(e);
-//                            return;
+                            return;
                         }
 
                         ImageProcessingLib.PreprocessingForParsing(billMatCopy);
@@ -293,8 +287,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
                         String toastMessage = "Exception has been thrown. See logs and try again!";
                         ErrorReporter(logMessage, toastMessage);
-                        throw new RuntimeException(e);
-//                        mListener.StartCameraFragment(image);
+                        mListener.StartCameraFragment(image);
                     }
                     finally {
                         if(null != billMat){
@@ -312,8 +305,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                     String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
                     BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
                     mHandler.post(mHideProgressDialog);
-                    throw new RuntimeException(e);
-//                    mListener.StartCameraFragment(image);
+                    mListener.StartCameraFragment(image);
                 }
             }
         };

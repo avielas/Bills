@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.bills.billslib.Contracts.PreparingEnvironmentUtil;
+import com.bills.billslib.Utilities.GMailSender;
 
 /**
  * Created by avielavr on 6/10/2017.
@@ -21,25 +22,6 @@ public class MainActivityBase extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
-                //Catch your exception
-                // Without System.exit() this will not work.
-                Intent i = new Intent(Intent.ACTION_SEND);
-                i.setType("message/rfc822");
-                i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"billsplitapplication@gmail.com"});
-                i.putExtra(Intent.EXTRA_SUBJECT, "subject of email");
-                i.putExtra(Intent.EXTRA_TEXT   , "body of email");
-                try {
-                    startActivity(Intent.createChooser(i, "Send mail..."));
-                } catch (android.content.ActivityNotFoundException ex) {
-                    Toast.makeText(MainActivityBase.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
-                }
-                System.exit(2);
-            }
-        });
 
         //first visit of on create
         if(savedInstanceState == null){
