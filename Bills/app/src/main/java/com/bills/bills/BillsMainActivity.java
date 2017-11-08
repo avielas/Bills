@@ -97,20 +97,6 @@ public class BillsMainActivity extends MainActivityBase implements
         StartWelcomeScreen();
     }
 
-    private void SetDefaultUncaughtExceptionHandler() {
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
-                GMailSender sender = new GMailSender("billsplitapplication@gmail.com", "billsplitapplicationisthebest");
-                sender.SendEmail("Uncaught exception has been thrown",
-                        paramThrowable.getMessage().toString(),
-                        "billsplitapplication@gmail.com",
-                        "billsplitapplication@gmail.com");
-                System.exit(2);
-            }
-        });
-    }
-
     public void onResume(){
         super.onResume();
         mAuth.addAuthStateListener(mAuthListener);
@@ -275,5 +261,19 @@ public class BillsMainActivity extends MainActivityBase implements
     @Override
     public void onFragmentInteraction() {
 
+    }
+
+    private void SetDefaultUncaughtExceptionHandler() {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+                GMailSender sender = new GMailSender("billsplitapplication@gmail.com", "billsplitapplicationisthebest");
+                sender.SendEmail("Uncaught exception has been thrown",
+                        paramThrowable.getMessage().toString(),
+                        "billsplitapplication@gmail.com",
+                        "billsplitapplication@gmail.com");
+                System.exit(2);
+            }
+        });
     }
 }
