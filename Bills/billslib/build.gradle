@@ -36,4 +36,5 @@ dependencies {
     compile android_support_card_view
     compile project(animatedLoadingIndicator)
     compile project(openCVLibrary)
+    implementation files('libs/activation.jar')
 }

@@ -14,7 +14,7 @@ import com.bills.bills.R;
 import com.bills.bills.firebase.UiUpdater;
 import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Contracts.Enums.LogLevel;
-import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Core.BillsLog;
 
 import java.util.List;
@@ -107,7 +107,7 @@ public class BillSummarizerFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            BillsLog.Log(Tag, LogLevel.Error, context.toString() + " must implement OnFragmentInteractionListener", LogsPathToPrintTo.BothUsers);
+            BillsLog.Log(Tag, LogLevel.Error, context.toString() + " must implement OnFragmentInteractionListener", LogsDestination.BothUsers);
             throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
         }
     }

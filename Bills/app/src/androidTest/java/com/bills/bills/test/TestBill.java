@@ -7,12 +7,13 @@ import android.util.Pair;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
 import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Core.BillAreaDetector;
 import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
-import com.bills.billslib.Utilities.FilesHandler;
+import com.bills.billslib.Utilities.Utilities;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -81,15 +82,15 @@ public class TestBill extends Thread{
             try {
                 _results.append(System.getProperty("line.separator") + "Test of " + _billFullName + System.getProperty("line.separator"));
                 tesseractOCREngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
-                expectedBillTextLines = FilesHandler.ReadTextFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
+                expectedBillTextLines = Utilities.ReadTextFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
                 if(expectedBillTextLines == null){
                     throw new Exception();
                 }
-                byte[] bytes = FilesHandler.ImageTxtFile2ByteArray(_billFullName);
+                byte[] bytes = Utilities.ImageTxtFile2ByteArray(_billFullName);
                 if(bytes == null){
                     throw new Exception();
                 }
-                billMat = FilesHandler.Bytes2MatAndRotateClockwise90(bytes);
+                billMat = Utilities.Bytes2MatAndRotateClockwise90(bytes);
                 if(billMat == null){
                     throw new Exception();
                 }
@@ -101,7 +102,7 @@ public class TestBill extends Thread{
                     billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
                     billMatCopy = billMat.clone();
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                    BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage(), LogsDestination.BothUsers);
                     //TODO: decide what to do. Retake the picture? crash the app?
                     throw new Exception();
                 }
@@ -120,8 +121,8 @@ public class TestBill extends Thread{
 //                                                                                                            this.getClass().getSimpleName());
 //            String pathToSavePrintRects = Constants.PRINTED_RECTS_IMAGES_PATH + "/" +_key + ".jpg";
 //            String pathToSavePrePrintRects = Constants.PRINTED_RECTS_IMAGES_PATH + "/" +_key + "1.jpg";
-//            FilesHandler.SaveToJPGFile(printWordsRectsbill, pathToSavePrintRects);
-//            FilesHandler.SaveToJPGFile(processedBillBitmap, pathToSavePrePrintRects);
+//            Utilities.SaveToJPGFile(printWordsRectsbill, pathToSavePrintRects);
+//            Utilities.SaveToJPGFile(processedBillBitmap, pathToSavePrePrintRects);
 //            printWordsRectsbill.recycle();
 //            warpedBillBitmap.recycle();
             /***********************************************************************/

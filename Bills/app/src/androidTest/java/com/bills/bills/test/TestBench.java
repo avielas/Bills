@@ -9,21 +9,20 @@ import android.util.Pair;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
-import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Contracts.Interfaces.ILogger;
 import com.bills.billslib.Core.BillsLog;
+import com.bills.billslib.Utilities.Utilities;
 
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,9 +103,9 @@ public class TestBench {
             case TEST_PHONE:
                 _restaurantsNamesTestFilter = Arrays.asList("sinta1" , "sinta2",
                                                             "pastaMarket1", "pastaMarket2", "pastaMarket3",
-                                                            "iza1","iza2",/**/
+                                                            "iza1","iza2"/*,*//*
                                                             "dovrin1", "dovrin2", "dovrin3", "dovrin4", "dovrin5",
-                                                            "nola1", "nola2", "nola3", "nola4"/**/);
+                                                            "nola1", "nola2", "nola3", "nola4"*/);
                 _billsTestFilter = Arrays.asList(/*"ocrBytes.txt", "ocrBytes1.txt", "ocrBytes2.txt", "ocrBytes3.txt", "ocrBytes4.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);
@@ -119,7 +118,7 @@ public class TestBench {
     private void InitBillsLogToLogcat() {
         BillsLog.Init(new ILogger() {
             @Override
-            public void Log(String tag, LogLevel logLevel, String message, LogsPathToPrintTo logsPathToPrintTo) {
+            public void Log(String tag, LogLevel logLevel, String message, LogsDestination logsDestination) {
                 switch (logLevel){
                     case Error:
                         Log.e(tag, message);
@@ -205,7 +204,7 @@ public class TestBench {
         }
         Double accuracyPercentTestsBench = (_testsAccuracyPercentSum / (accuracyPercentQueue.size()*100)) * 100;
         String formattedAccuracyPercentTestsBench = String.format("%.02f", accuracyPercentTestsBench);
-        String currentDateTime = DateFormat.getDateTimeInstance().format(new Date());
+        String currentDateTime = Utilities.GetTimeStamp();
         stream.write(("\nConclusions:").getBytes());
         stream.write(("\nRun at "+ currentDateTime).getBytes());
         stream.write(("\nAccuracy of tests bench is "+ formattedAccuracyPercentTestsBench +"%").getBytes());

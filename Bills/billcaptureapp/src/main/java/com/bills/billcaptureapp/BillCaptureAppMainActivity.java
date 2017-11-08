@@ -13,10 +13,10 @@ import com.bills.billcaptureapp.fragments.StartScreenFragment;
 import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
-import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.MainActivityBase;
-import com.bills.billslib.Utilities.FilesHandler;
+import com.bills.billslib.Utilities.Utilities;
 import com.bills.testslib.CameraFragment;
 import com.bills.testslib.TestsUtilities;
 import java.util.List;
@@ -41,7 +41,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
         mStartScreenFragment = new StartScreenFragment();
         mProgressDialog = new Dialog(this);
         mHandler = new Handler();
-        StartWelcomeFragment(null);
+        StartWelcomeFragment();
     }
 
     public void StartCameraFragment() {
@@ -56,7 +56,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
             transaction.commit();
             mCurrentFragment = mCameraFragment;
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
         }
     }
 
@@ -100,7 +100,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
 
     @Override
     public void StartWelcomeFragment() {
-        StartWelcomeFragment(null);
+        StartWelcomeFragment();
     }
 
     @Override
@@ -109,7 +109,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void StartWelcomeFragment(final byte[] image) {
+    public void StartCameraFragment(final byte[] image) {
         try {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, mStartScreenFragment);
@@ -123,18 +123,18 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
                 public void run() {
                     try {
                         mHandler.post(mShowProgressDialog);
-//                        FilesHandler.SaveBytesToPNGFile(image, currFileNameToSave);
-                        FilesHandler.SaveToTXTFile(image, currFileNameToSave);
+//                        Utilities.SaveBytesToPNGFile(image, currFileNameToSave);
+                        Utilities.SaveToTXTFile(image, currFileNameToSave);
                         mHandler.post(mHideProgressDialog);
                     } catch (Exception e) {
-                        BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                        BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
                     }
                 }
                 };
                 t.start();
             }
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
         }
     }
 

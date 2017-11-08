@@ -35,7 +35,7 @@ import com.bills.billslib.Core.MainActivityBase;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
 import com.bills.billslib.CustomViews.DragRectView;
-import com.bills.billslib.Utilities.FilesHandler;
+import com.bills.billslib.Utilities.Utilities;
 import com.bills.billslib.Utilities.TestsHelper;
 import com.bills.testslib.CameraActivity;
 import com.bills.testslib.TestsUtilities;
@@ -166,12 +166,12 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             _processedBillMat = new Mat();
 
             TestsUtilities.InitBillsLogToLogcat();
-            String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
+            String lastCapturedBillPath = Utilities.GetLastCapturedBillPath();
             if(lastCapturedBillPath == null){
                 throw new Exception();
             }
             _warpedBillMat = GetWarpedBillMat(lastCapturedBillPath);
-//            FilesHandler.SaveMatToPNGFile(_warpedBillMat, Constants.WARPED_PNG_PHOTO_PATH);
+//            Utilities.SaveMatToPNGFile(_warpedBillMat, Constants.WARPED_PNG_PHOTO_PATH);
 
             if(_warpedBillMat == null){
                 throw new Exception();
@@ -256,7 +256,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     }
 
     private void ValidateOcrBillResult(String imageStatus) throws Exception{
-        List<String> expectedBillTextLines = FilesHandler.ReadTextFile(_brandAndModelPath + "/" +_restaurantName + "/" + _expectedTxtFileName);
+        List<String> expectedBillTextLines = Utilities.ReadTextFile(_brandAndModelPath + "/" +_restaurantName + "/" + _expectedTxtFileName);
         if(expectedBillTextLines == null){
             throw new Exception();
         }
@@ -488,7 +488,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
 //                int yBegin    = keyListCurrentIndex.get(j).top ;
 //                int yEnd = keyListCurrentIndex.get(j).bottom;
 //                Bitmap bitmap = Bitmap.createBitmap(mFullBillProcessedImage, xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
-//                FilesHandler.SaveToPNGFile(bitmap, Constants.IMAGES_PATH + "/rect_" + i + "_" + j + ".jpg");
+//                Utilities.SaveToPNGFile(bitmap, Constants.IMAGES_PATH + "/rect_" + i + "_" + j + ".jpg");
 //                bitmap.recycle();
                 /**********************************************/
                 keyListCurrentIndex.get(j).left -= Constants.ENLARGE_RECT_VALUE;
@@ -530,7 +530,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 try {
                     String processedImagePathToSave = _brandAndModelPath +"/" + _restaurantName + "/"
                             + "bill.png";
-                    FilesHandler.SaveToPNGFile(_warpedBill, processedImagePathToSave);
+                    Utilities.SaveToPNGFile(_warpedBill, processedImagePathToSave);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -552,7 +552,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     }
 
     public Mat GetWarpedBillMat(String billFullName) throws Exception {
-        byte[] bytes = FilesHandler.ImageTxtFile2ByteArray(billFullName);
+        byte[] bytes = Utilities.ImageTxtFile2ByteArray(billFullName);
         if(bytes == null){
             throw new Exception();
         }
@@ -562,8 +562,8 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     public Mat GetWarpedBillMat(byte[] bytes) throws IOException {
         Mat mat = null;
         try{
-            mat = FilesHandler.Bytes2MatAndRotateClockwise90(bytes);
-//            FilesHandler.SaveMatToPNGFile(mat, Constants.CAMERA_CAPTURED_PNG_PHOTO_PATH);
+            mat = Utilities.Bytes2MatAndRotateClockwise90(bytes);
+//            Utilities.SaveMatToPNGFile(mat, Constants.CAMERA_CAPTURED_PNG_PHOTO_PATH);
             if(mat == null){
                 throw new Exception();
             }
@@ -622,7 +622,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                             // ToDo get user input here
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
                             String currentDateAndTime = simpleDateFormat.format(new Date());
-                            FilesHandler.SetOutputStream(_brandAndModelPath + _restaurantName + "/preprocessing_results_" + currentDateAndTime +".txt");
+                            Utilities.SetOutputStream(_brandAndModelPath + _restaurantName + "/preprocessing_results_" + currentDateAndTime +".txt");
                             System.out.println(_results);
                     }
                 })
@@ -642,11 +642,11 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             case RESULT_OK:
                 Mat warpedBillMat = null;
                 try {
-                    String lastCapturedBillPath = FilesHandler.GetLastCapturedBillPath();
+                    String lastCapturedBillPath = Utilities.GetLastCapturedBillPath();
                     if(lastCapturedBillPath == null){
                         throw new Exception();
                     }
-                    warpedBillMat = FilesHandler.GetRotatedBillMat(lastCapturedBillPath);
+                    warpedBillMat = Utilities.LoadRotatedBillMat(lastCapturedBillPath);
                     if(warpedBillMat == null){
                         throw new Exception();
                     }

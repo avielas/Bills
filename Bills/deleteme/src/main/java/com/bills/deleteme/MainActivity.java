@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bills.billslib.Utilities.Utilities;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,7 +28,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.Transaction.Result;
 import com.google.firebase.storage.FirebaseStorage;
@@ -37,20 +37,13 @@ import com.google.firebase.storage.UploadTask;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -117,11 +110,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //user is signed in
                     //onSignedInInitialize(user.getDisplayName());
                     mUid = user.getUid();
-                    DateFormat sdf = new SimpleDateFormat("yyyy_MM_dd___HH_mm_ss");
-                    Date date = new Date();
-                    String now = sdf.format(date);
+                    String timeStamp = Utilities.GetTimeStamp();;
 
-                    mBillStoragePath = mUid + "/" +now;
+                    mBillStoragePath = mUid + "/" + timeStamp;
 
                     mUsersDatabaseReference = mFirebaseDataBase.getReference().child("users/" + "/" + mBillStoragePath);
                     mUserIdsDatabaseReference = mFirebaseDataBase.getReference().child("userIds");

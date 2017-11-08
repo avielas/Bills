@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.bills.billslib.Contracts.Constants;
-import com.bills.billslib.Utilities.FilesHandler;
+import com.bills.billslib.Utilities.Utilities;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -206,12 +206,12 @@ public class MainActivity extends AppCompatActivity {
         if(!file.exists()) {
             switch (fileType) {
                 case Jpg:
-                    Bitmap bitmap = FilesHandler.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight); //FilesHandler.ByteArrayToBitmap(bytes);
-                    FilesHandler.SaveToPNGFile(bitmap, path + "/" + fileName);
+                    Bitmap bitmap = Utilities.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight); //Utilities.ByteArrayToBitmap(bytes);
+                    Utilities.SaveToPNGFile(bitmap, path + "/" + fileName);
                     bitmap.recycle();
                     break;
                 case Txt:
-                    FilesHandler.SaveToTXTFile(bytes, path + "/" + fileName);
+                    Utilities.SaveToTXTFile(bytes, path + "/" + fileName);
                     break;
             }
         }

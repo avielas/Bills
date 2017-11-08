@@ -18,8 +18,9 @@ import android.widget.Toast;
 import com.bills.billcaptureapp.R;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Core.BillsLog;
-import com.bills.billslib.Utilities.FilesHandler;
+import com.bills.billslib.Utilities.Utilities;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -85,7 +86,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        BillsLog.Log(Tag, LogLevel.Info, "onDestroyView", LogsPathToPrintTo.BothUsers);
+        BillsLog.Log(Tag, LogLevel.Info, "onDestroyView", LogsDestination.BothUsers);
     }
 
     @Override
@@ -120,7 +121,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                             mRestaurantName = v.getText().toString();
                             String folderToCreate = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL + "/" + mRestaurantName;
                             if (null != event && !event.isShiftPressed()) {
-                                boolean isFolderCreated = FilesHandler.CreateDirectory(folderToCreate);
+                                boolean isFolderCreated = Utilities.CreateDirectory(folderToCreate);
                                 HideSoftKeyboard(view);
                                 String toToast = isFolderCreated ?
                                         "Folder "+ folderToCreate + " created" :
@@ -129,7 +130,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                                 return true; // consume.
                             }else if(null == event &&
                                      actionId == EditorInfo.IME_ACTION_DONE){
-                                boolean isFolderCreated = FilesHandler.CreateDirectory(folderToCreate);
+                                boolean isFolderCreated = Utilities.CreateDirectory(folderToCreate);
                                 HideSoftKeyboard(view);
                                 String toToast = isFolderCreated ?
                                          "Folder "+ folderToCreate + " created" :
@@ -160,7 +161,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                     mListener.StartCameraFragment();
                     mListener.NotifyClickedButton(CaptureType.SIMPLE, mRestaurantName);
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
                 }
             }
         });
@@ -174,7 +175,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                     mListener.StartCameraFragment();
                     mListener.NotifyClickedButton(CaptureType.RIGHT, mRestaurantName);
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
                 }
             }
         });
@@ -188,7 +189,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                     mListener.StartCameraFragment();
                     mListener.NotifyClickedButton(CaptureType.LEFT, mRestaurantName);
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
                 }
             }
         });
@@ -202,7 +203,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                     mListener.StartCameraFragment();
                     mListener.NotifyClickedButton(CaptureType.REMOTLY, mRestaurantName);
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
                 }
             }
         });
@@ -216,7 +217,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
                     mListener.StartCameraFragment();
                     mListener.NotifyClickedButton(CaptureType.STRAIGHT, mRestaurantName);
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
                 }
             }
         });

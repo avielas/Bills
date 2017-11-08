@@ -51,7 +51,7 @@ public interface IOcrEngine {
      * @throws IllegalStateException In case the OCR Engine was not initialized
      * @throws RuntimeException In case of runtime(probably native) exception accured
      */
-    public String GetUTF8Text() throws IllegalStateException, RuntimeException;
+    String GetUTF8Text() throws IllegalStateException, RuntimeException;
 
     /**
      * Sets page segmentation mode
@@ -59,7 +59,7 @@ public interface IOcrEngine {
      * @throws IllegalStateException In case the OCR Engine was not initialized
      * @throws RuntimeException In case of runtime(probably native) exception accured
      */
-    public void SetPageSegMode(PageSegmentation pageSegMode) throws IllegalStateException, RuntimeException;
+    void SetPageSegMode(PageSegmentation pageSegMode) throws IllegalStateException, RuntimeException;
 
     /**
      * Returns flag whether the OCR Engine was initialized or not

@@ -15,8 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.Toast;
 
-import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.R;
 import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Camera.IOnCameraFinished;
@@ -30,7 +31,7 @@ import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.ImageProcessingLib;
 import com.bills.billslib.Core.TemplateMatcher;
 import com.bills.billslib.Core.TesseractOCREngine;
-import com.bills.billslib.Utilities.FilesHandler;
+import com.bills.billslib.Utilities.Utilities;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -49,6 +50,7 @@ import java.util.List;
 public class CameraFragment extends Fragment implements View.OnClickListener, IOnCameraFinished {
     protected String Tag = CameraFragment.class.getName();
     private Handler mHandler;
+//    private Handler h = new Handler(mContext.getMainLooper());
     private Dialog mProgressDialog;
     private Context mContext;
 
@@ -192,10 +194,12 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 try {
                     mHandler.post(mShowProgressDialog);
                     if (!OpenCVLoader.initDebug()) {
-                        BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCV.", LogsPathToPrintTo.BothUsers);
+                        String logMessage = "Failed to initialize OpenCV.";
+                        BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
                         mListener.Finish();
-                        mHandler.post(mHideProgressDialog);
-                        throw new Exception();
+                        ErrorReporter(logMessage, logMessage);
+                        throw new RuntimeException(logMessage);
+//                        return;
                     }
                     Mat billMat = null;
                     Mat billMatCopy = null;
@@ -212,33 +216,42 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         try {
                             Thread.sleep(200);
                         } catch (InterruptedException e) {
-                            mHandler.post(mHideProgressDialog);
-                            throw new Exception();
+                            String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                            String toastMessage = "Exception has been thrown. See logs and try again!";
+                            ErrorReporter(logMessage, toastMessage);
+                            throw new RuntimeException(e);
+//                            return;
                         }
                     }
 
                     try {
-                        billMat = FilesHandler.Bytes2MatAndRotateClockwise90(image);
+                        billMat = Utilities.Bytes2MatAndRotateClockwise90(image);
                         if(billMat == null){
-                            mHandler.post(mHideProgressDialog);
-                            throw new Exception();
+                            String logMessage = "failed to convert bytes to mat or rotating the image";
+                            String toastMessage = "Failed to convert or rotating image. See logs and try again!";
+                            ErrorReporter(logMessage, toastMessage);
+                            throw new RuntimeException(logMessage);
+//                            return;
                         }
                         if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
-                            mHandler.post(mHideProgressDialog);
-                            throw new Exception();
+                            String logMessage = "failed to get bills corners";
+                            ErrorReporter(logMessage, logMessage);
+                            throw new RuntimeException(logMessage);
+//                            return;
                         }
 
                         try {
                             billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
                             billMatCopy = billMat.clone();
                         } catch (Exception e) {
-                            mHandler.post(mHideProgressDialog);
-                            BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
-                            //TODO: decide what to do. Retake the picture? crash the app?
-                            throw new Exception();
+                            String logMessage = "Warp perspective has been failed. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                            String toastMessage = "Warp perspective has been failed. See logs and try again!";
+                            ErrorReporter(logMessage, toastMessage);
+                            throw new RuntimeException(e);
+//                            return;
                         }
 
-                        BillsLog.Log(Tag, LogLevel.Info, "Warped perspective successfully.", LogsPathToPrintTo.BothUsers);
+                        BillsLog.Log(Tag, LogLevel.Info, "Warped perspective successfully.", LogsDestination.BothUsers);
 
                         processedBillBitmap = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
                         ImageProcessingLib.PreprocessingForTM(billMat);
@@ -247,11 +260,13 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
                         try {
                             templateMatcher.Match();
-                            BillsLog.Log(Tag, LogLevel.Info, "Template matcher succeed.", LogsPathToPrintTo.BothUsers);
+                            BillsLog.Log(Tag, LogLevel.Info, "Template matcher succeeded.", LogsDestination.BothUsers);
                         } catch (Exception e) {
-                            mHandler.post(mHideProgressDialog);
-                            BillsLog.Log(Tag, LogLevel.Error, "Template matcher threw an exception: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
-                            throw new Exception();
+                            String logMessage = "Template matcher has been threw an exception. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                            String toastMessage = "Template matcher has been threw an exception. See logs and try again!";
+                            ErrorReporter(logMessage, toastMessage);
+                            throw new RuntimeException(e);
+//                            return;
                         }
 
                         ImageProcessingLib.PreprocessingForParsing(billMatCopy);
@@ -273,10 +288,13 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             index++;
                         }
                         mListener.StartSummarizerFragment(rows, image, mPassCode, mRelativeDbAndStoragePath);
-                        BillsLog.Log(Tag, LogLevel.Info, "Parsing finished", LogsPathToPrintTo.BothUsers);
-                    }catch (Exception ex){
-                        mHandler.post(mHideProgressDialog);
-                        mListener.StartWelcomeFragment(image);
+                        BillsLog.Log(Tag, LogLevel.Info, "Parsing finished", LogsDestination.BothUsers);
+                    }catch (Exception e){
+                        String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                        String toastMessage = "Exception has been thrown. See logs and try again!";
+                        ErrorReporter(logMessage, toastMessage);
+                        throw new RuntimeException(e);
+//                        mListener.StartCameraFragment(image);
                     }
                     finally {
                         if(null != billMat){
@@ -291,15 +309,18 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         mHandler.post(mHideProgressDialog);
                     }
                 } catch (Exception e) {
+                    String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                    BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
                     mHandler.post(mHideProgressDialog);
-                    BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                    throw new RuntimeException(e);
+//                    mListener.StartCameraFragment(image);
                 }
             }
         };
         t.start();
     }
 
-    // Create runnable for posting
+    // Create runnable for posting progress dialog
     final Runnable mHideProgressDialog = new Runnable() {
         public void run() {
             if(mProgressDialog != null)
@@ -321,6 +342,17 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         }
     };
 
+    private void ErrorReporter(String logMessage, final String toastMessage) {
+        BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+        mHandler.post(mHideProgressDialog);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(mContext, toastMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -335,6 +367,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         void StartSummarizerFragment(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath);
         void StartWelcomeFragment();
         void Finish();
-        void StartWelcomeFragment(byte[] image);
+        void StartCameraFragment(final byte[] image);
     }
 }

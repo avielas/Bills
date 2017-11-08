@@ -1,5 +1,6 @@
 package com.bills.bills.firebase;
 
+import com.bills.billslib.Utilities.Utilities;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -7,10 +8,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,9 +49,8 @@ public class PassCodeResolver {
             public Transaction.Result doTransaction(final MutableData mutableData) {
                 if (mutableData.hasChild(mUid)) {
                     HashMap<String, Object> value = (HashMap<String, Object>)mutableData.child(mUid).getValue();
-                    DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy__HH_mm_ss");
-                    Date date = new Date();
-                    String now = sdf.format(date);
+
+                    String now = Utilities.GetTimeStamp();
 
                     mBillRelativePath = mUid + "/" + now;
                     value.put(mRelativePathDbKey, mBillRelativePath);
@@ -72,12 +69,8 @@ public class PassCodeResolver {
                     //find an unused pass code
                     for (int i = 0; i < 10000; i++) {
                         if (!usedPassCodes.contains(i)) {
-                            DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy__HH_mm_ss");
-                            Date date = new Date();
-                            String now = sdf.format(date);
-
-                            mBillRelativePath = mUid + "/" + now;
-
+                            String timeStamp = Utilities.GetTimeStamp();
+                            mBillRelativePath = mUid + "/" + timeStamp;
                             Map<String, Object> userIdsValue = new HashMap<>();
                             userIdsValue.put(mPassCodeDbKey, i);
                             userIdsValue.put(mRelativePathDbKey, mBillRelativePath);

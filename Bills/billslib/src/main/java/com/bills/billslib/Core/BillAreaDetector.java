@@ -3,7 +3,7 @@ package com.bills.billslib.Core;
 import android.util.Log;
 
 import com.bills.billslib.Contracts.Enums.LogLevel;
-import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
@@ -200,13 +200,14 @@ public class BillAreaDetector {
                     "Top Left: " + topLeft +
                     "; Top Right: " + topRight +
                     "; Buttom Right: " + buttomRight +
-                    "; Buttom Left: " + buttomLeft, LogsPathToPrintTo.BothUsers);
+                    "; Buttom Left: " + buttomLeft, LogsDestination.BothUsers);
                 return true;
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            BillsLog.Log(Tag, LogLevel.Error, "An exception accured while trying to find bill corners. Error: " + ex.getMessage(), LogsPathToPrintTo.BothUsers);
+            String logMessage = "An exception occurred while trying to find bill corners. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
         }
         finally {
             if(newImage != null) {

@@ -230,7 +230,12 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void StartWelcomeFragment(final byte[] image) {
+    public void StartCameraFragment(final byte[] image) {
+        UploadBillImageToStorage(image);
+        StartCameraFragment();
+    }
+
+    private void UploadBillImageToStorage(final byte[] image) {
         mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback(){
             @Override
             public void OnPassCodeResovled(final Integer passCode, final String relativeDbAndStoragePath, final String userUid) {
@@ -244,8 +249,6 @@ public class BillsMainActivity extends MainActivityBase implements
                 Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
             }
         });
-
-        StartWelcomeScreen();
     }
 
     @Override

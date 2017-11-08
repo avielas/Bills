@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
-import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Core.BillsLog;
 
 import org.opencv.android.OpenCVLoader;
@@ -43,8 +43,8 @@ import java.util.TimeZone;
  * Created by avielavr on 5/8/2017.
  */
 
-public class FilesHandler {
-    private static String Tag = FilesHandler.class.getName();
+public class Utilities {
+    private static String Tag = Utilities.class.getName();
 
     public static boolean SaveToPNGFile(Bitmap bmp, String path){
         FileOutputStream out = null;
@@ -59,7 +59,7 @@ public class FilesHandler {
             {
                 Boolean isSuccess = folder.mkdirs();
                 if(!isSuccess) {
-                    BillsLog.Log(Tag, LogLevel.Error, "Can't create directory(ies)", LogsPathToPrintTo.BothUsers);
+                    BillsLog.Log(Tag, LogLevel.Error, "Can't create directory(ies)", LogsDestination.BothUsers);
                     return false;
                 }
             }
@@ -67,10 +67,11 @@ public class FilesHandler {
 
             // bmp is your Bitmap instance, PNG is a lossless format, the compression factor (100) is ignored
             bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
-            BillsLog.Log(Tag, LogLevel.Info, "SaveToPNGFile success!", LogsPathToPrintTo.BothUsers);
+            BillsLog.Log(Tag, LogLevel.Info, "SaveToPNGFile success!", LogsDestination.BothUsers);
             return true;
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, e.getMessage(), LogsPathToPrintTo.BothUsers);
+            String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
             return false;
         } finally {
             try {
@@ -78,7 +79,8 @@ public class FilesHandler {
                     out.close();
                 }
             } catch (IOException e) {
-                BillsLog.Log(Tag, LogLevel.Error, "Can't free output stream: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                String logMessage = "Can't free output stream. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
                 return false;
             }
         }
@@ -94,19 +96,52 @@ public class FilesHandler {
         }
         catch (Exception e)
         {
-            BillsLog.Log(Tag, LogLevel.Error, "Can't create directory(ies): " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+            String logMessage = "Can't create directory(ies). \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
             return false;
         }finally {
             if (bos != null) {
                 try {
                     bos.close();
                 } catch (IOException e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "Can't free allocated buffer: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                    String logMessage = "Can't free allocated buffer. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                    BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    public static boolean SaveMatToPNGFile(Mat mat, String path){
+        Bitmap bmp = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mat, bmp);
+        try {
+            return SaveToPNGFile(bmp, path);
+        }
+        catch (Exception e){
+            String logMessage = "SaveMatToPNGFile Failed. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+            return false;
+        }
+        finally {
+            bmp.recycle();
+        }
+    }
+
+    public static void SaveBytesToPNGFile(byte[] image, String fileFullName){
+        Mat mat = null;
+        try {
+            mat = Bytes2MatAndRotateClockwise90(image);
+            SaveMatToPNGFile(mat, fileFullName);
+        } catch (Exception e) {
+            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
+        }
+        finally {
+            if(mat != null){
+                mat.release();
+            }
+        }
     }
 
     public static byte[] ImageTxtFile2ByteArray(String path) throws IOException {
@@ -118,7 +153,8 @@ public class FilesHandler {
             bis = new BufferedInputStream(new FileInputStream(file));
             bis.read(image);
         }catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "failed to read input stream: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+            String logMessage = "failed to read input stream. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
             return null;
         }finally {
             if(bis != null){
@@ -147,7 +183,7 @@ public class FilesHandler {
             }
         }
         catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "failed to read text file: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+            BillsLog.Log(Tag, LogLevel.Error, "failed to read text file: " + e.getMessage(), LogsDestination.BothUsers);
             return null;
         }
         finally {
@@ -158,7 +194,7 @@ public class FilesHandler {
         return lines;
     }
 
-    public static Mat GetRotatedBillMat(String billFullName) throws Exception {
+    public static Mat LoadRotatedBillMat(String billFullName) throws Exception {
         byte[] bytes = ImageTxtFile2ByteArray(billFullName);
         if(bytes == null){
             throw new Exception();
@@ -166,51 +202,19 @@ public class FilesHandler {
         return Bytes2MatAndRotateClockwise90(bytes);
     }
 
-    public static Mat Bytes2MatAndRotateClockwise90(byte[] bytes) throws Exception {
-        if (!OpenCVLoader.initDebug()) {
-            BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCVLoader.", LogsPathToPrintTo.BothUsers);
-            return null;
-        }
-        Mat bgrMat = null;
-        MatOfByte matOfByte = new MatOfByte(bytes);
-        Mat jpegData = new Mat(1, bytes.length, CvType.CV_8UC1);
-        try{
-            jpegData.put(0, 0, bytes);
-            bgrMat = Imgcodecs.imdecode(jpegData, Imgcodecs.IMREAD_COLOR);
-            Imgproc.cvtColor(bgrMat, bgrMat, Imgproc.COLOR_RGB2BGRA, 4);
-            Mat dst = new Mat(bgrMat.height(), bgrMat.width(), bgrMat.type());
-            Core.flip(bgrMat.t(), dst, 1);
-            return dst;
-        }
-        catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "Failed to convert bytes to mat: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
-            return null;
-        }
-        finally{
-            if(matOfByte != null) {
-                matOfByte.release();
-            }
-            if(jpegData != null) {
-                jpegData.release();
-            }
-            if(bgrMat != null) {
-                bgrMat.release();
-            }
-        }
-    }
-
     /**
      * Set output stream for 'System.out.println'. The test prints just to file.
      * Read TEST_README for more info
      * @throws FileNotFoundException
      */
-    public static void SetOutputStream(String filneName){
-        File file = new File(filneName);
+    public static void SetOutputStream(String fileName){
+        File file = new File(fileName);
         PrintStream printStreamToFile = null;
         try {
             printStreamToFile = new PrintStream(file);
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "Failed to convert bytes to mat: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+            String logMessage = "Failed to set output stream. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
             return;
         }
         System.setOut(printStreamToFile);
@@ -230,7 +234,7 @@ public class FilesHandler {
             });
 
             if(listFiles == null || listFiles.length == 0){
-                BillsLog.Log(Tag, LogLevel.Error, "Failed to get files from directory.", LogsPathToPrintTo.BothUsers);
+                BillsLog.Log(Tag, LogLevel.Error, "Failed to get files from directory.", LogsDestination.BothUsers);
                 return null;
             }
             //sorting to take the last capture which took by Bills app
@@ -247,31 +251,10 @@ public class FilesHandler {
             });
         }
         catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "GetLastCapturedBillPath Failed: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+            String logMessage = "GetLastCapturedBillPath Failed. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
         }
         return listFiles[0].getPath();
-    }
-
-    public static Bitmap ConvertFirebaseBytesToBitmap(byte[] bytes, Integer itemWidth, Integer itemHeight){
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
-        Bitmap commonItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
-        commonItemBitmap.copyPixelsFromBuffer(buffer);
-        return commonItemBitmap;
-    }
-
-    public static boolean SaveMatToPNGFile(Mat mat, String path){
-        Bitmap bmp = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mat, bmp);
-        try {
-            return SaveToPNGFile(bmp, path);
-        }
-        catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "SaveMatToPNGFile Failed: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
-            return false;
-        }
-        finally {
-            bmp.recycle();
-        }
     }
 
     public static boolean CreateDirectory(String path) {
@@ -301,26 +284,51 @@ public class FilesHandler {
         }
     }
 
-    public static String GetCurrDateAndTime() {
+    public static String GetTimeStamp() {
         DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy HH:mm:ss_SSS");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Jerusalem"));
         Date date = new Date();
         return sdf.format(date);
     }
 
-    public static void SaveBytesToPNGFile(byte[] image, String fileFullName){
-        Mat mat = null;
-        try {
-            mat = Bytes2MatAndRotateClockwise90(image);
-            SaveMatToPNGFile(mat, fileFullName);
-        } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+    public static Mat Bytes2MatAndRotateClockwise90(byte[] bytes) throws Exception {
+        if (!OpenCVLoader.initDebug()) {
+            BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCVLoader.", LogsDestination.BothUsers);
+            return null;
         }
-        finally {
-            if(mat != null){
-                mat.release();
+        Mat bgrMat = null;
+        MatOfByte matOfByte = new MatOfByte(bytes);
+        Mat jpegData = new Mat(1, bytes.length, CvType.CV_8UC1);
+        try{
+            jpegData.put(0, 0, bytes);
+            bgrMat = Imgcodecs.imdecode(jpegData, Imgcodecs.IMREAD_COLOR);
+            Imgproc.cvtColor(bgrMat, bgrMat, Imgproc.COLOR_RGB2BGRA, 4);
+            Mat dst = new Mat(bgrMat.height(), bgrMat.width(), bgrMat.type());
+            Core.flip(bgrMat.t(), dst, 1);
+            return dst;
+        }
+        catch (Exception e){
+            String logMessage = "Failed to convert bytes to mat. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+            return null;
+        }
+        finally{
+            if(matOfByte != null) {
+                matOfByte.release();
+            }
+            if(jpegData != null) {
+                jpegData.release();
+            }
+            if(bgrMat != null) {
+                bgrMat.release();
             }
         }
+    }
 
+    public static Bitmap ConvertFirebaseBytesToBitmap(byte[] bytes, Integer itemWidth, Integer itemHeight){
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        Bitmap commonItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
+        commonItemBitmap.copyPixelsFromBuffer(buffer);
+        return commonItemBitmap;
     }
 }

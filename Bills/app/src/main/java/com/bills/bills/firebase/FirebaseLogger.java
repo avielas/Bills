@@ -3,9 +3,9 @@ package com.bills.bills.firebase;
 import android.util.Log;
 
 import com.bills.billslib.Contracts.Enums.LogLevel;
-import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Contracts.Interfaces.ILogger;
-import com.bills.billslib.Utilities.FilesHandler;
+import com.bills.billslib.Utilities.Utilities;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -41,7 +41,7 @@ public class FirebaseLogger implements ILogger {
 
     public FirebaseLogger(String userUid, String firebaseDBCurrUserReference, String firebaseDBMainUserReference){
         mUserUid = userUid;
-        mNow = FilesHandler.GetCurrDateAndTime();
+        mNow = Utilities.GetTimeStamp();
         mMyFirebaseLogReference  = FirebaseDatabase.getInstance().getReference().child(firebaseDBCurrUserReference + "/Logs/" + mNow);
         mMyFirebaseLogReference.keepSynced(true);
         mFirebaseLogReferenceApp = FirebaseDatabase.getInstance().getReference().child(firebaseDBMainUserReference + "/Logs");
@@ -49,7 +49,7 @@ public class FirebaseLogger implements ILogger {
     }
 
     @Override
-    public void Log(final String tag, final LogLevel logLevel, final String message, LogsPathToPrintTo logsPathToPrintTo) {
+    public void Log(final String tag, final LogLevel logLevel, final String message, LogsDestination logsDestination) {
         //print to Logcat
         switch (logLevel){
             case Error:
@@ -65,14 +65,14 @@ public class FirebaseLogger implements ILogger {
                 Log.v(tag, "this LogLevel enum doesn't exists: " + message);
         }
 
-        if (logsPathToPrintTo == LogsPathToPrintTo.BothUsers ||
-            logsPathToPrintTo == LogsPathToPrintTo.MainUser) {
+        if (logsDestination == LogsDestination.BothUsers ||
+            logsDestination == LogsDestination.MainUser) {
             //print to main user(application Logs folder) log
             mFirebaseLogReferenceApp.runTransaction(new Transaction.Handler() {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData) {
                     synchronized (mLock) {
-                        String now = FilesHandler.GetCurrDateAndTime();
+                        String now = Utilities.GetTimeStamp();
                         mutableData.child("(" + now + " ," + mUserUid + ")").setValue(/*TODO: How to add it on new line ?? +*/
                                 mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
                         return Transaction.success(mutableData);
@@ -84,20 +84,20 @@ public class FirebaseLogger implements ILogger {
                     Log.v(tag, "enter onComplete");
                     if (databaseError != null &&
                             (databaseError.toString().length() == 0 || databaseError.toString().isEmpty())) {
-                        Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails(), LogsPathToPrintTo.BothUsers);
+                        Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails(), LogsDestination.BothUsers);
                     }
                 }
             });
         }
 
-        if (logsPathToPrintTo == LogsPathToPrintTo.BothUsers ||
-            logsPathToPrintTo == LogsPathToPrintTo.SecondaryUser) {
+        if (logsDestination == LogsDestination.BothUsers ||
+            logsDestination == LogsDestination.SecondaryUser) {
             //print to secondary user log
             mMyFirebaseLogReference.runTransaction(new Transaction.Handler() {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData) {
                     synchronized (mLock) {
-                        String mNow = FilesHandler.GetCurrDateAndTime();
+                        String mNow = Utilities.GetTimeStamp();
                         mutableData.child(mNow).setValue(/*TODO: How to add it on new line ?? +*/
                                 mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
                         return Transaction.success(mutableData);
@@ -109,7 +109,7 @@ public class FirebaseLogger implements ILogger {
                     Log.v(tag, "enter onComplete");
                     if (databaseError != null &&
                             (databaseError.toString().length() == 0 || databaseError.toString().isEmpty())) {
-                        Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails(), LogsPathToPrintTo.BothUsers);
+                        Log(Tag, LogLevel.Error, "Error Message: " + databaseError.getMessage() + ", Details: " + databaseError.getDetails(), LogsDestination.BothUsers);
                     }
                 }
             });

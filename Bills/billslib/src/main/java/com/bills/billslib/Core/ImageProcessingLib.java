@@ -214,7 +214,7 @@ public class ImageProcessingLib {
         String pathToSave = Constants.IMAGES_PATH;
         Bitmap newBill = Bitmap.createBitmap(rgbaCopy.width(), rgbaCopy.height(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(rgbaCopy, newBill);
-//        FilesHandler.SaveToPNGFile(newBill, pathToSave + "/newBill.jpg");
+//        Utilities.SaveToPNGFile(newBill, pathToSave + "/newBill.jpg");
         int threshold = 20;
         int minLineSize = 0;
         int lineGap = 10;

@@ -3,7 +3,7 @@ package com.bills.testslib;
 import android.util.Log;
 
 import com.bills.billslib.Contracts.Enums.LogLevel;
-import com.bills.billslib.Contracts.Enums.LogsPathToPrintTo;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Contracts.Interfaces.ILogger;
 import com.bills.billslib.Core.BillsLog;
 
@@ -17,7 +17,7 @@ public class TestsUtilities {
     public static void InitBillsLogToLogcat() {
         BillsLog.Init(new ILogger() {
             @Override
-            public void Log(String tag, LogLevel logLevel, String message, LogsPathToPrintTo logsPathToPrintTo) {
+            public void Log(String tag, LogLevel logLevel, String message, LogsDestination logsDestination) {
                 switch (logLevel){
                     case Error:
                         Log.e(tag, message);

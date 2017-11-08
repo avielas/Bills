@@ -17,11 +17,7 @@ import android.widget.Toast;
 import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Camera.IOnCameraFinished;
 import com.bills.billslib.Contracts.Constants;
-import com.bills.billslib.Utilities.FilesHandler;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import com.bills.billslib.Utilities.Utilities;
 
 public class CameraActivity extends AppCompatActivity implements IOnCameraFinished, View.OnClickListener{
     private static final int REQUEST_CAMERA_PERMISSION = 101;
@@ -124,11 +120,9 @@ public class CameraActivity extends AppCompatActivity implements IOnCameraFinish
 
     @Override
     public void OnCameraFinished(byte[] bytes){
-        DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy__HH_mm_ss");
-        Date date = new Date();
-        String now = sdf.format(date);
-        String fileFullName = Constants.IMAGES_PATH + "/ocrBytes_" + now + ".txt";
-        FilesHandler.SaveToTXTFile(bytes, fileFullName);
+        String timeStamp = Utilities.GetTimeStamp();
+        String fileFullName = Constants.IMAGES_PATH + "/ocrBytes_" + timeStamp + ".txt";
+        Utilities.SaveToTXTFile(bytes, fileFullName);
         FinishActivity();
     }
 }

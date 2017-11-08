@@ -33,5 +33,6 @@ dependencies {
     compile firebase_database
     compile firebase_ui_auth
     compile firebase_storage
+    compile project(path: ':billslib')
 }
 

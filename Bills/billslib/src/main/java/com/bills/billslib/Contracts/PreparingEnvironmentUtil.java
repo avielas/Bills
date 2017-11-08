@@ -2,9 +2,8 @@ package com.bills.billslib.Contracts;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.util.Log;
 
-import com.bills.billslib.Utilities.FilesHandler;
+import com.bills.billslib.Utilities.Utilities;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,7 +20,7 @@ public class PreparingEnvironmentUtil {
 
     public static void PrepareTesseract(Context context) {
         try {
-            FilesHandler.CreateDirectory(Constants.IMAGES_PATH);
+            Utilities.CreateDirectory(Constants.IMAGES_PATH);
         } catch (Exception e) {
             e.printStackTrace();
         }
