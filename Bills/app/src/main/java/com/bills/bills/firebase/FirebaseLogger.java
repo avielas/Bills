@@ -29,7 +29,7 @@ public class FirebaseLogger implements ILogger {
     private DatabaseReference mFirebaseLogReferenceApp;
     private String mNow;
 
-    private int mRowCount = 0;
+    private long mRowCount;
     private AtomicInteger mCurEntryCount = new AtomicInteger(0);
 
     private AtomicBoolean mTransactionInProgress = new AtomicBoolean(false);
@@ -41,6 +41,7 @@ public class FirebaseLogger implements ILogger {
 
     public FirebaseLogger(String userUid, String firebaseDBCurrUserReference, String firebaseDBMainUserReference){
         mUserUid = userUid;
+        mRowCount = 0;
         mNow = Utilities.GetTimeStamp();
         mMyFirebaseLogReference  = FirebaseDatabase.getInstance().getReference().child(firebaseDBCurrUserReference + "/Logs/" + mNow);
         mMyFirebaseLogReference.keepSynced(true);
@@ -72,9 +73,12 @@ public class FirebaseLogger implements ILogger {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData) {
                     synchronized (mLock) {
+                        Long childrenCount = mutableData.getChildrenCount();
+                        mRowCount = childrenCount + 1;
                         String now = Utilities.GetTimeStamp();
-                        mutableData.child("(" + now + " ," + mUserUid + ")").setValue(/*TODO: How to add it on new line ?? +*/
-                                mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
+                        mutableData.child(String.valueOf(mRowCount)).setValue(/*TODO: How to add it on new line ?? +*/
+                                logLevel.toString() + ": " + tag + ": " + message +
+                                " (" + now + " ," + mUserUid + ")");
                         return Transaction.success(mutableData);
                     }
                 }
