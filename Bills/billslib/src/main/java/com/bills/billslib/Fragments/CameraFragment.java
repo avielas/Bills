@@ -287,7 +287,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
                         String toastMessage = "Exception has been thrown. See logs and try again!";
                         ErrorReporter(logMessage, toastMessage);
-                        mListener.StartCameraFragment(image);
                     }
                     finally {
                         if(null != billMat){
@@ -299,13 +298,14 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         if(null != billMatCopy){
                             billMatCopy.release();
                         }
-                        mHandler.post(mHideProgressDialog);
                     }
                 } catch (Exception e) {
                     String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
                     BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+                }
+                finally {
                     mHandler.post(mHideProgressDialog);
-                    mListener.StartCameraFragment(image);
+                    mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
                 }
             }
         };
@@ -359,6 +359,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         void StartSummarizerFragment(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath);
         void StartWelcomeFragment();
         void Finish();
-        void StartCameraFragment(final byte[] image);
+        void StartCameraFragment(final byte[] image, String mRelativeDbAndStoragePath);
     }
 }

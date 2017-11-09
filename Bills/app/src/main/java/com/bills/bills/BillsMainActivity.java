@@ -232,25 +232,15 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void StartCameraFragment(final byte[] image) {
-        UploadBillImageToStorage(image);
+    public void StartCameraFragment(final byte[] image, String relativeDbAndStoragePath) {
+        UploadBillImageToStorage(image, relativeDbAndStoragePath);
         StartCameraFragment();
     }
 
-    private void UploadBillImageToStorage(final byte[] image) {
-        mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback(){
-            @Override
-            public void OnPassCodeResovled(final Integer passCode, final String relativeDbAndStoragePath, final String userUid) {
-                FirebaseUploader uploader = new FirebaseUploader(UsersDbKey + "/" + relativeDbAndStoragePath,
-                        BillsPerUserDbKey + "/" + relativeDbAndStoragePath, BillsMainActivity.this);
-                uploader.UploadFullBillImage(image);
-            }
-
-            @Override
-            public void OnPassCodeResolveFail(String error) {
-                Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void UploadBillImageToStorage(byte[] image, String relativeDbAndStoragePath) {
+        FirebaseUploader uploader = new FirebaseUploader(UsersDbKey + "/" + relativeDbAndStoragePath,
+                BillsPerUserDbKey + "/" + relativeDbAndStoragePath, BillsMainActivity.this);
+        uploader.UploadFullBillImage(image);
     }
 
     @Override

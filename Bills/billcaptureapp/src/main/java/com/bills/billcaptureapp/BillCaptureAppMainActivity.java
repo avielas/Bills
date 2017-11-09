@@ -109,7 +109,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void StartCameraFragment(final byte[] image) {
+    public void StartCameraFragment(final byte[] image, String mRelativeDbAndStoragePath) {
         try {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, mStartScreenFragment);
