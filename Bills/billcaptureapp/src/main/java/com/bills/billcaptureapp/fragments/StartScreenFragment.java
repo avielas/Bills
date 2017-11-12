@@ -19,6 +19,7 @@ import com.bills.billcaptureapp.R;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Contracts.Enums.LogsDestination;
+
 import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Utilities.Utilities;
 

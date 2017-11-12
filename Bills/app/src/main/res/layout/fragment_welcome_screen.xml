@@ -5,8 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/welcome_screen_background"
+    android:contextClickable="false"
+    android:padding="0dp"
+    android:paddingBottom="0dp"
+    android:paddingEnd="0dp"
+    android:paddingHorizontal="0dp"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:paddingStart="0dp"
+    android:paddingTop="0dp"
+    android:paddingVertical="0dp"
     tools:context="com.bills.bills.fragments.WelcomeScreenFragment">
 
+
+    <ImageView
+        android:id="@+id/city_bg_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="410dp"
+        android:layout_weight="0.21"
+        android:src="@drawable/city_bg" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,74 +31,75 @@
         android:orientation="vertical"
         android:weightSum="1">
 
-        <!--<EditText-->
-            <!--android:id="@+id/editText7"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center|top"-->
-            <!--android:ems="10"-->
-            <!--android:inputType="textPersonName"-->
-            <!--android:text="Bills"-->
-            <!--android:textAlignment="center"-->
-            <!--android:textSize="36dp" />-->
         <Space
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="140dp"
             android:layout_weight="0.21" />
 
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="220dp"
             android:layout_weight="0.21"
-            app:srcCompat="@mipmap/bills_icon" />
+            app:srcCompat="@drawable/bills_icon" />
 
-        <TextView
-            android:id="@+id/textView"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|top"
-            android:ems="10"
-            android:inputType="textPersonName"
-            android:text="Bills"
-            android:textAlignment="center"
-            android:textSize="36dp"  />
+            android:layout_height="120dp"
+            android:layout_weight="0.21"
+            android:background="@drawable/down_shade"
+            android:orientation="vertical">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.23" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.21">
 
-        <Button
-            android:id="@+id/start_camera_button"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_action_icon___camera"
-            android:layout_gravity="center"
-            android:background="@drawable/welcome_screen_green_button"
-            android:text="Start Camera" />
+                <Button
+                    android:id="@+id/start_camera_button"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@drawable/ic_scan_bill"
+                    android:drawableLeft="@drawable/ic_action_icon___camera" />
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.15" />
+                <Button
+                    android:id="@+id/check_pass_code_button"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@drawable/ic_join_bill" />
 
-        <Button
-            android:id="@+id/check_pass_code_button"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/welcome_screen_green_button"
-            android:text="Check PassCode" />
+            </LinearLayout>
 
-        <EditText
-            android:id="@+id/pass_code_edittext"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="Enter pass code"
-            android:inputType="number"
-            android:textAlignment="center" />
+            <EditText
+                android:id="@+id/pass_code_edittext"
+                android:layout_width="70dp"
+                android:layout_height="80dp"
+                android:layout_gravity="right|center_vertical"
+                android:layout_weight="0.21"
+                android:ems="10"
+                android:gravity="top|right"
+                android:hint="הזן קוד"
+                android:inputType="numberDecimal"
+                android:textColor="#D50046"
+                android:textColorHighlight="#D50046"
+                android:textColorHint="#D50046"
+                android:textColorLink="#D50046"
+                android:textDirection="ltr"
+                android:textStyle="bold"
+                android:tooltipText="הזן קוד"
+                android:visibility="visible" />
+        </LinearLayout>
+
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/city_bg_l2_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="410dp"
+        android:src="@drawable/city_bg_l2" />
 
 </FrameLayout>

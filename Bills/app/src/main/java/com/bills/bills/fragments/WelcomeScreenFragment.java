@@ -6,8 +6,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bills.bills.R;
@@ -63,9 +67,22 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)     {
+
+        ImageView city1 = (ImageView) getActivity().findViewById(R.id.city_bg_image_view);
+
+        Animation animation
+                = AnimationUtils.loadAnimation(getContext(), R.anim.move);
+        city1.startAnimation(animation);
+
+        ImageView city2 = (ImageView)getActivity().findViewById(R.id.city_bg_l2_image_view);
+
+        Animation animation2 = AnimationUtils.loadAnimation(getContext(), R.anim.move2);
+        city2.startAnimation(animation2);
+
         view.findViewById(R.id.start_camera_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 mListener.StartCameraFragment();
             }
         });
