@@ -5,7 +5,7 @@ android {
     buildToolsVersion build_tools_version
 
     sourceSets.main {
-        jniLibs.srcDir 'libs'
+        jniLibs.srcDir 'jniLibs'
         jni.srcDirs = []
     }
 
