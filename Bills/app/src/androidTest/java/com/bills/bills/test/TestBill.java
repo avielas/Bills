@@ -121,8 +121,8 @@ public class TestBill extends Thread{
 //                                                                                                            this.getClass().getSimpleName());
 //            String pathToSavePrintRects = Constants.PRINTED_RECTS_IMAGES_PATH + "/" +_key + ".jpg";
 //            String pathToSavePrePrintRects = Constants.PRINTED_RECTS_IMAGES_PATH + "/" +_key + "1.jpg";
-//            FilesHandler.SaveToJPGFile(printWordsRectsbill, pathToSavePrintRects);
-//            FilesHandler.SaveToJPGFile(processedBillBitmap, pathToSavePrePrintRects);
+//            Utilities.SaveToJPGFile(printWordsRectsbill, pathToSavePrintRects);
+//            Utilities.SaveToJPGFile(processedBillBitmap, pathToSavePrePrintRects);
 //            printWordsRectsbill.recycle();
 //            warpedBillBitmap.recycle();
             /***********************************************************************/
