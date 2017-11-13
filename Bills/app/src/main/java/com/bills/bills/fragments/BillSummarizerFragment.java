@@ -80,12 +80,13 @@ public class BillSummarizerFragment extends Fragment {
         if(mMainUserMode){
             mUiUpdater = new UiUpdater();
             mUiUpdater.StartMainUser(mContext, mDbPath, mCommonItemsArea, mMyItemsArea, mBillRows, mTotalSumView, mTipView);
-            mPassCodeView.setText("PassCode: " + mPassCode);
+            mPassCodeView.setText(Integer.toString(mPassCode)
+            );
         }else {
 
             mUiUpdater = new UiUpdater();
             mUiUpdater.StartSecondaryUser(mContext, mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mTotalSumView, mTipView);
-            mPassCodeView.setText("PassCode: " + mPassCode);
+            mPassCodeView.setText(Integer.toString(mPassCode));
         }
     }
 
