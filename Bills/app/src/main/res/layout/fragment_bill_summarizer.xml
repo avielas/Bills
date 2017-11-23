@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bill_summarizer_frame_layout"
@@ -8,72 +8,109 @@
     android:orientation="vertical"
     tools:context="com.bills.bills.fragments.BillSummarizerFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-
-        <TextView
-            android:id="@+id/passcode_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_weight="1"
-            android:text="1234" />
-
-        <TextView
-            android:id="@+id/bill_summarizer_pass_code"
-            android:layout_width="75dp"
-            android:layout_height="63dp"
-            android:layout_gravity="top|right"
-            android:layout_weight="1"
-            android:gravity="right"
-            android:textSize="36sp"
-            tools:text="חשבון" />
-    </LinearLayout>
 
 
     <LinearLayout
+        android:id="@+id/summary_area_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ScrollView
+        <LinearLayout
+            android:id="@+id/headline_layout"
             android:layout_width="match_parent"
-            android:layout_height="240dp"
+            android:layout_height="46dp"
+            android:background="@drawable/summary_screen_header"
+            android:orientation="horizontal">
+            <Space
+                android:layout_width="70dp"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/passcode_textview"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:fontFamily="@fonts/secular_one"
+                android:gravity="bottom"
+                android:textColor="@color/summarizer_medium"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom|left"
+                android:fontFamily="@fonts/secular_one"
+                android:gravity="bottom|left"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="@color/summarizer_medium"
+                android:textColorLink="@color/summarizer_medium"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                tools:text="חשבון" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/common_items_area_heading_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/common_total_sum_edittext"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:fontFamily="@fonts/highland_gothic_flf"
+                android:gravity="center"
+                android:inputType="number"
+                android:text="0"
+                android:textColor="@color/summarizer_light"
+                android:textSize="20dp" />
+
+
+            <TextView
+                android:id="@+id/common_items_count"
+                android:layout_width="75dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:fontFamily="@fonts/highland_gothic_light_flf"
+                android:gravity="center"
+                android:text="[0]"
+                android:textColor="@color/summarizer_medium"
+                android:textSize="20dp" />
+
+            <TextView
+                android:id="@+id/common_bill_heading"
+                android:layout_width="180dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:fontFamily="@fonts/secular_one"
+                android:gravity="center"
+                android:text="מוצרים משותפים"
+                android:textColor="@color/summarizer_medium"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/common_summary_area"
+            android:layout_width="match_parent"
+            android:layout_height="235dp"
             android:layout_gravity="bottom"
             android:layout_marginBottom="0dp"
             android:layout_marginTop="0dp">
-
-
             <LinearLayout
                 android:id="@+id/common_items_area_linearlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <EditText
-                    android:id="@+id/common_bill_heading"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:ems="10"
-                    android:inputType="textPersonName"
-                    android:text="Common" />
-
-                <TextView
-                    android:id="@+id/common_total_sum_edittext"
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_gravity="bottom|left"
-                    android:background="@android:color/transparent"
-                    android:ems="10"
-                    android:inputType="number"
-                    android:text="Sum:"
-                    android:textSize="20dp" />
-
+                android:orientation="vertical"
+                android:gravity="right">
             </LinearLayout>
+
         </ScrollView>
 
         <ImageView
@@ -82,51 +119,138 @@
             android:layout_height="wrap_content"
             android:src="@drawable/summary_screen_spliter" />
 
+        <LinearLayout
+            android:id="@+id/my_items_heading_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/my_total_sum_edittext"
+                android:layout_width="110dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:fontFamily="@fonts/highland_gothic_flf"
+                android:gravity="center"
+                android:inputType="number"
+                android:text="0"
+                android:textColor="@color/summarizer_light"
+                android:textSize="20dp" />
+
+            <TextView
+                android:id="@+id/my_items_count"
+                android:layout_width="70dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:gravity="center"
+                android:text="[0]"
+                android:textColor="@color/summarizer_medium"
+                android:textSize="20dp" />
+
+            <TextView
+                android:id="@+id/my_bill_heading"
+                android:layout_width="180dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:fontFamily="@fonts/secular_one"
+                android:gravity="center"
+                android:text="המוצרים שלי"
+                android:textColor="@color/summarizer_medium"
+                android:textSize="20dp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="240dp"
+            android:layout_height="235dp"
             android:layout_gravity="top"
             android:layout_marginBottom="0dp"
             android:layout_marginTop="0dp">
-
             <LinearLayout
                 android:id="@+id/my_items_area_linearlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <EditText
-                    android:id="@+id/my_bill_heading"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:ems="10"
-                    android:text="My" />
-
-                <EditText
-                    android:id="@+id/tip_edittext"
-                    android:layout_width="114dp"
-                    android:layout_height="29dp"
-                    android:layout_gravity="bottom|center"
-                    android:background="@android:color/transparent"
-                    android:ems="10"
-                    android:hint="Tip"
-                    android:inputType="number" />
-
-                <TextView
-                    android:id="@+id/my_total_sum_edittext"
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_gravity="bottom|right"
-                    android:background="@android:color/transparent"
-                    android:ems="10"
-                    android:inputType="number"
-                    android:text="Sum:"
-                    android:textSize="20dp" />
             </LinearLayout>
 
         </ScrollView>
+
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/summarizer_light"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
 
-</LinearLayout>
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.21"
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:fontFamily="@fonts/secular_one"
+            android:gravity="right|bottom"
+            android:text="שח"
+            android:textColor="@color/summarizer_dark" />
+
+        <EditText
+            android:id="@+id/tip_sum_edittext"
+            android:layout_width="90dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.21"
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:gravity="left|center_vertical"
+            android:hint="10"
+            android:inputType="number"
+            android:textColor="@color/summarizer_dark"
+            android:textColorHint="@color/summarizer_dark"
+            android:fontFamily="@fonts/highland_gothic_flf" />
+
+        <EditText
+            android:id="@+id/tip_percent_edittext"
+            android:layout_width="90dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.21"
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:gravity="right|center"
+            android:hint="10"
+            android:inputType="number"
+            android:textColor="@color/summarizer_dark"
+            android:textColorHint="@color/summarizer_dark"
+            android:fontFamily="@fonts/highland_gothic_flf" />
+
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.21"
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:fontFamily="@fonts/secular_one"
+            android:gravity="left|bottom"
+            android:text="%"
+            android:textColor="@color/summarizer_dark" />
+
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="114dp"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:ems="20"
+            android:fontFamily="@fonts/secular_one"
+            android:gravity="center"
+            android:text="טיפ"
+            android:textColor="#471749"
+            android:textSize="18sp" />
+
+        </LinearLayout>
+</RelativeLayout>

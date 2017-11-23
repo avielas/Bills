@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -39,9 +40,13 @@ public class BillSummarizerFragment extends Fragment {
 
     private LinearLayout mCommonItemsArea;
     private LinearLayout mMyItemsArea;
-    private TextView mTotalSumView;
-    private EditText mTipView;
+    private TextView mCommonTotalSumView;
+    private TextView mMyTotalSumView;
+    private EditText mTipPercentView;
+    private EditText mTipSumView;
     private TextView mPassCodeView;
+    private TextView mCommonItemsCount;
+    private TextView mMyItemsCount;
 
     private List<BillRow> mBillRows;
     public BillSummarizerFragment() {
@@ -70,22 +75,26 @@ public class BillSummarizerFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mCommonItemsArea = (LinearLayout)getView().findViewById(R.id.common_items_area_linearlayout);
         mMyItemsArea = (LinearLayout)getView().findViewById(R.id.my_items_area_linearlayout);
-        mTotalSumView = (TextView)getView().findViewById(R.id.my_total_sum_edittext);
-        mTipView = (EditText)getView().findViewById(R.id.tip_edittext);
-        // TODO: to remove setEnabled(false)!
-        // TODO: I added it just for debugging usages
-        mTipView.setEnabled(false);
+        mCommonTotalSumView = (TextView)getView().findViewById(R.id.common_total_sum_edittext);
+        mMyTotalSumView = (TextView)getView().findViewById(R.id.my_total_sum_edittext);
+        mTipPercentView = (EditText)getView().findViewById(R.id.tip_percent_edittext);
+        mTipSumView = (EditText)getView().findViewById(R.id.tip_sum_edittext);
+
         mPassCodeView = (TextView)getView().findViewById(R.id.passcode_textview);
+
+        mCommonItemsCount = (TextView)getView().findViewById(R.id.common_items_count);
+        mMyItemsCount = (TextView)getView().findViewById(R.id.my_items_count);
 
         if(mMainUserMode){
             mUiUpdater = new UiUpdater();
-            mUiUpdater.StartMainUser(mContext, mDbPath, mCommonItemsArea, mMyItemsArea, mBillRows, mTotalSumView, mTipView);
+            mUiUpdater.StartMainUser(mContext, mDbPath, mCommonItemsArea, mMyItemsArea, mBillRows, mMyTotalSumView, mCommonTotalSumView,
+                    mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount);
             mPassCodeView.setText(Integer.toString(mPassCode)
             );
         }else {
-
             mUiUpdater = new UiUpdater();
-            mUiUpdater.StartSecondaryUser(mContext, mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mTotalSumView, mTipView);
+            mUiUpdater.StartSecondaryUser(mContext, mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mMyTotalSumView, mCommonTotalSumView,
+                    mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount);
             mPassCodeView.setText(Integer.toString(mPassCode));
         }
     }
@@ -93,6 +102,7 @@ public class BillSummarizerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     }
 
     @Override

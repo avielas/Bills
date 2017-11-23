@@ -2,12 +2,15 @@ package com.bills.bills.firebase;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.TextView;
 
 import com.bills.bills.R;
@@ -26,10 +29,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static android.view.View.GONE;
 
@@ -61,66 +66,66 @@ public class UiUpdater implements View.OnClickListener {
 
     private HashMap<Integer, BillRow> mBillRows;
 
-    private HashMap<Integer, Double> mLineNumToPriceMapper = new HashMap<>();
+    private HashMap<Integer, Double> mMyLineNumToPriceMapper = new HashMap<>();
 
     private ConcurrentHashMap<Integer, Integer> mCommonLineToQuantityMapper = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Integer, LinearLayout> mCommonLineNumToLineView = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Integer, TextView> mCommonLineNumberToQuantityView = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, Double> mCommonLineNumberToPriceMapper = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<Integer, Integer> mMyLineToQuantityMapper = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Integer, LinearLayout> mMyLineNumToLineView = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Integer, TextView> mMyLineNumberToQuantityView = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, Double> mMyLineNumberToPriceMapper = new ConcurrentHashMap<>();
+
 
     private Double mMyTotalSum = 0.0;
-    private TextView mBillSummarizerTotalSumView;
-    private EditText mBillSummarizerTipView;
-    private double mTip = 0;
+    private Double mCommonTotalSum = 0.0;
 
+    private TextView mCommonTotalSumView;
+    private TextView mMyTotalSumView;
+    private EditText mMyPercentTipView;
+    private EditText mMySumTipView;
+    private double mTipPercent = 0.1;
+    private double mTipSum = 0;
+
+    private TextView mCommonItemsCountTV = null;
+    private AtomicInteger mCommonItemsCount = new AtomicInteger(0);
+
+    private TextView mMyItemsCountTV = null;
+    private AtomicInteger mMyItemsCount = new AtomicInteger(0);
 
     public void StartMainUser(Context context,
                               String dbPath,
                               LinearLayout commonItemsArea,
                               LinearLayout myItemsArea,
                               List<BillRow> billRows,
-                              TextView billSummarizerTotalSumView,
-                              EditText billSummarizerTipView){
+                              TextView myTotalSumView,
+                              TextView commonTotalSumView,
+                              EditText tipPercentView,
+                              EditText mTipSumView,
+                              TextView commonItemsCount,
+                              TextView myItemsCount){
         mContext = context;
         mCommonItemsArea = commonItemsArea;
         mMyItemsArea = myItemsArea;
-        mBillSummarizerTotalSumView = billSummarizerTotalSumView;
-        mBillSummarizerTipView = billSummarizerTipView;
-        mBillSummarizerTipView.addTextChangedListener(new TextWatcher() {
-            private String curTip = "10";
-            public void afterTextChanged(Editable s) {
-                if(s.toString().equalsIgnoreCase("")) {
-                    mTip = 0;
-                }else {
-                    int newTip = Integer.parseInt(s.toString());
-                    if (newTip < 0 || newTip > 100) {
-                        mBillSummarizerTipView.setText(curTip);
-                    } else {
-                        curTip = s.toString();
-                        mTip = (1.0*newTip)/100;
-                        mBillSummarizerTotalSumView.setText(Double.toString(mMyTotalSum *(1+mTip)));
+        mCommonTotalSumView = commonTotalSumView;
+        mMyTotalSumView = myTotalSumView;
 
-                    }
-                }
+        mMyPercentTipView = tipPercentView;
+        mMySumTipView = mTipSumView;
 
-            }
-
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
-            }
-        });
+        mCommonItemsCountTV = commonItemsCount;
+        mMyItemsCountTV = myItemsCount;
+        mMyItemsArea = myItemsArea;
+        InitTipFields();
 
         for (BillRow row : billRows) {
-            AddRowsToUi(row);
+            AddRowToUi(row);
         }
 
+        mCommonItemsCountTV.setText("[" + Integer.toString(mCommonItemsCount.get()) + "]");
+        mCommonTotalSumView.setText(format(mCommonTotalSum));
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath);
@@ -135,6 +140,13 @@ public class UiUpdater implements View.OnClickListener {
                 Integer index = Integer.parseInt(dataSnapshot.getKey());
                 Integer newQuantity = dataSnapshot.getValue(Integer.class);
 
+                if(newQuantity < mCommonLineToQuantityMapper.get(index)) {
+                    mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
+                }else{
+                    mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
+                }
+                mCommonTotalSumView.setText(format(mCommonTotalSum));
+
                 if(newQuantity <= 0){
                     //nothing to update at common items view
                     if(!mCommonLineNumToLineView.containsKey(index)){
@@ -145,8 +157,6 @@ public class UiUpdater implements View.OnClickListener {
                     mCommonLineNumToLineView.get(index).setVisibility(GONE);
                     return;
                 }else{
-
-                    mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                     mCommonLineNumberToQuantityView.get(index).setText(""+newQuantity);
                     mCommonLineToQuantityMapper.put(index, newQuantity);
                 }
@@ -169,40 +179,23 @@ public class UiUpdater implements View.OnClickListener {
                                    String storagePath,
                                    LinearLayout commonItemsArea,
                                    LinearLayout myItemsArea,
-                                   TextView billSummarizerTotalSumView,
-                                   EditText billSummarizerTipView){
+                                   TextView myTotalSumView,
+                                   TextView commonTotalSumView,
+                                   EditText tipPercentView,
+                                   EditText tipSumView,
+                                   TextView commonItemsCount,
+                                   TextView myItemsCount){
         mContext = context;
         mCommonItemsArea = commonItemsArea;
         mMyItemsArea = myItemsArea;
-        mBillSummarizerTotalSumView = billSummarizerTotalSumView;
-        mBillSummarizerTipView = billSummarizerTipView;
-        mBillSummarizerTipView.addTextChangedListener(new TextWatcher() {
-            private String curTip = "10";
-            public void afterTextChanged(Editable s) {
-                if(s.toString().equalsIgnoreCase("")) {
-                    mTip = 0;
-                }else {
-                    int newTip = Integer.parseInt(s.toString());
-                    if (newTip < 0 || newTip > 100) {
-                        mBillSummarizerTipView.setText(curTip);
-                        BillsLog.Log(Tag, LogLevel.Info, "Tip setted to " + curTip, LogsDestination.BothUsers);
-                    } else {
-                        curTip = s.toString();
-                        mTip = (1.0*newTip)/100;
-                        mBillSummarizerTotalSumView.setText(Double.toString(mMyTotalSum *(1+mTip)));
-                        BillsLog.Log(Tag, LogLevel.Info, "Tip setted to " + Double.toString(mMyTotalSum *(1+mTip)), LogsDestination.BothUsers);
-                    }
-                }
-            }
+        mCommonTotalSumView = commonTotalSumView;
+        mMyTotalSumView = myTotalSumView;
+        mMyPercentTipView = tipPercentView;
+        mMySumTipView = tipSumView;
+        mCommonItemsCountTV = commonItemsCount;
+        mMyItemsCountTV = myItemsCount;
 
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
-            }
-        });
+        InitTipFields();
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath);
@@ -240,32 +233,80 @@ public class UiUpdater implements View.OnClickListener {
                             curLineStorageReference.getBytes(3 * ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                 @Override
                                 public void onSuccess(byte[] bytes) {
+
+                                    Typeface fontRegular = Typeface.createFromAsset(mContext.getAssets(),"fonts/highland_gothic_flf.ttf");
+                                    Typeface fontLight = Typeface.createFromAsset(mContext.getAssets(),"fonts/highland_gothic_light_flf.ttf");
+
                                     LinearLayout commonItemRow = new LinearLayout(mContext);
-                                    commonItemRow.setOrientation(LinearLayout.VERTICAL);
+                                    commonItemRow.setOrientation(LinearLayout.HORIZONTAL);
+                                    commonItemRow.setGravity(Gravity.RIGHT);
 
                                     LinearLayout myItemRow = new LinearLayout(mContext);
-                                    myItemRow.setOrientation(LinearLayout.VERTICAL);
+                                    myItemRow.setOrientation(LinearLayout.HORIZONTAL);
+                                    myItemRow.setGravity(Gravity.RIGHT);
+
+                                    mCommonTotalSum += Double.parseDouble(rowPrice) * rowCurQuantityInt;
+                                    mCommonLineNumberToPriceMapper.put(rowIndex, Double.parseDouble(rowPrice));
+                                    mCommonTotalSumView.setText(format(mCommonTotalSum));
 
                                     TextView commonPrice = new TextView(mContext);
                                     commonPrice.setText("" + rowPrice);
+                                    commonPrice.setTextSize(20);
+                                    commonPrice.setBackgroundColor(mContext.getResources().getColor(R.color.summarizer_light));
+                                    commonPrice.setTextColor(mContext.getResources().getColor(R.color.summarizer_dark));
+                                    commonPrice.setTypeface(fontRegular);
+                                    commonPrice.setGravity(Gravity.RIGHT);
                                     commonItemRow.addView(commonPrice);
 
                                     TextView myPrice = new TextView(mContext);
                                     myPrice.setText("" + rowPrice);
+                                    myPrice.setTextSize(20);
+                                    myPrice.setBackgroundColor(mContext.getResources().getColor(R.color.summarizer_light));
+                                    myPrice.setTypeface(fontRegular);
+                                    myPrice.setGravity(Gravity.RIGHT);
                                     myItemRow.addView(myPrice);
+
+                                    Space space = new Space(mContext);
+                                    space.setMinimumWidth(180);
+                                    commonItemRow.addView(space);
+
+                                    mCommonItemsCount.addAndGet(Integer.parseInt(rowQuantity));
+                                    mCommonItemsCountTV.setText("[" + Integer.toString(mCommonItemsCount.get()) + "]");
 
                                     TextView commonQuantityView = new TextView(mContext);
                                     commonQuantityView.setText("" + rowQuantity);
+                                    commonQuantityView.setTextSize(20);
+                                    commonQuantityView.setTextColor(mContext.getResources().getColor(R.color.summarizer_light));
+                                    commonQuantityView.setTypeface(fontLight);
                                     commonItemRow.addView(commonQuantityView);
+
+                                    space = new Space(mContext);
+                                    space.setMinimumWidth(180);
+                                    myItemRow.addView(space);
 
                                     TextView myQuantityView = new TextView(mContext);
                                     myQuantityView.setText("0");
+                                    myQuantityView.setTextSize(20);
+                                    myQuantityView.setTextColor(mContext.getResources().getColor(R.color.summarizer_light));
+                                    myQuantityView.setTypeface(fontLight);
                                     myItemRow.addView(myQuantityView);
 
-                                    Bitmap commonItemBitmap = Utilities.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
-                                    Bitmap myItemBitmap = Utilities.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
+                                    space = new Space(mContext);
+                                    space.setMinimumWidth(130);
+                                    commonItemRow.addView(space);
 
+                                    space = new Space(mContext);
+                                    space.setMinimumWidth(130);
+                                    myItemRow.addView(space);
+
+                                    Bitmap tmpBitmap = Utilities.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
+                                    Bitmap commonItemBitmap = Bitmap.createScaledBitmap(tmpBitmap, 500, 60, false);
+                                    tmpBitmap.recycle();
+
+                                    tmpBitmap = Utilities.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
+                                    Bitmap myItemBitmap = Bitmap.createScaledBitmap(tmpBitmap, 500, 60, false);
                                     ImageView commonImageView = new ImageView(mContext);
+
                                     commonImageView.setImageBitmap(commonItemBitmap);
                                     commonItemRow.addView(commonImageView);
 
@@ -281,7 +322,7 @@ public class UiUpdater implements View.OnClickListener {
 
                                     Integer rowQuantityPrsed = Integer.parseInt(rowQuantity);
                                     Double rowPriceParsed = Double.parseDouble(rowPrice);
-                                    mLineNumToPriceMapper.put(rowIndex, rowPriceParsed);
+                                    mMyLineNumToPriceMapper.put(rowIndex, rowPriceParsed);
 
                                     commonItemRow.setOnClickListener(UiUpdater.this);
 
@@ -308,6 +349,15 @@ public class UiUpdater implements View.OnClickListener {
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 Integer index = Integer.parseInt(dataSnapshot.getKey());
                 Integer newQuantity = dataSnapshot.getValue(Integer.class);
+
+                mCommonItemsCount.addAndGet(newQuantity - mCommonLineToQuantityMapper.get(index));
+                if(newQuantity < mCommonLineToQuantityMapper.get(index)) {
+                    mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
+                    mCommonTotalSumView.setText(format(mCommonTotalSum));
+                }else if(newQuantity > mCommonLineToQuantityMapper.get(index)){
+                    mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
+                    mCommonTotalSumView.setText(format(mCommonTotalSum));
+                }
 
                 if(newQuantity <= 0){
                     //nothing to update at common items view
@@ -344,49 +394,132 @@ public class UiUpdater implements View.OnClickListener {
         BillsLog.Log(Tag, LogLevel.Info, "StartSecondaryUser succeeded!", LogsDestination.BothUsers);
     }
 
+    private void InitTipFields() {
+        mMySumTipView.setText("0");
+        mMyPercentTipView.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                if (s.toString().equalsIgnoreCase("")) {
+                    mTipPercent = 0;
+                    mTipSum = 0;
+                    mMySumTipView.setText("0");
+                } else {
+
+                    double newTip = Double.parseDouble(s.toString());
+                    if (newTip != mTipPercent) {
+                        String curTip = s.toString();
+                        mTipPercent = (1.0 * newTip) / 100;
+                        mTipSum = mMyTotalSum * mTipPercent;
+                        mMySumTipView.setText(format(mTipSum));
+                        mMyTotalSumView.setText(format(mMyTotalSum + mTipSum));
+                    }
+                }
+
+            }
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+
+            }
+
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+            }
+        });
+
+        mMySumTipView.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                if (s.toString().equalsIgnoreCase("")) {
+                    mTipSum = 0;
+                    mTipPercent = 0;
+                    mMyPercentTipView.setText("0");
+                } else {
+                    double newTip = Double.parseDouble(s.toString());
+                    if (newTip != mTipSum) {
+                        mTipPercent = (1.0 * newTip) / mMyTotalSum;
+                        mMyPercentTipView.setText(format(mTipPercent));
+                        mMyTotalSumView.setText(format(mMyTotalSum + newTip));
+
+                    }
+                }
+
+            }
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+        });
+
+    }
+
     private int GetRowUiIndex(Integer newRowIndex) {
         if(mCommonLineNumToLineView.size() == 0){
-            return 1;
+            return 0 ;
         }
 
         Integer[] rowIndeces = new Integer[mCommonLineNumToLineView.size()];
         mCommonLineNumToLineView.keySet().toArray(rowIndeces);
         Arrays.sort(rowIndeces);
         if(newRowIndex < rowIndeces[0]){
-            return 1;
+            return 0;
         }
         for(int retVal = 1; retVal < rowIndeces.length; retVal++){
             if(newRowIndex < rowIndeces[retVal] && newRowIndex > rowIndeces[retVal-1]){
-                return retVal + 1;
+                return retVal;
             }
         }
 
-        return rowIndeces.length + 1;
+        return rowIndeces.length;
     }
 
-    private void AddRowsToUi(BillRow row) {
+    private void AddRowToUi(BillRow row) {
+        Typeface fontRegular = Typeface.createFromAsset(mContext.getAssets(),"fonts/highland_gothic_flf.ttf");
+        Typeface fontLight = Typeface.createFromAsset(mContext.getAssets(),"fonts/highland_gothic_light_flf.ttf");
+
         LinearLayout commonItemRow = new LinearLayout(mContext);
-        commonItemRow.setOrientation(LinearLayout.VERTICAL);
+        commonItemRow.setOrientation(LinearLayout.HORIZONTAL);
 
         LinearLayout myItemRow = new LinearLayout(mContext);
-        myItemRow.setOrientation(LinearLayout.VERTICAL);
+        myItemRow.setOrientation(LinearLayout.HORIZONTAL);
+
+        mCommonTotalSum += (row.GetPrice() * row.GetQuantity());
+        mCommonLineNumberToPriceMapper.put(row.GetRowIndex(), row.GetPrice());
 
         TextView commonPrice = new TextView(mContext);
-        commonPrice.setText(Double.toString(row.GetPrice()));
+        commonPrice.setText(format(row.GetPrice()));
+        commonPrice.setBackgroundColor(mContext.getResources().getColor(R.color.summarizer_light));
+        commonPrice.setTextColor(mContext.getResources().getColor(R.color.summarizer_dark));
+        commonPrice.setTypeface(fontRegular);
+        commonPrice.setGravity(Gravity.RIGHT);
         commonItemRow.addView(commonPrice);
 
         TextView myPrice = new TextView(mContext);
-        myPrice.setText(Double.toString(row.GetPrice()));
+        myPrice.setText(format(row.GetPrice()));
+        myPrice.setBackgroundColor(mContext.getResources().getColor(R.color.summarizer_light));
+        myPrice.setTypeface(fontRegular);
+        myPrice.setGravity(Gravity.RIGHT);
+        myPrice.setTextColor(mContext.getResources().getColor(R.color.summarizer_dark));
+
         myItemRow.addView(myPrice);
 
-        mLineNumToPriceMapper.put(row.GetRowIndex(), row.GetPrice());
+        mMyLineNumToPriceMapper.put(row.GetRowIndex(), row.GetPrice());
+
+        mCommonItemsCount.addAndGet(row.GetQuantity());
 
         TextView commonQuantityView = new TextView(mContext);
         commonQuantityView.setText(Integer.toString(row.GetQuantity()));
+        commonQuantityView.setTextColor(mContext.getResources().getColor(R.color.summarizer_light));
+        commonQuantityView.setTypeface(fontLight);
         commonItemRow.addView(commonQuantityView);
 
         TextView myQuantityView = new TextView(mContext);
         myQuantityView.setText("0");
+        myQuantityView .setTextColor(mContext.getResources().getColor(R.color.summarizer_light));
+        myQuantityView.setTypeface(fontLight);
         myItemRow.addView(myQuantityView);
 
         ImageView commonImageView = new ImageView(mContext);
@@ -419,10 +552,15 @@ public class UiUpdater implements View.OnClickListener {
     public void onClick(View v) {
         //move item from my Bill to common Bill
         if(((LinearLayout)v.getParent()).getId() == R.id.my_items_area_linearlayout) {
+            mMyItemsCountTV.setText("[" + Integer.toString(mMyItemsCount.decrementAndGet()) + "]");
+            mCommonItemsCountTV.setText("[" + Integer.toString(mCommonItemsCount.incrementAndGet()) + "]");
             //find relevant entry
             for (HashMap.Entry<Integer, LinearLayout> entry : mMyLineNumToLineView.entrySet()) {
                 if(entry.getValue() == v){
                     Integer index = entry.getKey();
+                    mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
+                    mCommonTotalSumView.setText(format(mCommonTotalSum));
+
                     if(mMyLineToQuantityMapper.get(index) == 1){ // Line should be removed from my view and added to common view
                         mMyLineNumToLineView.get(index).setVisibility(GONE);
                         mMyLineToQuantityMapper.put(index, 0);
@@ -430,7 +568,7 @@ public class UiUpdater implements View.OnClickListener {
                         BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " removed from My view and added to Common view", LogsDestination.BothUsers);
                     }else if(mMyLineToQuantityMapper.get(index) > 1){ //Line should be moved to common view
                         mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) - 1);
-                        mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
+                        mMyLineNumberToQuantityView.get(index).setText("" + mMyLineToQuantityMapper.get(index));
                         BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " moved from My to Common view (in case of quantity > 1)", LogsDestination.BothUsers);
                     }
 
@@ -449,8 +587,10 @@ public class UiUpdater implements View.OnClickListener {
 
                     mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));
 
-                    mMyTotalSum -= mLineNumToPriceMapper.get(index);
-                    mBillSummarizerTotalSumView.setText(Double.toString(mMyTotalSum *(1+mTip)));
+                    mMyTotalSum -= mMyLineNumToPriceMapper.get(index);
+                    mMyTotalSumView.setText(format(mMyTotalSum *(1+ mTipPercent)));
+                    mTipSum =  mMyTotalSum * mTipPercent;
+                    mMySumTipView.setText(format(mTipSum));
                     return;
                 }
             }
@@ -458,9 +598,14 @@ public class UiUpdater implements View.OnClickListener {
 
         //move item from common Bill to my Bill and substract 1 from item's quantity
         if(((LinearLayout) v.getParent()).getId() == R.id.common_items_area_linearlayout){
+            mMyItemsCountTV.setText("[" + Integer.toString(mMyItemsCount.incrementAndGet()) + "]");
+            mCommonItemsCountTV.setText("[" + Integer.toString(mCommonItemsCount.decrementAndGet()) + "]");
             for (HashMap.Entry<Integer, LinearLayout> entry : mCommonLineNumToLineView.entrySet()) {
                 if(entry.getValue() == v){
                     Integer index = entry.getKey();
+                    mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
+                    mCommonTotalSumView.setText(format(mCommonTotalSum));
+
                     if(mCommonLineToQuantityMapper.get(index) <= 1){ // Line should be removed from common view and added to my view
                         mCommonLineNumToLineView.get(index).setVisibility(GONE);
                         mCommonLineToQuantityMapper.put(index, 0);
@@ -487,14 +632,22 @@ public class UiUpdater implements View.OnClickListener {
 
                     mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));
 
-                    mMyTotalSum += mLineNumToPriceMapper.get(index);
+                    mMyTotalSum += mMyLineNumToPriceMapper.get(index);
 
 
-                    mBillSummarizerTotalSumView.setText(Double.toString(mMyTotalSum *(1+mTip)));
-
+                    mMyTotalSumView.setText(format(mMyTotalSum *(1+ mTipPercent)));
+                    mTipSum =  mMyTotalSum * mTipPercent;
+                    mMySumTipView.setText(format(mTipSum));
                     return;
                 }
             }
         }
+    }
+
+    public static String format(double d) {
+        NumberFormat nf = NumberFormat.getInstance();
+        nf.setMinimumFractionDigits(2);
+        nf.setMaximumFractionDigits(2);
+        return nf.format(d);
     }
 }

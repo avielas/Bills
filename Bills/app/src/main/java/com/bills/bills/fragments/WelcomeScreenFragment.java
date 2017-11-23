@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -95,6 +96,17 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
                 } catch (Exception ex) {
                     Toast.makeText(getActivity(), "Invalid pass code.Try again", Toast.LENGTH_SHORT).show();
                     return;
+                }
+            }
+        });
+
+        final EditText passCodeTextView = (EditText)getView().findViewById(R.id.pass_code_edittext);
+        passCodeTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    InputMethodManager input = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    input.hideSoftInputFromWindow(passCodeTextView.getWindowToken(), 0);
                 }
             }
         });

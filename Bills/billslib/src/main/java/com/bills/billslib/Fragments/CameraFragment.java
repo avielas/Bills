@@ -366,4 +366,5 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         void Finish();
         void StartCameraFragment(final byte[] image, String mRelativeDbAndStoragePath);
     }
+
 }

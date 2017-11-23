@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.bills.bills.firebase.FirebaseLogger;
@@ -56,6 +57,7 @@ public class BillsMainActivity extends MainActivityBase implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mContext = this;
         SetDefaultUncaughtExceptionHandler();
         setContentView(R.layout.activity_bills_main);
@@ -263,6 +265,7 @@ public class BillsMainActivity extends MainActivityBase implements
                         "billsplitapplication@gmail.com",
                         "billsplitapplication@gmail.com");
                 System.exit(2);
+                Log.e("BillsMainActivity", paramThrowable.getMessage());
             }
         });
     }
