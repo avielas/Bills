@@ -6,6 +6,8 @@ import android.graphics.Rect;
 import com.bills.billslib.Contracts.Enums.Language;
 import com.bills.billslib.Contracts.Enums.PageSegmentation;
 
+import org.opencv.core.Scalar;
+
 import java.util.List;
 
 /**
@@ -124,4 +126,12 @@ public interface IOcrEngine {
      * @throws RuntimeException In case of runtime(probably native) exception accured
      */
     Bitmap GetThresholdedImage() throws IllegalStateException, RuntimeException;
+
+    /**
+     *
+     * @param src black & white bitmap image
+     * @param color new color of the backgound
+     * @return bitmap with the new background
+     */
+    Bitmap ChangeBackgroundColor(Bitmap src, Scalar color);
 }

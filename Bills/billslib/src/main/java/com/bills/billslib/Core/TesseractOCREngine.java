@@ -11,6 +11,11 @@ import com.googlecode.leptonica.android.Pixa;
 import com.googlecode.leptonica.android.WriteFile;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -263,6 +268,34 @@ public class TesseractOCREngine implements IOcrEngine {
                 thresholdedPixImage.recycle();
             }
         }
+    }
+
+    @Override
+    public Bitmap ChangeBackgroundColor(Bitmap src, Scalar color) {
+            Mat srcMat = new Mat();
+            Mat grayscaleMat = new Mat();
+            Mat mask = new Mat();
+
+            try {
+                Utils.bitmapToMat(src, srcMat);
+
+                Imgproc.cvtColor(srcMat, grayscaleMat, Imgproc.COLOR_RGBA2GRAY);
+
+                Imgproc.threshold(grayscaleMat, mask, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+
+                srcMat.setTo(color, mask);
+
+                Bitmap dst = Bitmap.createBitmap(src.getWidth(), src.getHeight(), src.getConfig());
+
+                Utils.matToBitmap(srcMat, dst);
+                return dst;
+            }catch (Exception ex){
+                throw ex;
+            }finally {
+                srcMat.release();
+                grayscaleMat.release();
+                mask.release();
+            }
     }
 
     private void CheckInitialized() throws IllegalStateException{
