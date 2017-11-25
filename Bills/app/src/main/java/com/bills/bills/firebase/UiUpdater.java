@@ -425,6 +425,8 @@ public class UiUpdater implements View.OnClickListener {
         mScreenSplitter = screenSpliter;
         screenSpliter.setOnTouchListener(new View.OnTouchListener() {
             float lastY = Float.MIN_VALUE;
+            float commonAreaInitialHeight = mCommonItemsContainer.getLayoutParams().height;
+            float myAreaInitialHeight = mMyItemsContainer.getLayoutParams().height;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -445,6 +447,12 @@ public class UiUpdater implements View.OnClickListener {
                             if(commonItemsContainerLp.height + dist > 0 && myItemsContainerLp.height - dist > 0) {
                                 commonItemsContainerLp.height += dist;
                                 myItemsContainerLp.height -= dist;
+                            }
+
+                            if(commonItemsContainerLp.height + myItemsContainerLp.height  < commonAreaInitialHeight + myAreaInitialHeight){
+                                float delta = commonAreaInitialHeight + myAreaInitialHeight - (commonItemsContainerLp.height + myItemsContainerLp.height);
+                                commonItemsContainerLp.height += delta / 2;
+                                myItemsContainerLp.height += delta / 2;
                             }
 
                             mCommonItemsContainer.setLayoutParams(commonItemsContainerLp);
