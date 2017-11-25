@@ -168,7 +168,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             _warpedBillMat = new Mat();
             _processedBillMat = new Mat();
 
-            TestsUtilities.InitBillsLogToLogcat();
+            TestsUtilities.InitBillsLogToLogcat(_sessionId);
             String lastCapturedBillPath = Utilities.GetLastCapturedBillPath(_sessionId);
             if(lastCapturedBillPath == null){
                 throw new Exception();
