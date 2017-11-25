@@ -24,6 +24,7 @@ public class PassCodeResolver {
 
     private DatabaseReference mUserIdsDatabaseReference;
     private FirebaseDatabase mFirebaseDatabase;
+    private String mNow;
     private String mUid;
     private String mBillRelativePath;
 
@@ -35,11 +36,16 @@ public class PassCodeResolver {
 
     private final AtomicBoolean mNewPassCodeRetrieved = new AtomicBoolean(false);
     private final AtomicInteger mTransactionRetries = new AtomicInteger(0);
-    public PassCodeResolver(String uid){
+    public PassCodeResolver(String uid, String appLogRootPath, String nowForFirstSession){
+        mNow = nowForFirstSession;
         mUid = uid;
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mUserIdsDatabaseReference = mFirebaseDatabase.getReference().child("userIds/");
         mUserIdsDatabaseReference.keepSynced(true);
+    }
+
+    public void SetNow(String now){
+        mNow = now;
     }
 
     //Generate unique PassCode and DB path
@@ -50,9 +56,9 @@ public class PassCodeResolver {
                 if (mutableData.hasChild(mUid)) {
                     HashMap<String, Object> value = (HashMap<String, Object>)mutableData.child(mUid).getValue();
 
-                    String now = Utilities.GetTimeStamp();
+                    //String now = Utilities.GetTimeStamp();
 
-                    mBillRelativePath = mUid + "/" + now;
+                    mBillRelativePath = mUid + "/" + mNow;
                     value.put(mRelativePathDbKey, mBillRelativePath);
 
                     newPassCode.set(((Long)(value.get(mPassCodeDbKey))).intValue());

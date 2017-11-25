@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static android.view.View.GONE;
 
@@ -111,11 +112,13 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     private Point _buttomRight = new Point();
     private LinearLayout _testsDebugView;
     private RelativeLayout _emptyRelativeLayoutView;
+    private UUID _sessionId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tests_debug_view);
+        _sessionId = UUID.randomUUID();
         _testsDebugView = (LinearLayout)findViewById(R.id.tests_debug_view);
         _emptyRelativeLayoutView = (RelativeLayout)findViewById(R.id.empty_relative_layout_view);
         _emptyRelativeLayoutView.setVisibility(GONE);
@@ -165,8 +168,8 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             _warpedBillMat = new Mat();
             _processedBillMat = new Mat();
 
-            TestsUtilities.InitBillsLogToLogcat();
-            String lastCapturedBillPath = Utilities.GetLastCapturedBillPath();
+            TestsUtilities.InitBillsLogToLogcat(_sessionId);
+            String lastCapturedBillPath = Utilities.GetLastCapturedBillPath(_sessionId);
             if(lastCapturedBillPath == null){
                 throw new Exception();
             }
@@ -256,7 +259,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     }
 
     private void ValidateOcrBillResult(String imageStatus) throws Exception{
-        List<String> expectedBillTextLines = Utilities.ReadTextFile(_brandAndModelPath + "/" +_restaurantName + "/" + _expectedTxtFileName);
+        List<String> expectedBillTextLines = Utilities.ReadTextFile(_sessionId, _brandAndModelPath + "/" +_restaurantName + "/" + _expectedTxtFileName);
         if(expectedBillTextLines == null){
             throw new Exception();
         }
@@ -530,7 +533,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 try {
                     String processedImagePathToSave = _brandAndModelPath +"/" + _restaurantName + "/"
                             + "bill.png";
-                    Utilities.SaveToPNGFile(_warpedBill, processedImagePathToSave);
+                    Utilities.SaveToPNGFile(_sessionId, _warpedBill, processedImagePathToSave);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -552,7 +555,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     }
 
     public Mat GetWarpedBillMat(String billFullName) throws Exception {
-        byte[] bytes = Utilities.ImageTxtFile2ByteArray(billFullName);
+        byte[] bytes = Utilities.ImageTxtFile2ByteArray(_sessionId, billFullName);
         if(bytes == null){
             throw new Exception();
         }
@@ -562,12 +565,12 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     public Mat GetWarpedBillMat(byte[] bytes) throws IOException {
         Mat mat = null;
         try{
-            mat = Utilities.Bytes2MatAndRotateClockwise90(bytes);
+            mat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, bytes);
 //            Utilities.SaveMatToPNGFile(mat, Constants.CAMERA_CAPTURED_PNG_PHOTO_PATH);
             if(mat == null){
                 throw new Exception();
             }
-            BillAreaDetector areaDetector = new BillAreaDetector();
+            BillAreaDetector areaDetector = new BillAreaDetector(_sessionId);
             Point mTopLeft = new Point();
             Point mTopRight = new Point();
             Point mButtomLeft = new Point();
@@ -576,7 +579,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 Log.d(Tag, "Failed to initialize OpenCV.");
                 return null;
             }
-            if (!areaDetector.GetBillCorners(mat , mTopLeft, mTopRight, mButtomRight, mButtomLeft)) {
+            if (!areaDetector.GetBillCorners(mat, mTopRight, mButtomRight, mButtomLeft, mTopLeft)) {
                 return null;
             }
 
@@ -597,6 +600,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
     private void RunBillsMainFlow(int requestCode) {
         try {
             Intent intent = new Intent(getBaseContext(), CameraActivity.class);
+            intent.putExtra("UUID", _sessionId);
             if (intent.resolveActivity(getPackageManager()) != null) {
                 startActivityForResult(intent, requestCode);
             }
@@ -622,7 +626,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                             // ToDo get user input here
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
                             String currentDateAndTime = simpleDateFormat.format(new Date());
-                            Utilities.SetOutputStream(_brandAndModelPath + _restaurantName + "/preprocessing_results_" + currentDateAndTime +".txt");
+                            Utilities.SetOutputStream(_sessionId, _brandAndModelPath + _restaurantName + "/preprocessing_results_" + currentDateAndTime +".txt");
                             System.out.println(_results);
                     }
                 })
@@ -642,11 +646,11 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             case RESULT_OK:
                 Mat warpedBillMat = null;
                 try {
-                    String lastCapturedBillPath = Utilities.GetLastCapturedBillPath();
+                    String lastCapturedBillPath = Utilities.GetLastCapturedBillPath(_sessionId);
                     if(lastCapturedBillPath == null){
                         throw new Exception();
                     }
-                    warpedBillMat = Utilities.LoadRotatedBillMat(lastCapturedBillPath);
+                    warpedBillMat = Utilities.LoadRotatedBillMat(_sessionId, lastCapturedBillPath);
                     if(warpedBillMat == null){
                         throw new Exception();
                     }
@@ -665,12 +669,12 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 _userCropFinished.setText("Done");
                 _userCropFinished.setOnClickListener(this);
                 _dragRectView = new DragRectView(this);
-                BillAreaDetector areaDetector = new BillAreaDetector();
+                BillAreaDetector areaDetector = new BillAreaDetector(_sessionId);
                 if (!OpenCVLoader.initDebug()) {
                     Log.d("aa", "Failed to initialize OpenCV.");
                 }
 
-                if (!areaDetector.GetBillCorners(_warpedBillMat, _topLeft, _topRight, _buttomRight, _buttomLeft)) {
+                if (!areaDetector.GetBillCorners(_warpedBillMat, _topRight, _buttomRight, _buttomLeft, _topLeft)) {
                     _dragRectView.TopLeft = null;
                     _dragRectView.TopRight = null;
                     _dragRectView.ButtomLeft = null;

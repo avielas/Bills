@@ -38,9 +38,11 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,6 +56,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
 //    private Handler h = new Handler(mContext.getMainLooper());
     private Dialog mProgressDialog;
     private Context mContext;
+    private UUID _sessionId;
 
     //Camera Renderer
     private CameraRenderer mRenderer;
@@ -77,8 +80,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         // Required empty public constructor
     }
 
-    public void Init(Context context, Integer passCode, String relativeDbAndStoragePath){
+    public void Init(UUID sessionId, Integer passCode, String relativeDbAndStoragePath, Context context){
         mContext = context;
+        _sessionId = sessionId;
         mPassCode = passCode;
         mRelativeDbAndStoragePath = relativeDbAndStoragePath;
         mHandler = new Handler();
@@ -196,7 +200,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                     mHandler.post(mShowProgressDialog);
                     if (!OpenCVLoader.initDebug()) {
                         String logMessage = "Failed to initialize OpenCV.";
-                        BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+                        BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
                         mListener.Finish();
                         ErrorReporter(logMessage, logMessage);
                         mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
@@ -206,7 +210,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                     Bitmap processedBillBitmap = null;
                     TemplateMatcher templateMatcher;
                     int numOfItems;
-                    BillAreaDetector areaDetector = new BillAreaDetector();
+                    BillAreaDetector areaDetector = new BillAreaDetector(_sessionId);
                     Point topLeft = new Point();
                     Point topRight = new Point();
                     Point buttomLeft = new Point();
@@ -224,14 +228,15 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                     }
 
                     try {
-                        billMat = Utilities.Bytes2MatAndRotateClockwise90(image);
+//                        byte[ ] imageA = Utilities.ImageTxtFile2ByteArray("/storage/emulated/0/TesseractSample/samsung_GT-I9300/sinta1/ocrBytes.txt");
+                        billMat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, image);
                         if(billMat == null){
                             String logMessage = "failed to convert bytes to mat or rotating the image";
                             String toastMessage = "Failed to convert or rotating image. See logs and try again!";
                             ErrorReporter(logMessage, toastMessage);
                             mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
                         }
-                        if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
+                        if (!areaDetector.GetBillCorners(billMat, topRight, buttomRight, buttomLeft, topLeft)) {
                             String logMessage = "failed to get bills corners";
                             ErrorReporter(logMessage, logMessage);
                             mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
@@ -247,7 +252,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
                         }
 
-                        BillsLog.Log(Tag, LogLevel.Info, "Warped perspective successfully.", LogsDestination.BothUsers);
+                        BillsLog.Log(_sessionId, LogLevel.Info, "Warped perspective successfully.", LogsDestination.BothUsers, Tag);
 
                         processedBillBitmap = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
                         ImageProcessingLib.PreprocessingForTM(billMat);
@@ -256,7 +261,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
                         try {
                             templateMatcher.Match();
-                            BillsLog.Log(Tag, LogLevel.Info, "Template matcher succeeded.", LogsDestination.BothUsers);
+                            BillsLog.Log(_sessionId, LogLevel.Info, "Template matcher succeeded.", LogsDestination.BothUsers, Tag);
                         } catch (Exception e) {
                             String logMessage = "Template matcher has been threw an exception. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
                             String toastMessage = "Template matcher has been threw an exception. See logs and try again!";
@@ -284,7 +289,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             rows.add(new BillRow(price, quantity, index, finalItem));
                             index++;
                         }
-                        BillsLog.Log(Tag, LogLevel.Info, "Parsing finished", LogsDestination.BothUsers);
+                        BillsLog.Log(_sessionId, LogLevel.Info, "Parsing finished", LogsDestination.BothUsers, Tag);
                         mListener.StartSummarizerFragment(rows, image, mPassCode, mRelativeDbAndStoragePath);
                     }catch (Exception e){
                         String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
@@ -307,7 +312,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 } catch (Exception e) {
                     String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
                                                           "\nException Message: " + e.getMessage();
-                    BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+                    BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
                     mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
                 }
                 finally {
@@ -341,7 +346,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     };
 
     private void ErrorReporter(String logMessage, final String toastMessage) {
-        BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+        BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -366,5 +371,4 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         void Finish();
         void StartCameraFragment(final byte[] image, String mRelativeDbAndStoragePath);
     }
-
 }

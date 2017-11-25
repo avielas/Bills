@@ -13,10 +13,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * Created by michaelvalershtein on 09/09/2017.
  */
@@ -24,21 +20,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FirebaseLogger implements ILogger {
 
     private static String Tag = FirebaseLogger.class.getName();
-    private String mNow;
     private String mUserUid;
     private DatabaseReference mMyFirebaseLogReference;
-    private DatabaseReference mFirebaseLogReferenceApp;
-    private long mRowCount;
+    private DatabaseReference mAppFirebaseLogReference;
+    private long mRowCountAppLog;
+    private long mRowCountMyLog;
     private Object mLock = new Object();
 
-    public FirebaseLogger(String userUid, String firebaseDBCurrUserReference, String firebaseDBMainUserReference){
+    public FirebaseLogger(String userUid, String myFirebaseLogPath, String appFirebaseLogPath){
         mUserUid = userUid;
-        mRowCount = 0;
-        mNow = Utilities.GetTimeStamp();
-        mMyFirebaseLogReference  = FirebaseDatabase.getInstance().getReference().child(firebaseDBCurrUserReference + "/Logs/" + mNow);
+        mRowCountAppLog = 0;
+        mRowCountMyLog = 1;
+        mMyFirebaseLogReference  = FirebaseDatabase.getInstance().getReference().child(myFirebaseLogPath);
         mMyFirebaseLogReference.keepSynced(true);
-        mFirebaseLogReferenceApp = FirebaseDatabase.getInstance().getReference().child(firebaseDBMainUserReference + "/Logs");
-        mFirebaseLogReferenceApp.keepSynced(true);
+        mAppFirebaseLogReference = FirebaseDatabase.getInstance().getReference().child(appFirebaseLogPath);
+        mAppFirebaseLogReference.keepSynced(true);
     }
 
     @Override
@@ -61,14 +57,14 @@ public class FirebaseLogger implements ILogger {
         if (logsDestination == LogsDestination.BothUsers ||
             logsDestination == LogsDestination.MainUser) {
             //print to main user(application Logs folder) log
-            mFirebaseLogReferenceApp.runTransaction(new Transaction.Handler() {
+            mAppFirebaseLogReference.runTransaction(new Transaction.Handler() {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData) {
                     synchronized (mLock) {
                         Long childrenCount = mutableData.getChildrenCount();
-                        mRowCount = childrenCount + 1;
+                        mRowCountAppLog = childrenCount + 1;
                         String now = Utilities.GetTimeStamp();
-                        mutableData.child(String.valueOf(mRowCount)).setValue(/*TODO: How to add it on new line ?? +*/
+                        mutableData.child(String.valueOf(mRowCountAppLog)).setValue(/*TODO: How to add it on new line ?? +*/
                                 logLevel.toString() + ": " + tag + ": " + message +
                                 " (" + now + " ," + mUserUid + ")");
                         return Transaction.success(mutableData);
@@ -93,9 +89,9 @@ public class FirebaseLogger implements ILogger {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData) {
                     synchronized (mLock) {
-                        String mNow = Utilities.GetTimeStamp();
-                        mutableData.child(mNow).setValue(/*TODO: How to add it on new line ?? +*/
-                                mRowCount++ + ", " + logLevel.toString() + ": " + tag + ": " + message);
+                        String now = Utilities.GetTimeStamp();
+                        mutableData.child(String.valueOf(mRowCountMyLog++)).setValue(/*TODO: How to add it on new line ?? +*/
+                                logLevel.toString() + ": " + tag + ": " + message + " (" + now + ")");
                         return Transaction.success(mutableData);
                     }
                 }
@@ -110,5 +106,11 @@ public class FirebaseLogger implements ILogger {
                 }
             });
         }
+    }
+
+    @Override
+    public void UninitCommonSession(String myFirebaseLogPath) {
+        mMyFirebaseLogReference  = FirebaseDatabase.getInstance().getReference().child(myFirebaseLogPath);
+        mMyFirebaseLogReference.keepSynced(true);
     }
 }

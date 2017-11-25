@@ -6,7 +6,7 @@ android {
     flavorDimensions "default"
 
     sourceSets.main {
-        jniLibs.srcDir 'jniLibs'
+        jniLibs.srcDir 'libs'
         jni.srcDirs = []
     }
 

@@ -36,6 +36,7 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -47,13 +48,10 @@ import static android.view.View.GONE;
 
 public class UiUpdater implements View.OnClickListener {
     private static String Tag = UiUpdater.class.getName();
-    private final String ImageType = "image/jpg";
     private final String ImageWidth = "width";
     private final String ImageHeight = "height";
     private final String Price = "Price";
-    private final String Quantity = "Quantity";
-
-    private final String RowsDbKey = "Rows";
+    private final UUID mSessionId;
 
     private Context mContext;
 
@@ -67,6 +65,7 @@ public class UiUpdater implements View.OnClickListener {
     private LinearLayout mMyItemsArea;
     private LinearLayout mCommonItemsArea;
 
+    private HashMap<Integer, Double> mLineNumToPriceMapper = new HashMap<>();
     private HashMap<Integer, BillRow> mBillRows;
 
     private HashMap<Integer, Double> mMyLineNumToPriceMapper = new HashMap<>();
@@ -84,6 +83,10 @@ public class UiUpdater implements View.OnClickListener {
 
     private Double mMyTotalSum = 0.0;
     private Double mCommonTotalSum = 0.0;
+
+    public UiUpdater(final UUID sessionId) {
+        mSessionId = sessionId;
+    }
 
     private TextView mCommonTotalSumView;
     private TextView mMyTotalSumView;
@@ -187,7 +190,7 @@ public class UiUpdater implements View.OnClickListener {
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
-        BillsLog.Log(Tag, LogLevel.Info, "StartMainUser succeeded!", LogsDestination.BothUsers);
+        BillsLog.Log(mSessionId, LogLevel.Info, "StartMainUser succeeded!", LogsDestination.BothUsers, Tag);
     }
 
     public void StartSecondaryUser(final Context context,
@@ -251,7 +254,7 @@ public class UiUpdater implements View.OnClickListener {
                                 itemHeight = Integer.parseInt(storageMetadata.getCustomMetadata(ImageHeight));
                                 itemWidth = Integer.parseInt(storageMetadata.getCustomMetadata(ImageWidth));
                             } catch (Exception e) {
-                                BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
+                                BillsLog.Log(mSessionId, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers, Tag);
                                 return;
                             }
                             curLineStorageReference.getBytes(3 * ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
@@ -361,11 +364,11 @@ public class UiUpdater implements View.OnClickListener {
                                     mMyLineNumberToQuantityView.put(rowIndex, myQuantityView);
                                 }
                             });
-                            BillsLog.Log(Tag, LogLevel.Info, "onChildAdded of row " + rowIndex + " succeeded!", LogsDestination.SecondaryUser);
+                            BillsLog.Log(mSessionId, LogLevel.Info, "onChildAdded of row " + rowIndex + " succeeded!", LogsDestination.SecondaryUser, Tag);
                         }
                     });
                 }else{
-                    BillsLog.Log(Tag, LogLevel.Info, "onChildAdded of row " + rowIndex + " failed due to quantity "+ rowCurQuantityInt +"!", LogsDestination.SecondaryUser);
+                    BillsLog.Log(mSessionId, LogLevel.Info, "onChildAdded of row " + rowIndex + " failed due to quantity "+ rowCurQuantityInt +"!", LogsDestination.SecondaryUser, Tag);
                 }
             }
 
@@ -415,7 +418,7 @@ public class UiUpdater implements View.OnClickListener {
 
             }
         });
-        BillsLog.Log(Tag, LogLevel.Info, "StartSecondaryUser succeeded!", LogsDestination.BothUsers);
+        BillsLog.Log(mSessionId, LogLevel.Info, "StartSecondaryUser succeeded!", LogsDestination.BothUsers, Tag);
     }
 
     private void InitScreenSplitter(ImageView screenSpliter) {
@@ -571,6 +574,10 @@ public class UiUpdater implements View.OnClickListener {
 
         myItemRow.addView(myPrice);
 
+        Space space = new Space(mContext);
+        space.setMinimumWidth(180);
+        commonItemRow.addView(space);
+
         mMyLineNumToPriceMapper.put(row.GetRowIndex(), row.GetPrice());
 
         mCommonItemsCount.addAndGet(row.GetQuantity());
@@ -581,18 +588,32 @@ public class UiUpdater implements View.OnClickListener {
         commonQuantityView.setTypeface(fontLight);
         commonItemRow.addView(commonQuantityView);
 
+        space = new Space(mContext);
+        space.setMinimumWidth(180);
+        myItemRow.addView(space);
+
         TextView myQuantityView = new TextView(mContext);
         myQuantityView.setText("0");
         myQuantityView .setTextColor(mContext.getResources().getColor(R.color.summarizer_light));
         myQuantityView.setTypeface(fontLight);
         myItemRow.addView(myQuantityView);
 
+        space = new Space(mContext);
+        space.setMinimumWidth(130);
+        commonItemRow.addView(space);
+
+        space = new Space(mContext);
+        space.setMinimumWidth(130);
+        myItemRow.addView(space);
+
         ImageView commonImageView = new ImageView(mContext);
-        commonImageView.setImageBitmap(row.GetItem());
+        Bitmap commonItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), 500, 60, false);
+        commonImageView.setImageBitmap(commonItemBitmap);
         commonItemRow.addView(commonImageView);
 
         ImageView myImageView = new ImageView(mContext);
-        myImageView.setImageBitmap(row.GetItem());
+        Bitmap myItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), 500, 60, false);
+        myImageView.setImageBitmap(myItemBitmap);
         myItemRow.addView(myImageView);
 
         mCommonItemsArea.addView(commonItemRow);
@@ -630,11 +651,13 @@ public class UiUpdater implements View.OnClickListener {
                         mMyLineNumToLineView.get(index).setVisibility(GONE);
                         mMyLineToQuantityMapper.put(index, 0);
                         mMyLineNumberToQuantityView.get(index).setText("0");
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " removed from My view and added to Common view", LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " removed from My view and added to Common view", LogsDestination.BothUsers, Tag);
                     }else if(mMyLineToQuantityMapper.get(index) > 1){ //Line should be moved to common view
                         mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) - 1);
                         mMyLineNumberToQuantityView.get(index).setText("" + mMyLineToQuantityMapper.get(index));
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " moved from My to Common view (in case of quantity > 1)", LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " removed from My view and added to Common view", LogsDestination.BothUsers, Tag);
+                        mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " moved from My to Common view (in case of quantity > 1)", LogsDestination.BothUsers, Tag);
                     }
 
                     //Line in common view should be updated
@@ -642,12 +665,12 @@ public class UiUpdater implements View.OnClickListener {
                         mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index ) + 1);
                         mCommonLineNumberToQuantityView.get(index).setText(""+mCommonLineToQuantityMapper.get(index));
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + ", in Common view, updated", LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + ", in Common view, updated", LogsDestination.BothUsers, Tag);
                     }else{ //Line in common view shlould be added
                         mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mCommonLineNumberToQuantityView.get(index).setText("1");
                         mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) + 1);
-                        BillsLog.Log(Tag, LogLevel.Info, "Added line " + index + " to Common view", LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Added line " + index + " to Common view", LogsDestination.BothUsers, Tag);
                     }
 
                     mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));
@@ -675,11 +698,11 @@ public class UiUpdater implements View.OnClickListener {
                         mCommonLineNumToLineView.get(index).setVisibility(GONE);
                         mCommonLineToQuantityMapper.put(index, 0);
                         mCommonLineNumberToQuantityView.get(index).setText("0");
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " removed from Common view and added to My view", LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " removed from Common view and added to My view", LogsDestination.BothUsers, Tag);
                     }else{ //Line should be moved to my view
                         mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) - 1);
                         mCommonLineNumberToQuantityView.get(index).setText(""+mCommonLineToQuantityMapper.get(index));
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + " moved from Common to My view (in case of quantity > 1)", LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " moved from Common to My view (in case of quantity > 1)", LogsDestination.BothUsers, Tag);
                     }
 
                     //Line in my view should be updated
@@ -687,12 +710,12 @@ public class UiUpdater implements View.OnClickListener {
                         mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index ) + 1);
                         mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
-                        BillsLog.Log(Tag, LogLevel.Info, "Line " + index + ", in My view, updated", LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + ", in My view, updated", LogsDestination.BothUsers, Tag);
                     }else{ //Line in My view shlould be added
                         mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mMyLineNumberToQuantityView.get(index).setText("1");
                         mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) + 1);
-                        BillsLog.Log(Tag, LogLevel.Info, "Added line " + index + " to My view", LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Added line " + index + " to My view", LogsDestination.BothUsers, Tag);
                     }
 
                     mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));

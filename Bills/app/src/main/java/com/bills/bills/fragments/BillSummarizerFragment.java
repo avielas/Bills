@@ -21,6 +21,7 @@ import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Core.BillsLog;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,6 +35,7 @@ public class BillSummarizerFragment extends Fragment {
     private String mDbPath;
     private String mStoragePath;
     private OnFragmentInteractionListener mListener;
+    private UUID mSessionId;
 
     private boolean mMainUserMode;
     private Context mContext;
@@ -57,22 +59,23 @@ public class BillSummarizerFragment extends Fragment {
         // Required empty public constructor
     }
 
-
     //Secondary user
-    public void Init(Context context, Integer passCode, String dbPath, String storagePath) {
+    public void Init(final UUID sessionId, Context context, Integer passCode, String dbPath, String storagePath) {
         mPassCode = passCode;
         mDbPath = dbPath;
         mStoragePath = storagePath;
         mContext = context;
         mMainUserMode = false;
+        mSessionId = sessionId;
     }
 
-    public void Init(Context context, Integer passCode, String dbPath, List<BillRow> rows) {
+    public void Init(UUID sessionId, Context context, Integer passCode, String dbPath, List<BillRow> rows) {
         mPassCode = passCode;
         mDbPath = dbPath;
         mContext = context;
         mBillRows = rows;
         mMainUserMode = true;
+        mSessionId = sessionId;
     }
 
     @Override
@@ -95,13 +98,13 @@ public class BillSummarizerFragment extends Fragment {
         ScrollView mMyItemsContainer = (ScrollView) getView().findViewById(R.id.my_summary_area);
 
         if(mMainUserMode){
-            mUiUpdater = new UiUpdater();
+            mUiUpdater = new UiUpdater(mSessionId);
             mUiUpdater.StartMainUser(mContext, mDbPath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer, mBillRows, mMyTotalSumView, mCommonTotalSumView,
                     mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
             mPassCodeView.setText(Integer.toString(mPassCode)
             );
         }else {
-            mUiUpdater = new UiUpdater();
+            mUiUpdater = new UiUpdater(mSessionId);
             mUiUpdater.StartSecondaryUser(mContext, mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer,  mMyTotalSumView, mCommonTotalSumView,
                     mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
             mPassCodeView.setText(Integer.toString(mPassCode));
@@ -111,7 +114,6 @@ public class BillSummarizerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     }
 
     @Override
@@ -127,7 +129,7 @@ public class BillSummarizerFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            BillsLog.Log(Tag, LogLevel.Error, context.toString() + " must implement OnFragmentInteractionListener", LogsDestination.BothUsers);
+            BillsLog.Log(mSessionId, LogLevel.Error, context.toString() + " must implement OnFragmentInteractionListener", LogsDestination.BothUsers, Tag);
             throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
         }
     }

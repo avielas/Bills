@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
     Button _button;
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private long storageUserChildrenCount = 0;
     private long currBillParsedRowsCount = 0;
     private boolean isDownloading = false;
+    private UUID _sessionId;
     public enum FileType{ Txt, Jpg};
 
     //Firebase Authentication members
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         _button = (Button) findViewById(R.id.button);
+        _sessionId = UUID.randomUUID();
         AddListenerPrintWordsLocationButton();
 
         //Firebase Authentication initialization
@@ -207,11 +210,11 @@ public class MainActivity extends AppCompatActivity {
             switch (fileType) {
                 case Jpg:
                     Bitmap bitmap = Utilities.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight); //Utilities.ByteArrayToBitmap(bytes);
-                    Utilities.SaveToPNGFile(bitmap, path + "/" + fileName);
+                    Utilities.SaveToPNGFile(_sessionId, bitmap, path + "/" + fileName);
                     bitmap.recycle();
                     break;
                 case Txt:
-                    Utilities.SaveToTXTFile(bytes, path + "/" + fileName);
+                    Utilities.SaveToTXTFile(_sessionId, bytes, path + "/" + fileName);
                     break;
             }
         }

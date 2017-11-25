@@ -19,9 +19,12 @@ import com.bills.billslib.Camera.IOnCameraFinished;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Utilities.Utilities;
 
+import java.util.UUID;
+
 public class CameraActivity extends AppCompatActivity implements IOnCameraFinished, View.OnClickListener{
     private static final int REQUEST_CAMERA_PERMISSION = 101;
     private CameraRenderer _renderer;
+    private UUID _sessionId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +32,9 @@ public class CameraActivity extends AppCompatActivity implements IOnCameraFinish
         setContentView(R.layout.activity_bills_main);
         _renderer = new CameraRenderer(this);
         _renderer.SetOnCameraFinishedListener(this);
+
+        Bundle extras = getIntent().getExtras();
+        _sessionId = (UUID)extras.get("UUID");
 
         //first visit of on create
         if(savedInstanceState == null){
@@ -122,7 +128,7 @@ public class CameraActivity extends AppCompatActivity implements IOnCameraFinish
     public void OnCameraFinished(byte[] bytes){
         String timeStamp = Utilities.GetTimeStamp();
         String fileFullName = Constants.IMAGES_PATH + "/ocrBytes_" + timeStamp + ".txt";
-        Utilities.SaveToTXTFile(bytes, fileFullName);
+        Utilities.SaveToTXTFile(_sessionId, bytes, fileFullName);
         FinishActivity();
     }
 }

@@ -37,6 +37,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
 
 
 /**
@@ -46,7 +47,7 @@ import java.util.TimeZone;
 public class Utilities {
     private static String Tag = Utilities.class.getName();
 
-    public static boolean SaveToPNGFile(Bitmap bmp, String path){
+    public static boolean SaveToPNGFile(final UUID sessionId, Bitmap bmp, String path){
         FileOutputStream out = null;
         try {
             File file = new File(path);
@@ -59,7 +60,7 @@ public class Utilities {
             {
                 Boolean isSuccess = folder.mkdirs();
                 if(!isSuccess) {
-                    BillsLog.Log(Tag, LogLevel.Error, "Can't create directory(ies)", LogsDestination.BothUsers);
+                    BillsLog.Log(sessionId, LogLevel.Error, "Can't create directory(ies)", LogsDestination.BothUsers, Tag);
                     return false;
                 }
             }
@@ -67,11 +68,11 @@ public class Utilities {
 
             // bmp is your Bitmap instance, PNG is a lossless format, the compression factor (100) is ignored
             bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
-            BillsLog.Log(Tag, LogLevel.Info, "SaveToPNGFile success!", LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Info, "SaveToPNGFile success!", LogsDestination.BothUsers, Tag);
             return true;
         } catch (Exception e) {
             String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
             return false;
         } finally {
             try {
@@ -80,13 +81,13 @@ public class Utilities {
                 }
             } catch (IOException e) {
                 String logMessage = "Can't free output stream. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+                BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
                 return false;
             }
         }
     }
 
-    public static boolean SaveToTXTFile(byte[] image, String fileFullName){
+    public static boolean SaveToTXTFile(final UUID sessionId, byte[] image, String fileFullName){
         BufferedOutputStream bos = null;
         try {
             bos = new BufferedOutputStream(new FileOutputStream(fileFullName));
@@ -97,7 +98,7 @@ public class Utilities {
         catch (Exception e)
         {
             String logMessage = "Can't create directory(ies). \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
             return false;
         }finally {
             if (bos != null) {
@@ -105,7 +106,7 @@ public class Utilities {
                     bos.close();
                 } catch (IOException e) {
                     String logMessage = "Can't free allocated buffer. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                    BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+                    BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
                     return false;
                 }
             }
@@ -113,15 +114,15 @@ public class Utilities {
         return true;
     }
 
-    public static boolean SaveMatToPNGFile(Mat mat, String path){
+    public static boolean SaveMatToPNGFile(final UUID sessionId, Mat mat, String path){
         Bitmap bmp = Bitmap.createBitmap(mat.width(), mat.height(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(mat, bmp);
         try {
-            return SaveToPNGFile(bmp, path);
+            return SaveToPNGFile(sessionId, bmp, path);
         }
         catch (Exception e){
             String logMessage = "SaveMatToPNGFile Failed. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
             return false;
         }
         finally {
@@ -129,13 +130,13 @@ public class Utilities {
         }
     }
 
-    public static void SaveBytesToPNGFile(byte[] image, String fileFullName){
+    public static void SaveBytesToPNGFile(final UUID sessionId, byte[] image, String fileFullName){
         Mat mat = null;
         try {
-            mat = Bytes2MatAndRotateClockwise90(image);
-            SaveMatToPNGFile(mat, fileFullName);
+            mat = Bytes2MatAndRotateClockwise90(sessionId, image);
+            SaveMatToPNGFile(sessionId, mat, fileFullName);
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers, Tag);
         }
         finally {
             if(mat != null){
@@ -144,7 +145,7 @@ public class Utilities {
         }
     }
 
-    public static byte[] ImageTxtFile2ByteArray(String path) throws IOException {
+    public static byte[] ImageTxtFile2ByteArray(final UUID sessionId, String path) throws IOException {
         File file = new File(path);
         int size = (int) file.length();
         byte[] image = new byte[size];
@@ -154,7 +155,7 @@ public class Utilities {
             bis.read(image);
         }catch (Exception e){
             String logMessage = "failed to read input stream. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
             return null;
         }finally {
             if(bis != null){
@@ -166,11 +167,13 @@ public class Utilities {
 
     /**
      *
+     *
+     * @param sessionId
      * @param fileFullName txt file full name on device
      * @return list of string with file lines
      * @throws IOException
      */
-    public static List<String> ReadTextFile(String fileFullName) throws IOException {
+    public static List<String> ReadTextFile(final UUID sessionId, String fileFullName) throws IOException {
         BufferedReader bufferedReader = null;
         List<String> lines = new ArrayList<>();
         try{
@@ -183,7 +186,7 @@ public class Utilities {
             }
         }
         catch (Exception e){
-            BillsLog.Log(Tag, LogLevel.Error, "failed to read text file: " + e.getMessage(), LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Error, "failed to read text file: " + e.getMessage(), LogsDestination.BothUsers, Tag);
             return null;
         }
         finally {
@@ -194,12 +197,12 @@ public class Utilities {
         return lines;
     }
 
-    public static Mat LoadRotatedBillMat(String billFullName) throws Exception {
-        byte[] bytes = ImageTxtFile2ByteArray(billFullName);
+    public static Mat LoadRotatedBillMat(final UUID sessionId, String billFullName) throws Exception {
+        byte[] bytes = ImageTxtFile2ByteArray(sessionId, billFullName);
         if(bytes == null){
             throw new Exception();
         }
-        return Bytes2MatAndRotateClockwise90(bytes);
+        return Bytes2MatAndRotateClockwise90(sessionId, bytes);
     }
 
     /**
@@ -207,20 +210,20 @@ public class Utilities {
      * Read TEST_README for more info
      * @throws FileNotFoundException
      */
-    public static void SetOutputStream(String fileName){
+    public static void SetOutputStream(final UUID sessionId, String fileName){
         File file = new File(fileName);
         PrintStream printStreamToFile = null;
         try {
             printStreamToFile = new PrintStream(file);
         } catch (Exception e) {
             String logMessage = "Failed to set output stream. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
             return;
         }
         System.setOut(printStreamToFile);
     }
 
-    public static String GetLastCapturedBillPath() {
+    public static String GetLastCapturedBillPath(final UUID sessionId) {
         File f = new File(Constants.IMAGES_PATH);
         File[] listFiles = null;
 
@@ -234,7 +237,7 @@ public class Utilities {
             });
 
             if(listFiles == null || listFiles.length == 0){
-                BillsLog.Log(Tag, LogLevel.Error, "Failed to get files from directory.", LogsDestination.BothUsers);
+                BillsLog.Log(sessionId, LogLevel.Error, "Failed to get files from directory.", LogsDestination.BothUsers, Tag);
                 return null;
             }
             //sorting to take the last capture which took by Bills app
@@ -252,7 +255,7 @@ public class Utilities {
         }
         catch (Exception e){
             String logMessage = "GetLastCapturedBillPath Failed. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
         }
         return listFiles[0].getPath();
     }
@@ -291,9 +294,9 @@ public class Utilities {
         return sdf.format(date);
     }
 
-    public static Mat Bytes2MatAndRotateClockwise90(byte[] bytes) throws Exception {
+    public static Mat Bytes2MatAndRotateClockwise90(final UUID sessionId, byte[] bytes) throws Exception {
         if (!OpenCVLoader.initDebug()) {
-            BillsLog.Log(Tag, LogLevel.Error, "Failed to initialize OpenCVLoader.", LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Error, "Failed to initialize OpenCVLoader.", LogsDestination.BothUsers, Tag);
             return null;
         }
         Mat bgrMat = null;
@@ -309,7 +312,7 @@ public class Utilities {
         }
         catch (Exception e){
             String logMessage = "Failed to convert bytes to mat. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+            BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
             return null;
         }
         finally{

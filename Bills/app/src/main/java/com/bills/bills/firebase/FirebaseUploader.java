@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,6 +34,7 @@ public class FirebaseUploader {
     private String Tag = FirebaseUploader.class.getName();
     private FirebaseDatabase mFirebseDatabase;
     private DatabaseReference mUsersDatabaseReference;
+    private UUID mSessionId;
 
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mBillsPerUserStorageReference;
@@ -42,12 +44,12 @@ public class FirebaseUploader {
     private final String ImageHeight = "height";
     private final String Price = "Price";
     private final String Quantity = "Quantity";
-    private final String RowsDbKey = "Rows";
 
     private final AtomicInteger mUplodedRowsCounter = new AtomicInteger(0);
     private AtomicBoolean mUploadFailed = new AtomicBoolean(false);
 
-    public FirebaseUploader(String dbPath, String storagePath, Activity activity){
+    public FirebaseUploader(UUID sessionId, String dbPath, String storagePath, Activity activity){
+        mSessionId = sessionId;
         mFirebseDatabase = FirebaseDatabase.getInstance();
         mUsersDatabaseReference = mFirebseDatabase.getReference().child(dbPath);
         mUsersDatabaseReference.keepSynced(true);
@@ -71,11 +73,11 @@ public class FirebaseUploader {
         storageFullBillRef.putBytes(fullBillImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image", LogsDestination.BothUsers);
+                BillsLog.Log(mSessionId, LogLevel.Info, "Uploaded full bill image", LogsDestination.BothUsers, Tag);
                 storageFullBillRef.updateMetadata(ocrBytesMetadata).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image MetaData", LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Uploaded full bill image MetaData", LogsDestination.BothUsers, Tag);
                     }
                 });
             }
@@ -143,11 +145,11 @@ public class FirebaseUploader {
         storageFullBillRef.putBytes(fullBillImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image", LogsDestination.BothUsers);
+                BillsLog.Log(mSessionId, LogLevel.Info, "Uploaded full bill image", LogsDestination.BothUsers, Tag);
                 storageFullBillRef.updateMetadata(ocrBytesMetadata).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        BillsLog.Log(Tag, LogLevel.Info, "Uploaded full bill image MetaData", LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Info, "Uploaded full bill image MetaData", LogsDestination.BothUsers, Tag);
                     }
                 });
             }
@@ -155,7 +157,7 @@ public class FirebaseUploader {
             @Override
             public void onFailure(@NonNull Exception e) {
                 String logMessage = "Failed to upload full bill image. StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                BillsLog.Log(Tag, LogLevel.Error, logMessage , LogsDestination.BothUsers);
+                BillsLog.Log(mSessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
             }
         });
     }
