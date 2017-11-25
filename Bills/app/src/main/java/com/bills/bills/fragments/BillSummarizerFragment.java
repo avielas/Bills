@@ -8,7 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bills.bills.R;
@@ -49,6 +51,8 @@ public class BillSummarizerFragment extends Fragment {
     private TextView mMyItemsCount;
 
     private List<BillRow> mBillRows;
+    private ImageView mScreenSpliter;
+
     public BillSummarizerFragment() {
         // Required empty public constructor
     }
@@ -85,16 +89,21 @@ public class BillSummarizerFragment extends Fragment {
         mCommonItemsCount = (TextView)getView().findViewById(R.id.common_items_count);
         mMyItemsCount = (TextView)getView().findViewById(R.id.my_items_count);
 
+        mScreenSpliter = (ImageView)getView().findViewById(R.id.summary_screen_spliter);
+
+        ScrollView mCommonItemsContainer = (ScrollView) getView().findViewById(R.id.common_summary_area);
+        ScrollView mMyItemsContainer = (ScrollView) getView().findViewById(R.id.my_summary_area);
+
         if(mMainUserMode){
             mUiUpdater = new UiUpdater();
-            mUiUpdater.StartMainUser(mContext, mDbPath, mCommonItemsArea, mMyItemsArea, mBillRows, mMyTotalSumView, mCommonTotalSumView,
-                    mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount);
+            mUiUpdater.StartMainUser(mContext, mDbPath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer, mBillRows, mMyTotalSumView, mCommonTotalSumView,
+                    mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
             mPassCodeView.setText(Integer.toString(mPassCode)
             );
         }else {
             mUiUpdater = new UiUpdater();
-            mUiUpdater.StartSecondaryUser(mContext, mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mMyTotalSumView, mCommonTotalSumView,
-                    mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount);
+            mUiUpdater.StartSecondaryUser(mContext, mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer,  mMyTotalSumView, mCommonTotalSumView,
+                    mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
             mPassCodeView.setText(Integer.toString(mPassCode));
         }
     }

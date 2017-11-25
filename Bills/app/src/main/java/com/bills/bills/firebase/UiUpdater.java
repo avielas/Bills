@@ -6,10 +6,13 @@ import android.graphics.Typeface;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Space;
 import android.widget.TextView;
 
@@ -95,17 +98,25 @@ public class UiUpdater implements View.OnClickListener {
     private TextView mMyItemsCountTV = null;
     private AtomicInteger mMyItemsCount = new AtomicInteger(0);
 
+    private ImageView mScreenSplitter;
+
+    ScrollView mCommonItemsContainer;
+    ScrollView mMyItemsContainer;
+
     public void StartMainUser(Context context,
                               String dbPath,
                               LinearLayout commonItemsArea,
                               LinearLayout myItemsArea,
+                              ScrollView commonItemsContainer,
+                              ScrollView myItemsContainer,
                               List<BillRow> billRows,
                               TextView myTotalSumView,
                               TextView commonTotalSumView,
                               EditText tipPercentView,
                               EditText mTipSumView,
                               TextView commonItemsCount,
-                              TextView myItemsCount){
+                              TextView myItemsCount,
+                              ImageView screenSpliter){
         mContext = context;
         mCommonItemsArea = commonItemsArea;
         mMyItemsArea = myItemsArea;
@@ -118,6 +129,11 @@ public class UiUpdater implements View.OnClickListener {
         mCommonItemsCountTV = commonItemsCount;
         mMyItemsCountTV = myItemsCount;
         mMyItemsArea = myItemsArea;
+
+        mCommonItemsContainer = commonItemsContainer;
+        mMyItemsContainer = myItemsContainer;
+
+        InitScreenSplitter(screenSpliter);
         InitTipFields();
 
         for (BillRow row : billRows) {
@@ -179,12 +195,15 @@ public class UiUpdater implements View.OnClickListener {
                                    String storagePath,
                                    LinearLayout commonItemsArea,
                                    LinearLayout myItemsArea,
+                                   ScrollView commonItemsContainer,
+                                   ScrollView myItemsContainer,
                                    TextView myTotalSumView,
                                    TextView commonTotalSumView,
                                    EditText tipPercentView,
                                    EditText tipSumView,
                                    TextView commonItemsCount,
-                                   TextView myItemsCount){
+                                   TextView myItemsCount,
+                                   ImageView screenSpliter){
         mContext = context;
         mCommonItemsArea = commonItemsArea;
         mMyItemsArea = myItemsArea;
@@ -194,6 +213,11 @@ public class UiUpdater implements View.OnClickListener {
         mMySumTipView = tipSumView;
         mCommonItemsCountTV = commonItemsCount;
         mMyItemsCountTV = myItemsCount;
+
+        mCommonItemsContainer = commonItemsContainer;
+        mMyItemsContainer = myItemsContainer;
+
+        InitScreenSplitter(screenSpliter);
 
         InitTipFields();
 
@@ -392,6 +416,47 @@ public class UiUpdater implements View.OnClickListener {
             }
         });
         BillsLog.Log(Tag, LogLevel.Info, "StartSecondaryUser succeeded!", LogsDestination.BothUsers);
+    }
+
+    private void InitScreenSplitter(ImageView screenSpliter) {
+        mScreenSplitter = screenSpliter;
+        screenSpliter.setOnTouchListener(new View.OnTouchListener() {
+            float lastY = Float.MIN_VALUE;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        lastY = event.getRawY();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        lastY = Float.MIN_VALUE;
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        if (lastY != Float.MIN_VALUE) {
+                            float dist = event.getRawY() - lastY;
+
+                            ViewGroup.LayoutParams commonItemsContainerLp = mCommonItemsContainer.getLayoutParams();
+                            ViewGroup.LayoutParams myItemsContainerLp = mMyItemsContainer.getLayoutParams();
+
+                            if(commonItemsContainerLp.height + dist > 0 && myItemsContainerLp.height - dist > 0) {
+                                commonItemsContainerLp.height += dist;
+                                myItemsContainerLp.height -= dist;
+                            }
+
+                            mCommonItemsContainer.setLayoutParams(commonItemsContainerLp);
+                            mMyItemsContainer.setLayoutParams(myItemsContainerLp);
+
+                        }
+                        lastY = event.getRawY();
+                        break;
+                    default:
+                        break;
+                }
+
+                return true;
+            }
+        });
     }
 
     private void InitTipFields() {
