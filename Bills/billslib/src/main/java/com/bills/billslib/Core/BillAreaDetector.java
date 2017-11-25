@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by michaelvalershtein on 17/04/2017.
@@ -32,8 +33,13 @@ public class BillAreaDetector {
 
     private static int _histSizeNum = 64;
     private static int _bucketSize = 256 / _histSizeNum;
+    private UUID _sessionId;
 
-    public boolean GetBillCorners(final Mat source, Point topLeft, Point topRight, Point buttomRight, Point buttomLeft){
+    public BillAreaDetector(final UUID sessionId) {
+        _sessionId = sessionId;
+    }
+
+    public boolean GetBillCorners(final Mat source, Point topRight, Point buttomRight, Point buttomLeft, Point topLeft){
         Mat newImage = null;
         Mat contrast = null;
         Mat destinationImage = null;
@@ -196,18 +202,18 @@ public class BillAreaDetector {
                         buttomRight.y = points.get(2).y;
                     }
                 }
-                BillsLog.Log(Tag, LogLevel.Info, "Got bill corners: " +
+                BillsLog.Log(_sessionId, LogLevel.Info, "Got bill corners: " +
                     "Top Left: " + topLeft +
                     "; Top Right: " + topRight +
                     "; Buttom Right: " + buttomRight +
-                    "; Buttom Left: " + buttomLeft, LogsDestination.BothUsers);
+                    "; Buttom Left: " + buttomLeft, LogsDestination.BothUsers, Tag);
                 return true;
             }
         }
         catch (Exception e)
         {
             String logMessage = "An exception occurred while trying to find bill corners. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-            BillsLog.Log(Tag, LogLevel.Error, logMessage, LogsDestination.BothUsers);
+            BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
         }
         finally {
             if(newImage != null) {

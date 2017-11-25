@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -41,6 +42,7 @@ public class TestBench {
     private String Tag = this.getClass().getSimpleName();
     private static final int TEST_EMULATOR = 1;
     private static final int TEST_PHONE = 3;
+    private UUID _sessionId;
     Context _context;
     private Double _testsAccuracyPercentSum = 0.0;
     private long _timeMs;
@@ -78,7 +80,8 @@ public class TestBench {
     @Test
     public void begin() throws Exception {
         _context = getInstrumentation().getContext();
-        InitBillsLogToLogcat();
+        _sessionId = UUID.randomUUID();
+        InitBillsLogToLogcat(_sessionId);
         _timeMs = System.currentTimeMillis();
         String sourceDirectory;
         _isRunJustTM = false;
@@ -115,8 +118,8 @@ public class TestBench {
         }
     }
 
-    private void InitBillsLogToLogcat() {
-        BillsLog.Init(new ILogger() {
+    private void InitBillsLogToLogcat(UUID sessionId) {
+        BillsLog.AddNewSession(sessionId, new ILogger() {
             @Override
             public void Log(String tag, LogLevel logLevel, String message, LogsDestination logsDestination) {
                 switch (logLevel){
@@ -132,6 +135,11 @@ public class TestBench {
                     default:
                         Log.v(tag, "this LogLevel enum doesn't exists: " + message);
                 }
+            }
+
+            @Override
+            public void UninitCommonSession(String myFirebaseLogPath) {
+                throw new UnsupportedOperationException(Tag + ": Function UninitCommonSession doesn't implement for this class");
             }
         });
     }
@@ -179,7 +187,7 @@ public class TestBench {
             for(int i=0; i < currBills.size(); i++)
             {
                 mThreadPoolExecutor.execute(
-                        new TestBill(rootBrandModelDirectory, restaurant, currBills.get(i), _isRunJustTM,
+                        new TestBill(_sessionId, rootBrandModelDirectory, restaurant, currBills.get(i), _isRunJustTM,
                                 accuracyPercentQueue, passedResultsQueue, failedResultsQueue));
             }
         }

@@ -19,12 +19,14 @@ import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.Core.MainActivityBase;
 import com.bills.billslib.Utilities.GMailSender;
+import com.bills.billslib.Utilities.Utilities;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class BillsMainActivity extends MainActivityBase implements
         WelcomeScreenFragment.OnFragmentInteractionListener,
@@ -33,13 +35,16 @@ public class BillsMainActivity extends MainActivityBase implements
 
     private String Tag = BillsMainActivity.class.getName();
     private static final int RC_SIGN_IN = 123;
-    private static final int REQUEST_CAMERA_PERMISSION = 101;
 
     private static final String UsersDbKey = "users";
     private static final String BillsPerUserDbKey = "BillsPerUser";
     private final String RowsDbKey = "Rows";
     private String mUid;
     private Context mContext;
+    private String mNowForFirstSession;
+    private static Boolean mFirstEnteringInitCommonSession;
+    private static Boolean mFirstEnteringInitPrivateSessionSecondUser;
+
     //Fragments
     private BillSummarizerFragment mBillSummarizerFragment;
     private WelcomeScreenFragment mWelcomeFragment;
@@ -50,8 +55,13 @@ public class BillsMainActivity extends MainActivityBase implements
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+    //Storage and DB paths
+    private String mMyLogRootPath;
+    private String mAppLogRootPath;
+    private String mAppStoragePath;
 
     private PassCodeResolver mPassCodeResolver;
+    private UUID mSessionId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +86,7 @@ public class BillsMainActivity extends MainActivityBase implements
                 if(user != null){
                     //user is signed in
                     mUid = user.getUid();
-                    mPassCodeResolver = new PassCodeResolver(mUid);
-
+                    InitPrivateSession();
                     Toast.makeText(BillsMainActivity.this, "You are now signed in. Welcome", Toast.LENGTH_LONG).show();
                 }else{
                     //user is signed out
@@ -97,6 +106,66 @@ public class BillsMainActivity extends MainActivityBase implements
         StartWelcomeScreen();
     }
 
+    private void InitPrivateSession() {
+        String now = Utilities.GetTimeStamp();
+
+        //saving for later use as first Session folder at my logs
+        mNowForFirstSession = now;
+        mSessionId = UUID.randomUUID();
+        mMyLogRootPath  = UsersDbKey + "/" + mUid + "/Logs/" + now;
+        mAppLogRootPath = UsersDbKey + "/" + mUid;
+        mAppStoragePath = BillsPerUserDbKey + "/" + mUid + "/" + now;
+        mFirstEnteringInitCommonSession = true;
+        mFirstEnteringInitPrivateSessionSecondUser = true;
+
+        /**** First initialization of private session. Actually we initiate appFirebaseLogPath to  ****/
+        /**** root path because at this stage we shouldn't print anything to application log path. ****/
+        /**** Same for mAppStoragePath.                                                        ****/
+        BillsLog.AddNewSession(mSessionId,
+                               new FirebaseLogger(mUid,
+                                                  mMyLogRootPath,
+                                                  mAppLogRootPath));
+        mPassCodeResolver = null;
+        mPassCodeResolver = new PassCodeResolver(mUid, mAppLogRootPath, mNowForFirstSession);
+    }
+
+    private void InitCommonSession(){
+        String now = mFirstEnteringInitCommonSession ? mNowForFirstSession : Utilities.GetTimeStamp();
+        mSessionId = UUID.randomUUID();
+        mAppStoragePath = BillsPerUserDbKey + "/" + mUid + "/" + now;
+        BillsLog.AddNewSession(mSessionId,
+                               new FirebaseLogger(mUid,
+                                  mMyLogRootPath + "/" + now,
+                                 mAppLogRootPath + "/" + now + "/Logs"));
+        mFirstEnteringInitCommonSession = false;
+        mPassCodeResolver.SetNow(now);
+    }
+
+    /***
+     * The following function erase the previous set of DB/Storage paths. Actually it erase the set of InitPrivateSession
+     * which should be re-defined for second user
+     * @param userUid - current user id
+     * @param relativeDbAndStoragePath - relative DB path of application. used to extract the application directory timestamp
+     */
+    private void InitPrivateSessionSecondUser(String userUid, String relativeDbAndStoragePath){
+        String now = relativeDbAndStoragePath.split("/")[1];
+        mSessionId = UUID.randomUUID();
+        String nowNewSessionChild = mFirstEnteringInitPrivateSessionSecondUser ? now : Utilities.GetTimeStamp();
+        mMyLogRootPath = UsersDbKey + "/" + userUid + "/Logs/" + now;
+        mAppLogRootPath = UsersDbKey + "/" + relativeDbAndStoragePath + "/Logs";
+        mAppStoragePath = BillsPerUserDbKey + "/" + userUid + "/" + nowNewSessionChild;
+        BillsLog.AddNewSession(mSessionId,
+                new FirebaseLogger(userUid,
+                        mMyLogRootPath + "/" + nowNewSessionChild,
+                        mAppLogRootPath));
+        mFirstEnteringInitPrivateSessionSecondUser = false;
+        mPassCodeResolver.SetNow(now);
+    }
+
+    private void UninitCommonSession(){
+        BillsLog.UninitCommonSession(mSessionId, mMyLogRootPath);
+    }
+
     public void onResume(){
         super.onResume();
         mAuth.addAuthStateListener(mAuthListener);
@@ -114,6 +183,7 @@ public class BillsMainActivity extends MainActivityBase implements
     @Override
     public void onBackPressed(){
         if(mCurrentFragment == mCameraFragment || mCurrentFragment == mBillSummarizerFragment){
+            UninitCommonSession();
             StartWelcomeScreen();
         }else{
             super.onBackPressed();
@@ -141,12 +211,12 @@ public class BillsMainActivity extends MainActivityBase implements
 
     @Override
     public void StartCameraFragment() {
+        InitCommonSession();
         mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback() {
             @Override
             public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath, String userUid) {
-
-                mCameraFragment.Init(mContext, passCode, relativeDbAndStoragePath);
-                BillsLog.Init(new FirebaseLogger(userUid, "users/" + userUid, "users/" + relativeDbAndStoragePath));
+                mCameraFragment.Init(mSessionId, passCode, relativeDbAndStoragePath, mContext);
+//                BillsLog.AddNewSession(mSessionId, new FirebaseLogger(userUid, "users/" + userUid, "users/" + relativeDbAndStoragePath));
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
                 // Replace whatever is in the fragment_container view with this fragment,
@@ -169,15 +239,18 @@ public class BillsMainActivity extends MainActivityBase implements
 
     @Override
     public void StartSummarizerFragment(int passCode) {
-
+        //TODO - BUG - see where the second user print logs instead of printing to
+        //TODO - app logs
+//        InitCommonSession();
         mPassCodeResolver.GetRelativePath(passCode, new PassCodeResolver.IPassCodeResolverCallback() {
             @Override
             public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath, String userUid) {
-                mBillSummarizerFragment.Init(BillsMainActivity.this.getApplicationContext(),
+                InitPrivateSessionSecondUser(userUid, relativeDbAndStoragePath);
+                mBillSummarizerFragment.Init(mSessionId,
+                        BillsMainActivity.this.getApplicationContext(),
                         passCode,
                         "users/" + relativeDbAndStoragePath + "/" + RowsDbKey,
                         "BillsPerUser/" + relativeDbAndStoragePath);
-                BillsLog.Init(new FirebaseLogger(userUid, "users/" + userUid, "users/" + relativeDbAndStoragePath));
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container, mBillSummarizerFragment);
                 transaction.addToBackStack(null);
@@ -200,11 +273,10 @@ public class BillsMainActivity extends MainActivityBase implements
     public void StartSummarizerFragment(final List<BillRow> rows, final byte[] image,
                                         final Integer passCode, final String relativeDbAndStoragePath) {
 
-                mBillSummarizerFragment.Init(BillsMainActivity.this.getApplicationContext(), passCode,
-                        "users/" + relativeDbAndStoragePath + "/" + RowsDbKey, rows);
+        String rowDbKeyPath = UsersDbKey + "/" + relativeDbAndStoragePath + "/" + RowsDbKey;
+        mBillSummarizerFragment.Init(mSessionId, BillsMainActivity.this.getApplicationContext(), passCode, rowDbKeyPath, rows);
 
-        FirebaseUploader uploader = new FirebaseUploader(UsersDbKey + "/" + relativeDbAndStoragePath + "/" + RowsDbKey,
-                BillsPerUserDbKey + "/" + relativeDbAndStoragePath, BillsMainActivity.this);
+        FirebaseUploader uploader = new FirebaseUploader(mSessionId, rowDbKeyPath, mAppStoragePath, BillsMainActivity.this);
         uploader.UploadRows(rows, image, new FirebaseUploader.IFirebaseUploaderCallback() {
 
             @Override
@@ -238,8 +310,8 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     private void UploadBillImageToStorage(byte[] image, String relativeDbAndStoragePath) {
-        FirebaseUploader uploader = new FirebaseUploader(UsersDbKey + "/" + relativeDbAndStoragePath,
-                BillsPerUserDbKey + "/" + relativeDbAndStoragePath, BillsMainActivity.this);
+        String relativeDbAndStoragePathToUpload = UsersDbKey + "/" + relativeDbAndStoragePath;
+        FirebaseUploader uploader = new FirebaseUploader(mSessionId, relativeDbAndStoragePathToUpload, mAppStoragePath, BillsMainActivity.this);
         uploader.UploadFullBillImage(image);
     }
 

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Queue;
+import java.util.UUID;
 
 /**
  * Created by avielavr on 5/19/2017.
@@ -41,11 +42,13 @@ public class TestBill extends Thread{
     private Queue<Pair> _accuracyPercentQueue;
     private Queue<Pair> _passedResultsQueue;
     private Queue<Pair> _failedResultsQueue;
+    private UUID _sessionId;
 
-    public TestBill(String rootBrandModelDirectory, String restaurant, String bill,
+    public TestBill(final UUID sessionId, String rootBrandModelDirectory, String restaurant, String bill,
                     Boolean isRunJustTM, Queue<Pair> accuracyPercentQueue,
                     Queue<Pair> passedResultsQueue, Queue<Pair> failedResultsQueue)
     {
+        _sessionId = sessionId;
         _rootBrandModelDirectory = rootBrandModelDirectory;
         _restaurant = restaurant;
         _billFullName = bill;
@@ -65,7 +68,7 @@ public class TestBill extends Thread{
             TesseractOCREngine tesseractOCREngine;
             tesseractOCREngine = new TesseractOCREngine();
             String expectedTxtFileName = _restaurant.toString() + ".txt";
-            BillAreaDetector areaDetector = new BillAreaDetector();
+            BillAreaDetector areaDetector = new BillAreaDetector(_sessionId);
             Point topLeft = new Point();
             Point topRight = new Point();
             Point buttomLeft = new Point();
@@ -82,19 +85,19 @@ public class TestBill extends Thread{
             try {
                 _results.append(System.getProperty("line.separator") + "Test of " + _billFullName + System.getProperty("line.separator"));
                 tesseractOCREngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
-                expectedBillTextLines = Utilities.ReadTextFile(_rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
+                expectedBillTextLines = Utilities.ReadTextFile(_sessionId, _rootBrandModelDirectory + _restaurant + "/" + expectedTxtFileName);
                 if(expectedBillTextLines == null){
                     throw new Exception();
                 }
-                byte[] bytes = Utilities.ImageTxtFile2ByteArray(_billFullName);
+                byte[] bytes = Utilities.ImageTxtFile2ByteArray(_sessionId, _billFullName);
                 if(bytes == null){
                     throw new Exception();
                 }
-                billMat = Utilities.Bytes2MatAndRotateClockwise90(bytes);
+                billMat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, bytes);
                 if(billMat == null){
                     throw new Exception();
                 }
-                if (!areaDetector.GetBillCorners(billMat, topLeft, topRight, buttomRight, buttomLeft)) {
+                if (!areaDetector.GetBillCorners(billMat, topRight, buttomRight, buttomLeft, topLeft)) {
                     throw new Exception();
                 }
 
@@ -102,7 +105,7 @@ public class TestBill extends Thread{
                     billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
                     billMatCopy = billMat.clone();
                 } catch (Exception e) {
-                    BillsLog.Log(Tag, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage(), LogsDestination.BothUsers);
+                    BillsLog.Log(_sessionId, LogLevel.Error, "Failed to warp perspective. Exception: " + e.getMessage(), LogsDestination.BothUsers, Tag);
                     //TODO: decide what to do. Retake the picture? crash the app?
                     throw new Exception();
                 }

@@ -9,4 +9,5 @@ import com.bills.billslib.Contracts.Enums.LogsDestination;
 
 public interface ILogger {
     void Log(String tag, LogLevel logLevel, String message, LogsDestination logsDestination);
+    void UninitCommonSession(String myFirebaseLogPath);
 }

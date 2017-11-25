@@ -20,6 +20,7 @@ import com.bills.billslib.Utilities.Utilities;
 import com.bills.testslib.CameraFragment;
 import com.bills.testslib.TestsUtilities;
 import java.util.List;
+import java.util.UUID;
 
 public class BillCaptureAppMainActivity extends MainActivityBase implements
         com.bills.billslib.Fragments.CameraFragment.OnFragmentInteractionListener,
@@ -30,13 +31,15 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     private Fragment mCurrentFragment;
     private Handler mHandler;
     private String currFileNameToSave;
+    private UUID mSessionId;
     Dialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bill_capture_app_main);
-        TestsUtilities.InitBillsLogToLogcat();
+        mSessionId = UUID.randomUUID();
+        TestsUtilities.InitBillsLogToLogcat(mSessionId);
         mCameraFragment = new CameraFragment();
         mStartScreenFragment = new StartScreenFragment();
         mProgressDialog = new Dialog(this);
@@ -46,7 +49,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
 
     public void StartCameraFragment() {
         try {
-            mCameraFragment.Init(this, 0, "");
+            mCameraFragment.Init(mSessionId, 0, "", this);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, mCameraFragment);
             //addToBackStack because of the back button
@@ -56,7 +59,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
             transaction.commit();
             mCurrentFragment = mCameraFragment;
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
+            BillsLog.Log(mSessionId, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers, Tag);
         }
     }
 
@@ -124,17 +127,17 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
                     try {
                         mHandler.post(mShowProgressDialog);
 //                        Utilities.SaveBytesToPNGFile(image, currFileNameToSave);
-                        Utilities.SaveToTXTFile(image, currFileNameToSave);
+                        Utilities.SaveToTXTFile(mSessionId, image, currFileNameToSave);
                         mHandler.post(mHideProgressDialog);
                     } catch (Exception e) {
-                        BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
+                        BillsLog.Log(mSessionId, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers, Tag);
                     }
                 }
                 };
                 t.start();
             }
         } catch (Exception e) {
-            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
+            BillsLog.Log(mSessionId, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers, Tag);
         }
     }
 
