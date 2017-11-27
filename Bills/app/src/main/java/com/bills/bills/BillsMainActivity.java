@@ -233,8 +233,8 @@ public class BillsMainActivity extends MainActivityBase implements
 
             @Override
             public void OnPassCodeResolveFail(String error) {
-                Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
-                StartCameraFragment();
+                Toast.makeText(BillsMainActivity.this, "משהו השתבש... נא לנסות שוב", Toast.LENGTH_SHORT).show();
+                StartWelcomeFragment();
             }
         });
     }
@@ -264,8 +264,7 @@ public class BillsMainActivity extends MainActivityBase implements
 
             @Override
             public void OnPassCodeResolveFail(String error) {
-                Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
-                StartCameraFragment();
+                Toast.makeText(BillsMainActivity.this, "הקוד שהזנת לא נמצא...", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -306,9 +305,9 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void StartCameraFragment(final byte[] image, String relativeDbAndStoragePath) {
+    public void ReturnToWelcomScreen(final byte[] image, String relativeDbAndStoragePath) {
         UploadBillImageToStorage(image, relativeDbAndStoragePath);
-        StartCameraFragment();
+        StartWelcomeFragment();
     }
 
     private void UploadBillImageToStorage(byte[] image, String relativeDbAndStoragePath) {
