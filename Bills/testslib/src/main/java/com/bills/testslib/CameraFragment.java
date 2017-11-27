@@ -10,6 +10,6 @@ import android.support.v4.app.Fragment;
 public class CameraFragment extends com.bills.billslib.Fragments.CameraFragment {
     @Override
     public void OnCameraFinished(byte[] image) {
-        mListener.StartWelcomeFragment();
+        mListener.ReturnToWelcomeScreen();
     }
 }

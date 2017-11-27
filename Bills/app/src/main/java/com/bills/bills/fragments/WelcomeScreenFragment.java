@@ -8,9 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -84,7 +82,7 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
             @Override
             public void onClick(View v) {
 
-                mListener.StartCameraFragment();
+                mListener.StartCamera();
             }
         });
         view.findViewById(R.id.check_pass_code_button).setOnClickListener(new View.OnClickListener() {
@@ -92,7 +90,7 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
             public void onClick(View v) {
                 try {
                     int passCode = Integer.parseInt(((EditText) getView().findViewById(R.id.pass_code_edittext)).getText().toString());
-                    mListener.StartSummarizerFragment(passCode);
+                    mListener.StartSummarizer(passCode);
                 } catch (Exception ex) {
                     Toast.makeText(getActivity(), "Invalid pass code.Try again", Toast.LENGTH_SHORT).show();
                     return;
@@ -124,9 +122,9 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
          */
     public interface OnFragmentInteractionListener {
 
-        void StartCameraFragment();
+        void StartCamera();
 
-        void StartSummarizerFragment(int passCode);
+        void StartSummarizer(int passCode);
 
 
     }

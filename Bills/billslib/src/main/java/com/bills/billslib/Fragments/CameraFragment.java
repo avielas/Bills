@@ -38,7 +38,6 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +105,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
+
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -203,7 +203,8 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
                         mListener.Finish();
                         ErrorReporter(logMessage, logMessage);
-                        mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
+                        mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
+                        return;
                     }
                     Mat billMat = null;
                     Mat billMatCopy = null;
@@ -221,9 +222,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             Thread.sleep(200);
                         } catch (InterruptedException e) {
                             String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                            String toastMessage = "Exception has been thrown. See logs and try again!";
+                            String toastMessage = "משהו השתבש... נא לנסות שוב";
                             ErrorReporter(logMessage, toastMessage);
-                            mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
+                            mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
+                            return;
                         }
                     }
 
@@ -232,14 +234,17 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         billMat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, image);
                         if(billMat == null){
                             String logMessage = "failed to convert bytes to mat or rotating the image";
-                            String toastMessage = "Failed to convert or rotating image. See logs and try again!";
+                            String toastMessage = "משהו השתבש... נא לנסות שוב";
                             ErrorReporter(logMessage, toastMessage);
-                            mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
+                            mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
+                            return;
                         }
                         if (!areaDetector.GetBillCorners(billMat, topRight, buttomRight, buttomLeft, topLeft)) {
                             String logMessage = "failed to get bills corners";
-                            ErrorReporter(logMessage, logMessage);
-                            mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
+                            String toastMessage = "אזור החשבון לא זוהה. נא לנסות שוב";
+                            ErrorReporter(logMessage, toastMessage);
+                            mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
+                            return;
                         }
 
                         try {
@@ -247,9 +252,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             billMatCopy = billMat.clone();
                         } catch (Exception e) {
                             String logMessage = "Warp perspective has been failed. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                            String toastMessage = "Warp perspective has been failed. See logs and try again!";
+                            String toastMessage = "סיבוב החשבון נכשל... נא לנסות שנית";
                             ErrorReporter(logMessage, toastMessage);
-                            mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
+                            mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
+                            return;
                         }
 
                         BillsLog.Log(_sessionId, LogLevel.Info, "Warped perspective successfully.", LogsDestination.BothUsers, Tag);
@@ -263,10 +269,11 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             templateMatcher.Match();
                             BillsLog.Log(_sessionId, LogLevel.Info, "Template matcher succeeded.", LogsDestination.BothUsers, Tag);
                         } catch (Exception e) {
-                            String logMessage = "Template matcher has been threw an exception. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                            String toastMessage = "Template matcher has been threw an exception. See logs and try again!";
+                            String logMessage = "Template matcher threw an exception. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                            String toastMessage = "החשבונית לא זוהתה... נא לנסות שנית";
                             ErrorReporter(logMessage, toastMessage);
-                            mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
+                            mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
+                            return;
                         }
 
                         ImageProcessingLib.PreprocessingForParsing(billMatCopy);
@@ -290,13 +297,14 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             index++;
                         }
                         BillsLog.Log(_sessionId, LogLevel.Info, "Parsing finished", LogsDestination.BothUsers, Tag);
-                        mListener.StartSummarizerFragment(rows, image, mPassCode, mRelativeDbAndStoragePath);
+                        mListener.ProceedToSummarizerFragment(rows, image, mPassCode, mRelativeDbAndStoragePath);
                     }catch (Exception e){
                         String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
                                                               "\nException Message: " + e.getMessage();
-                        String toastMessage = "Exception has been thrown. See logs and try again!";
+                        String toastMessage = "משהו השתבש... נא לנסות שוב";
                         ErrorReporter(logMessage, toastMessage);
-                        mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
+                        mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
+                        return;
                     }
                     finally {
                         if(null != billMat){
@@ -313,7 +321,8 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                     String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
                                                           "\nException Message: " + e.getMessage();
                     BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
-                    mListener.StartCameraFragment(image, mRelativeDbAndStoragePath);
+                    mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
+                    return;
                 }
                 finally {
                     mHandler.post(mHideProgressDialog);
@@ -366,9 +375,9 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        void StartSummarizerFragment(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath);
-        void StartWelcomeFragment();
+        void ProceedToSummarizerFragment(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath);
+        void ReturnToWelcomeScreen();
         void Finish();
-        void StartCameraFragment(final byte[] image, String mRelativeDbAndStoragePath);
+        void ReturnToWelcomeScreen(final byte[] image, String mRelativeDbAndStoragePath);
     }
 }

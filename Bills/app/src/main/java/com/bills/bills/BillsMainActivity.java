@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.bills.bills.firebase.FirebaseLogger;
@@ -212,7 +211,7 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void StartCameraFragment() {
+    public void StartCamera() {
         InitCommonSession();
         mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback() {
             @Override
@@ -233,14 +232,14 @@ public class BillsMainActivity extends MainActivityBase implements
 
             @Override
             public void OnPassCodeResolveFail(String error) {
-                Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
-                StartCameraFragment();
+                Toast.makeText(BillsMainActivity.this, "משהו השתבש... נא לנסות שוב", Toast.LENGTH_SHORT).show();
+                ReturnToWelcomeScreen();
             }
         });
     }
 
     @Override
-    public void StartSummarizerFragment(int passCode) {
+    public void StartSummarizer(int passCode) {
         //TODO - BUG - see where the second user print logs instead of printing to
         //TODO - app logs
 //        InitCommonSession();
@@ -264,16 +263,15 @@ public class BillsMainActivity extends MainActivityBase implements
 
             @Override
             public void OnPassCodeResolveFail(String error) {
-                Toast.makeText(BillsMainActivity.this, "Failed to get passCode...", Toast.LENGTH_SHORT).show();
-                StartCameraFragment();
+                Toast.makeText(BillsMainActivity.this, "הקוד שהזנת לא נמצא...", Toast.LENGTH_SHORT).show();
             }
         });
 
     }
 
     @Override
-    public void StartSummarizerFragment(final List<BillRow> rows, final byte[] image,
-                                        final Integer passCode, final String relativeDbAndStoragePath) {
+    public void ProceedToSummarizerFragment(final List<BillRow> rows, final byte[] image,
+                                            final Integer passCode, final String relativeDbAndStoragePath) {
 
         String rowDbKeyPath = UsersDbKey + "/" + relativeDbAndStoragePath + "/" + RowsDbKey;
         mBillSummarizerFragment.Init(mSessionId, BillsMainActivity.this.getApplicationContext(), passCode, rowDbKeyPath, rows);
@@ -287,7 +285,7 @@ public class BillsMainActivity extends MainActivityBase implements
             @Override
             public void OnFail(String message) {
                 Log.e(Tag, "Error accured while uploading bill rows. Error: " + message);
-                StartCameraFragment();
+                ReturnToWelcomeScreen();
             }
         });
 
@@ -301,14 +299,15 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void StartWelcomeFragment() {
+    public void ReturnToWelcomeScreen() {
         StartWelcomeScreen();
     }
 
     @Override
-    public void StartCameraFragment(final byte[] image, String relativeDbAndStoragePath) {
+    public void ReturnToWelcomeScreen(final byte[] image, String relativeDbAndStoragePath) {
         UploadBillImageToStorage(image, relativeDbAndStoragePath);
-        StartCameraFragment();
+        mCurrentFragment = mWelcomeFragment;
+        ReturnToWelcomeScreen();
     }
 
     private void UploadBillImageToStorage(byte[] image, String relativeDbAndStoragePath) {
@@ -320,11 +319,6 @@ public class BillsMainActivity extends MainActivityBase implements
     @Override
     public void Finish() {
         finish();
-    }
-
-    @Override
-    public void onFragmentInteraction() {
-
     }
 
     private void SetDefaultUncaughtExceptionHandler() {
