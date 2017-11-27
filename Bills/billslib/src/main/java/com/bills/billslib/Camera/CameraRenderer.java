@@ -145,6 +145,7 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
 
     @Override
     public void run() {
+        _camera.startPreview();
         initGL(_surfaceTexture);
 
         // Setup camera filters map
@@ -284,7 +285,9 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
 
     Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         @Override
-        public void onPictureTaken(byte[] data, Camera camera) {_cameraListener.OnCameraFinished(data);}
+        public void onPictureTaken(byte[] data, Camera camera) {
+            _camera.stopPreview();
+            _cameraListener.OnCameraFinished(data);}
     };
 
     public void SetOnCameraFinishedListener(IOnCameraFinished listener){
