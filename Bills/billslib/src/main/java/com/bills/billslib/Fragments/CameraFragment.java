@@ -38,6 +38,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +106,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
-
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
