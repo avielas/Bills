@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class BillCaptureAppMainActivity extends MainActivityBase implements
-        com.bills.billslib.Fragments.CameraFragment.OnFragmentInteractionListener,
+        CameraFragment.AvielOnFragmentInteractionListener,
         StartScreenFragment.OnFragmentInteractionListener{
     private String Tag = BillCaptureAppMainActivity.class.getName();
     private CameraFragment mCameraFragment;
@@ -31,6 +31,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     private Fragment mCurrentFragment;
     private Handler mHandler;
     private String currFileNameToSave;
+    private String currPngFileNameToSave;
     private UUID mSessionId;
     Dialog mProgressDialog;
 
@@ -68,6 +69,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
         String folderToSaveOn = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL + "/" + restaurantName;
         switch (captureType){
             case SIMPLE:
+                currPngFileNameToSave = folderToSaveOn + "/ocr.png";
                 currFileNameToSave = folderToSaveOn + "/ocrBytes.txt";
                 break;
             case RIGHT:
@@ -103,8 +105,39 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
 
     @Override
     public void ReturnToWelcomeScreen() {
-        ReturnToWelcomeScreen();
+        ReturnToWelcomeScreen(null);
     }
+
+    public void ReturnToWelcomeScreen(final byte[] image) {
+        try {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, mStartScreenFragment);
+            transaction.addToBackStack(null);
+            // Commit the transaction
+            transaction.commit();
+            mCurrentFragment = mStartScreenFragment;
+            mProgressDialog = new Dialog(this);
+            if (null != image) {
+                Thread t = new Thread() {
+                    public void run() {
+                        try {
+                            mHandler.post(mShowProgressDialog);
+//                            Utilities.SaveBytesToPNGFile(mSessionId, image, currPngFileNameToSave);
+                            Utilities.SaveToTXTFile(mSessionId, image, currFileNameToSave);
+                            mHandler.post(mHideProgressDialog);
+                        } catch (Exception e) {
+//                            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+                        }
+                    }
+                };
+                t.start();
+            }
+        } catch (Exception e) {
+//            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
+        }
+    }
+
+
 
     @Override
     public void Finish() {

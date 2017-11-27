@@ -10,6 +10,12 @@ import android.support.v4.app.Fragment;
 public class CameraFragment extends com.bills.billslib.Fragments.CameraFragment {
     @Override
     public void OnCameraFinished(byte[] image) {
-        mListener.ReturnToWelcomeScreen();
+
+        //DANGEROUS CAST!!!!!!
+        ((AvielOnFragmentInteractionListener)mListener).ReturnToWelcomeScreen(image);
+    }
+
+    public interface AvielOnFragmentInteractionListener extends OnFragmentInteractionListener{
+        void ReturnToWelcomeScreen(final byte[] image);
     }
 }
