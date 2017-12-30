@@ -67,6 +67,10 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)     {
 
+
+        /*
+        //Removed for BETA, need to improve performance before reviving
+
         ImageView city1 = (ImageView) getActivity().findViewById(R.id.city_bg_image_view);
 
         Animation animation
@@ -77,7 +81,7 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
 
         Animation animation2 = AnimationUtils.loadAnimation(getContext(), R.anim.move2);
         city2.startAnimation(animation2);
-
+        */
         view.findViewById(R.id.start_camera_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
