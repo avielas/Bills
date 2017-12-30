@@ -8,6 +8,7 @@ import java.security.Provider;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -57,7 +58,7 @@ public class GMailSender extends javax.mail.Authenticator implements IMailSender
     }
 
     @Override
-    public synchronized void SendEmail(String subject, String body, String sender, String recipients) {
+    public synchronized void SendEmail(String subject, String body, String sender, String recipients) throws MessagingException {
         try{
             MimeMessage message = new MimeMessage(session);
             DataHandler handler = new DataHandler(new ByteArrayDataSource(body.getBytes(), "text/plain"));
@@ -70,7 +71,7 @@ public class GMailSender extends javax.mail.Authenticator implements IMailSender
                 message.setRecipient(Message.RecipientType.TO, new InternetAddress(recipients));
             Transport.send(message);
         }catch(Exception e){
-
+            throw e;
         }
     }
 
