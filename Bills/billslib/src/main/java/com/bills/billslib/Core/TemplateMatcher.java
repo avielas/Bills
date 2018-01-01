@@ -110,7 +110,7 @@ public class TemplateMatcher  {
         BillsLog.Log(sessionId, LogLevel.Info, "Finishing Match function! ", LogsDestination.MainUser, Tag);
     }
 
-    public void Parsing(UUID sessionId, int numOfItems) {
+    public void Parsing(UUID sessionId, int numOfItems) throws Exception {
         BillsLog.Log(sessionId, LogLevel.Info, "Entering Parsing function! ", LogsDestination.MainUser, Tag);
         ArrayList<ArrayList<Rect>> locations = locationsItemsArea;
 
@@ -124,6 +124,7 @@ public class TemplateMatcher  {
         } catch (Exception e) {
             String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
             BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
+            throw e;
         }
         BillsLog.Log(sessionId, LogLevel.Info, "Finishing Parsing function! ", LogsDestination.MainUser, Tag);
     }
