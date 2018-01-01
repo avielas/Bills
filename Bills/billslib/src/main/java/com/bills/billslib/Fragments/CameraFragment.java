@@ -266,7 +266,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
 
                         templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
                         try {
-                            templateMatcher.Match();
+                            templateMatcher.Match(_sessionId);
                             BillsLog.Log(_sessionId, LogLevel.Info, "Template matcher succeeded.", LogsDestination.BothUsers, Tag);
                         } catch (Exception e) {
                             String logMessage = "Template matcher threw an exception. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
@@ -283,7 +283,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                         /***** Out Of Memory when running 4 threads parallel                                      *****/
                         Utils.matToBitmap(billMatCopy, processedBillBitmap);
                         templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
-                        templateMatcher.Parsing(numOfItems);
+                        templateMatcher.Parsing(_sessionId, numOfItems);
 
                         List<BillRow> rows = new ArrayList<>();
                         int index = 0;

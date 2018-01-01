@@ -132,7 +132,7 @@ public class TestBill extends Thread{
 
             templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
             try{
-                templateMatcher.Match();
+                templateMatcher.Match(_sessionId);
             }
             catch (Exception e){
                 _results.append(" " + Log.getStackTraceString(e)+ System.getProperty("line.separator"));
@@ -157,7 +157,7 @@ public class TestBill extends Thread{
             /***** Out Of Memory when running 4 threads parallel                                      *****/
             Utils.matToBitmap(billMatCopy, processedBillBitmap);
             templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
-            templateMatcher.Parsing(numOfItems);
+            templateMatcher.Parsing(_sessionId, numOfItems);
             LinkedHashMap ocrResultCroppedBill = GetOcrResults(templateMatcher);
             CompareExpectedToOcrResult(ocrResultCroppedBill, expectedBillTextLines);
             processedBillBitmap.recycle();

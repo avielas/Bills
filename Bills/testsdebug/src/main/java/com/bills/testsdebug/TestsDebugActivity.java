@@ -426,7 +426,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                     _results.setLength(0);
                     int numOfItems = templateMatcher.priceAndQuantity.size();
                     templateMatcher.InitializeBeforeSecondUse(_processedBill);
-                    templateMatcher.Parsing(numOfItems);
+                    templateMatcher.Parsing(_sessionId, numOfItems);
                     //ValidateOcrBillResult("Original", _warpedBill);
                     ValidateOcrBillResult("Processed");
                     OpenUserInputDialog();
@@ -443,7 +443,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             public void onClick(View arg0) {
                 try {
                     templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBill);
-                    templateMatcher.Match();
+                    templateMatcher.Match(_sessionId);
                     _warpedBill.recycle();
                     _processedBill.recycle();
                     _warpedBill = CreateItemsAreaBitmapFromTMRects(templateMatcher.connectionsItemsArea);
