@@ -2,6 +2,7 @@ package com.bills.bills;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -27,6 +28,8 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import javax.mail.MessagingException;
 
 public class BillsMainActivity extends MainActivityBase implements
         WelcomeScreenFragment.OnFragmentInteractionListener,
@@ -104,6 +107,7 @@ public class BillsMainActivity extends MainActivityBase implements
                 }
             }
         };
+
         StartWelcomeScreen();
     }
 
@@ -324,14 +328,29 @@ public class BillsMainActivity extends MainActivityBase implements
     private void SetDefaultUncaughtExceptionHandler() {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
-            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
-                GMailSender sender = new GMailSender("billsplitapplication@gmail.com", "billsplitapplicationisthebest");
-                sender.SendEmail("Uncaught exception has been thrown",
-                        paramThrowable.getMessage().toString(),
-                        "billsplitapplication@gmail.com",
-                        "billsplitapplication@gmail.com");
-                System.exit(2);
-                Log.e("BillsMainActivity", paramThrowable.getMessage());
+            public void uncaughtException(Thread paramThread, final Throwable paramThrowable) {
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try  {
+                            GMailSender sender = new GMailSender("billsplitapplication@gmail.com", "billsplitapplicationisthebest");
+                            try {
+                                String userDetails = Build.MANUFACTURER + "-" + Build.MODEL +
+                                        ". OS is " + Build.VERSION.RELEASE;
+                                sender.SendEmail("Uncaught exception has been thrown from " + userDetails,
+                                        paramThrowable.getMessage().toString(),
+                                        "billsplitapplication@gmail.com",
+                                        "billsplitapplication@gmail.com");
+                            } catch (MessagingException e) {
+                                e.printStackTrace();
+                            }
+                            finish();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                thread.start();
             }
         });
     }

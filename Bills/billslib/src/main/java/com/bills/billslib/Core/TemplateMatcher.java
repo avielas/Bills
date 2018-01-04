@@ -5,6 +5,8 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import com.bills.billslib.Contracts.Constants;
+import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Contracts.Interfaces.IOcrEngine;
 
 import java.util.AbstractMap;
@@ -13,6 +15,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by mvalersh on 12/2/2016.
@@ -20,6 +23,7 @@ import java.util.Map;
 
 
 public class TemplateMatcher  {
+    protected String Tag = TemplateMatcher.class.getName();
     private IOcrEngine mOCREngine;
     private int itemColumn;
     public final ArrayList<Double[]> priceAndQuantity = new ArrayList<>();
@@ -58,8 +62,8 @@ public class TemplateMatcher  {
         priceAndQuantity.clear();
     }
 
-    public void Match() throws Exception {
-        boolean success;
+    public void Match(UUID sessionId) throws Exception {
+        BillsLog.Log(sessionId, LogLevel.Info, "Entering Match function! ", LogsDestination.MainUser, Tag);
         ArrayList<ArrayList<Rect>> locations = GetWordLocations(mFullBillProcessedImage);
         int lineIndex = 0;
         //print all word locations to Log
@@ -77,11 +81,11 @@ public class TemplateMatcher  {
 
         LinkedHashMap<Rect, Rect>[] connections = new LinkedHashMap[locations.size() - 1];
 
-        SetConnections(locations, connections);
+        SetConnections(sessionId, locations, connections);
 
         List<Map.Entry<Integer, Integer>> startEndOfAreasList = new ArrayList<>();
         //find largest "connected" area. Two lines are connected if there are at least two words in "similar" location which are connected
-        IdentifyOptionalConnectedAreas(locations, connections, startEndOfAreasList);
+        IdentifyOptionalConnectedAreas(sessionId, locations, connections, startEndOfAreasList);
 
         int maxSizeIndex = Integer.MIN_VALUE;
         for(int i = 0, maxSize = Integer.MIN_VALUE; i < startEndOfAreasList.size(); i++){
@@ -95,17 +99,19 @@ public class TemplateMatcher  {
         int itemsAreaEnd = startEndOfAreasList.get(maxSizeIndex).getValue();
 
         try {
-            GetPriceAndQuantity(itemsAreaStart, itemsAreaEnd, connections, locations, false);
-            SetItemsLocations(itemsAreaStart, itemsAreaEnd, connections, locations);
-            success = true;
-            CreatingRects(startEndOfAreasList, connections, locations);
+            GetPriceAndQuantity(sessionId, itemsAreaStart, itemsAreaEnd, connections, locations, false);
+            SetItemsLocations(sessionId, itemsAreaStart, itemsAreaEnd, connections, locations);
+            CreatingRects(sessionId, startEndOfAreasList, connections, locations);
         } catch (Exception e) {
-            e.printStackTrace();
+            String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+            BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
             throw e;
         }
+        BillsLog.Log(sessionId, LogLevel.Info, "Finishing Match function! ", LogsDestination.MainUser, Tag);
     }
 
-    public void Parsing(int numOfItems) {
+    public void Parsing(UUID sessionId, int numOfItems) {
+        BillsLog.Log(sessionId, LogLevel.Info, "Entering Parsing function! ", LogsDestination.MainUser, Tag);
         ArrayList<ArrayList<Rect>> locations = locationsItemsArea;
 
         LinkedHashMap<Rect, Rect>[] connections = connectionsItemsArea;
@@ -114,13 +120,16 @@ public class TemplateMatcher  {
         int itemsAreaEnd = numOfItems - 1;
 
         try {
-            GetPriceAndQuantity(itemsAreaStart, itemsAreaEnd, connections, locations, true);
+            GetPriceAndQuantity(sessionId, itemsAreaStart, itemsAreaEnd, connections, locations, true);
         } catch (Exception e) {
-            e.printStackTrace();
+            String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+            BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
         }
+        BillsLog.Log(sessionId, LogLevel.Info, "Finishing Parsing function! ", LogsDestination.MainUser, Tag);
     }
 
-    private void SetConnections(ArrayList<ArrayList<Rect>> locations, LinkedHashMap<Rect, Rect>[] connections) {
+    private void SetConnections(UUID sessionId, ArrayList<ArrayList<Rect>> locations, LinkedHashMap<Rect, Rect>[] connections) {
+        BillsLog.Log(sessionId, LogLevel.Info, "Entering SetConnections", LogsDestination.MainUser, Tag);
         for (int i = 0; i < locations.size()-1; i++){
             connections[i] = new LinkedHashMap<>();
             for(int j = 0; j < locations.get(i).size(); j++){
@@ -136,7 +145,7 @@ public class TemplateMatcher  {
         }
     }
 
-    private void SetItemsLocations(int itemsAreaStart, int itemsAreaEnd, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {
+    private void SetItemsLocations(UUID sessionId, int itemsAreaStart, int itemsAreaEnd, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {
         Rect[][] lineConnectionRects = new Rect[itemsAreaEnd - itemsAreaStart + 1][connections[itemsAreaStart].size()];
         for(int i = itemsAreaStart; i < itemsAreaEnd; i++){
             try {
@@ -209,7 +218,8 @@ public class TemplateMatcher  {
         }
     }
 
-    private void IdentifyOptionalConnectedAreas(ArrayList<ArrayList<Rect>> locations, LinkedHashMap<Rect, Rect>[] connections, List<Map.Entry<Integer, Integer>> startEndOfAreasList) {
+    private void IdentifyOptionalConnectedAreas(UUID sessionId, ArrayList<ArrayList<Rect>> locations, LinkedHashMap<Rect, Rect>[] connections, List<Map.Entry<Integer, Integer>> startEndOfAreasList) {
+        BillsLog.Log(sessionId, LogLevel.Info, "Entering IdentifyOptionalConnectedAreas", LogsDestination.MainUser, Tag);
         LinkedHashMap<Rect, Rect> connection = new LinkedHashMap();
         int connctedRects = 0;
         int start = -1;
@@ -374,20 +384,21 @@ public class TemplateMatcher  {
         return false;
     }
 
-    private void GetPriceAndQuantity(int itemsAreaStart, int itemsAreaEnd,
+    private void GetPriceAndQuantity(UUID sessionId, int itemsAreaStart, int itemsAreaEnd,
                                      LinkedHashMap<Rect, Rect>[] connections,
                                      ArrayList<ArrayList<Rect>> locations, Boolean isParsing) throws Exception {
+        BillsLog.Log(sessionId, LogLevel.Info, "Entering GetPriceAndQuantity", LogsDestination.MainUser, Tag);
         mOCREngine.SetImage(mFullBillProcessedImage);
 
         mOCREngine.SetNumbersOnlyFormat();
 
         double[][] parsedNumbersArray = new double[itemsAreaEnd - itemsAreaStart + 1][connections[itemsAreaStart].size()];
 
-        GetParsedNumbers(itemsAreaStart, itemsAreaEnd, connections, parsedNumbersArray, locations, isParsing);
+        GetParsedNumbers(sessionId, itemsAreaStart, itemsAreaEnd, connections, parsedNumbersArray, locations, isParsing);
 
         int[] parsedNumbersArraySizes = new int[connections[itemsAreaStart].size()];
 
-        GetParsedNumbersSizes(parsedNumbersArray, parsedNumbersArraySizes);
+        GetParsedNumbersSizes(sessionId, parsedNumbersArray, parsedNumbersArraySizes);
 
         int[] sortedParsedNumbersArraySizes = new int[parsedNumbersArraySizes.length];
         System.arraycopy(parsedNumbersArraySizes, 0, sortedParsedNumbersArraySizes, 0, parsedNumbersArraySizes.length);
@@ -418,7 +429,8 @@ public class TemplateMatcher  {
         }
     }
 
-    private void GetParsedNumbersSizes(double[][] parsedNumbersArray, int[] parsedNumbersArraySizes) {
+    private void GetParsedNumbersSizes(UUID sessionId, double[][] parsedNumbersArray, int[] parsedNumbersArraySizes) {
+        BillsLog.Log(sessionId, LogLevel.Info, "Entering GetParsedNumbersSizes", LogsDestination.MainUser, Tag);
         for(int i = 0; i < parsedNumbersArray.length; i++){
             double[] sortedLine = new double[parsedNumbersArray[0].length];
             System.arraycopy(parsedNumbersArray[i], 0, sortedLine, 0, sortedLine.length);
@@ -434,10 +446,11 @@ public class TemplateMatcher  {
         }
     }
 
-    private void GetParsedNumbers(int itemsAreaStart, int itemsAreaEnd,
+    private void GetParsedNumbers(UUID sessionId, int itemsAreaStart, int itemsAreaEnd,
                                   LinkedHashMap<Rect, Rect>[] connections,
                                   double[][] parsedNumbersArray,
                                   ArrayList<ArrayList<Rect>> locations, Boolean isParsing) throws Exception {
+        BillsLog.Log(sessionId, LogLevel.Info, "Entering GetParsedNumbers", LogsDestination.MainUser, Tag);
         int i;
         itemColumn = CalculateIndexOfItemsColumn(itemsAreaStart, itemsAreaEnd, connections, locations);
         for(i = itemsAreaStart; i < itemsAreaEnd; i++) {
@@ -497,7 +510,9 @@ public class TemplateMatcher  {
                 String parsedNumberString = mOCREngine.GetUTF8Text();
                 parsedNumberString = CleaningParsedNumber(parsedNumberString);
                 parsedNumber = Double.parseDouble(parsedNumberString);
-            } catch (Exception ex) {
+            } catch (Exception e) {
+                String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                BillsLog.Log(sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
                 parsedNumbersArray[i - itemsAreaStart][j] = -1;
                 continue;
             }
@@ -634,7 +649,7 @@ public class TemplateMatcher  {
         }
     }
 
-    private void CreatingRects(List<Map.Entry<Integer, Integer>> startEndOfAreasList, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {
+    private void CreatingRects(UUID sessionId, List<Map.Entry<Integer, Integer>> startEndOfAreasList, LinkedHashMap<Rect, Rect>[] connections, ArrayList<ArrayList<Rect>> locations) {
         Log.d(this.getClass().getSimpleName(), "");
         int max = 0, beginIndex = 0, endIndex = 0;
         for (Map.Entry<Integer, Integer> entry : startEndOfAreasList) {
