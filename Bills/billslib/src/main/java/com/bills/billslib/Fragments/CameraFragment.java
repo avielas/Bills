@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.bills.billslib.Contracts.Enums.LogsDestination;
+import com.bills.billslib.CustomViews.DragRectView;
 import com.bills.billslib.R;
 import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Camera.IOnCameraFinished;
@@ -239,13 +240,37 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                             mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
                             return;
                         }
+
+                        DragRectView dragRectView = new DragRectView(getContext());
                         if (!areaDetector.GetBillCorners(billMat, topRight, buttomRight, buttomLeft, topLeft)) {
                             String logMessage = "failed to get bills corners";
-                            String toastMessage = "אזור החשבון לא זוהה. נא לנסות שוב";
+                            String toastMessage = "אזור החשבון לא זוהה, נא לסמן את אזור החשבונית";
                             ErrorReporter(logMessage, toastMessage);
-                            mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
-                            return;
+                        }else{
+                            dragRectView.TopLeft = new android.graphics.Point(((Double)(topLeft.x)).intValue(),
+                                    ((Double)(topLeft.y)).intValue());
+
+                            dragRectView.TopRight = new android.graphics.Point(((Double)(topRight.x)).intValue(),
+                                    ((Double)(topRight.y)).intValue());
+
+                            dragRectView.ButtomRight = new android.graphics.Point(((Double)(buttomRight.x)).intValue(),
+                                    ((Double)(buttomRight.y)).intValue());
+
+                            dragRectView.ButtomLeft = new android.graphics.Point(((Double)(buttomLeft.x)).intValue(),
+                                    ((Double)(buttomLeft.y)).intValue());
                         }
+
+                        final Object o = new Object();
+
+                        Thread dragRectViewWatcher = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                            }
+                        });
+                        dragRectViewWatcher.start();
+
+                        dragRectViewWatcher.join();
 
                         try {
                             billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
