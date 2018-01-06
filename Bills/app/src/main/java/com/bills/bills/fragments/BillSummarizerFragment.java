@@ -129,8 +129,8 @@ public class BillSummarizerFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            BillsLog.Log(mSessionId, LogLevel.Error, context.toString() + " must implement OnFragmentInteractionListener", LogsDestination.BothUsers, Tag);
-            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
+            BillsLog.Log(mSessionId, LogLevel.Error, context.toString() + " must implement OnCameraFragmentInteractionListener", LogsDestination.BothUsers, Tag);
+            throw new RuntimeException(context.toString() + " must implement OnCameraFragmentInteractionListener");
         }
     }
 

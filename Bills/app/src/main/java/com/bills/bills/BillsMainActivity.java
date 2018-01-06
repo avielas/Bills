@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.bills.bills.firebase.FirebaseLogger;
 import com.bills.bills.firebase.FirebaseUploader;
 import com.bills.bills.firebase.PassCodeResolver;
+import com.bills.bills.fragments.BillAnalyzerFragment;
 import com.bills.bills.fragments.BillSummarizerFragment;
 import com.bills.billslib.Fragments.CameraFragment;
 import com.bills.bills.fragments.WelcomeScreenFragment;
@@ -34,7 +35,8 @@ import javax.mail.MessagingException;
 public class BillsMainActivity extends MainActivityBase implements
         WelcomeScreenFragment.OnFragmentInteractionListener,
         BillSummarizerFragment.OnFragmentInteractionListener,
-        CameraFragment.OnFragmentInteractionListener{
+        CameraFragment.OnCameraFragmentInteractionListener,
+        BillAnalyzerFragment.OnBillAnalyzernteractionListener{
 
     private String Tag = BillsMainActivity.class.getName();
     private static final int RC_SIGN_IN = 123;
@@ -52,6 +54,7 @@ public class BillsMainActivity extends MainActivityBase implements
     private BillSummarizerFragment mBillSummarizerFragment;
     private WelcomeScreenFragment mWelcomeFragment;
     private CameraFragment mCameraFragment;
+    private BillAnalyzerFragment mBillAnalyzerFragment;
     private Fragment mCurrentFragment;
 
     //Firebase Authentication members
@@ -66,6 +69,8 @@ public class BillsMainActivity extends MainActivityBase implements
     private PassCodeResolver mPassCodeResolver;
     private UUID mSessionId;
 
+    private Integer mCurPassCode;
+    private String mCurRelativeDbAndStoragePath;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +83,7 @@ public class BillsMainActivity extends MainActivityBase implements
         mBillSummarizerFragment = new BillSummarizerFragment();
         mWelcomeFragment = new WelcomeScreenFragment();
         mCameraFragment = new CameraFragment();
+        mBillAnalyzerFragment = new BillAnalyzerFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, mWelcomeFragment).commit();
         mCurrentFragment = mWelcomeFragment;
 
@@ -187,9 +193,12 @@ public class BillsMainActivity extends MainActivityBase implements
 
     @Override
     public void onBackPressed(){
-        if(mCurrentFragment == mCameraFragment || mCurrentFragment == mBillSummarizerFragment){
+        if(mCurrentFragment == mCameraFragment || mCurrentFragment == mBillSummarizerFragment) {
             UninitCommonSession();
             StartWelcomeScreen();
+        }else if(mCurrentFragment == mBillAnalyzerFragment){
+            UninitCommonSession();
+            StartCamera();
         }else{
             super.onBackPressed();
         }
@@ -220,8 +229,9 @@ public class BillsMainActivity extends MainActivityBase implements
         mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback() {
             @Override
             public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath, String userUid) {
-                mCameraFragment.Init(mSessionId, passCode, relativeDbAndStoragePath, mContext);
-//                BillsLog.AddNewSession(mSessionId, new FirebaseLogger(userUid, "users/" + userUid, "users/" + relativeDbAndStoragePath));
+                mCurPassCode = passCode;
+                mCurRelativeDbAndStoragePath = relativeDbAndStoragePath;
+
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
                 // Replace whatever is in the fragment_container view with this fragment,
@@ -237,9 +247,13 @@ public class BillsMainActivity extends MainActivityBase implements
             @Override
             public void OnPassCodeResolveFail(String error) {
                 Toast.makeText(BillsMainActivity.this, "משהו השתבש... נא לנסות שוב", Toast.LENGTH_SHORT).show();
-                ReturnToWelcomeScreen();
+                onBillAnalyzerFailed();
             }
         });
+    }
+
+    private void StartBillAnalyzer(){
+
     }
 
     @Override
@@ -274,55 +288,22 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void ProceedToSummarizerFragment(final List<BillRow> rows, final byte[] image,
-                                            final Integer passCode, final String relativeDbAndStoragePath) {
+    public void onCameraSuccess(final byte[] image) {
 
-        String rowDbKeyPath = UsersDbKey + "/" + relativeDbAndStoragePath + "/" + RowsDbKey;
-        mBillSummarizerFragment.Init(mSessionId, BillsMainActivity.this.getApplicationContext(), passCode, rowDbKeyPath, rows);
-
-        FirebaseUploader uploader = new FirebaseUploader(mSessionId, rowDbKeyPath, mAppStoragePath, BillsMainActivity.this);
-        uploader.UploadRows(rows, image, new FirebaseUploader.IFirebaseUploaderCallback() {
-
-            @Override
-            public void OnSuccess() {}
-
-            @Override
-            public void OnFail(String message) {
-                Log.e(Tag, "Error accured while uploading bill rows. Error: " + message);
-                ReturnToWelcomeScreen();
-            }
-        });
-
+        mBillAnalyzerFragment.Init(image, mSessionId, mCurPassCode, mCurRelativeDbAndStoragePath, mContext);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, mBillSummarizerFragment);
+        transaction.replace(R.id.fragment_container, mBillAnalyzerFragment);
         transaction.addToBackStack(null);
 
         // Commit the transaction
         transaction.commit();
-        mCurrentFragment = mBillSummarizerFragment;
-    }
-
-    @Override
-    public void ReturnToWelcomeScreen() {
-        StartWelcomeScreen();
-    }
-
-    @Override
-    public void ReturnToWelcomeScreen(final byte[] image, String relativeDbAndStoragePath) {
-        UploadBillImageToStorage(image, relativeDbAndStoragePath);
-        mCurrentFragment = mWelcomeFragment;
-        ReturnToWelcomeScreen();
+        mCurrentFragment = mBillAnalyzerFragment;
     }
 
     private void UploadBillImageToStorage(byte[] image, String relativeDbAndStoragePath) {
         String relativeDbAndStoragePathToUpload = UsersDbKey + "/" + relativeDbAndStoragePath;
         FirebaseUploader uploader = new FirebaseUploader(mSessionId, relativeDbAndStoragePathToUpload, mAppStoragePath, BillsMainActivity.this);
         uploader.UploadFullBillImage(image);
-    }
-
-    @Override
-    public void Finish() {
-        finish();
     }
 
     private void SetDefaultUncaughtExceptionHandler() {
@@ -353,5 +334,45 @@ public class BillsMainActivity extends MainActivityBase implements
                 thread.start();
             }
         });
+    }
+
+    @Override
+    public void onBillAnalyzerSucceed(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath) {
+
+        String rowDbKeyPath = UsersDbKey + "/" + mCurRelativeDbAndStoragePath + "/" + RowsDbKey;
+        mBillSummarizerFragment.Init(mSessionId, BillsMainActivity.this.getApplicationContext(), mCurPassCode, rowDbKeyPath, rows);
+
+        FirebaseUploader uploader = new FirebaseUploader(mSessionId, rowDbKeyPath, mAppStoragePath, BillsMainActivity.this);
+        uploader.UploadRows(rows, image, new FirebaseUploader.IFirebaseUploaderCallback() {
+
+            @Override
+            public void OnSuccess() {}
+
+            @Override
+            public void OnFail(String message) {
+                Log.e(Tag, "Error accured while uploading bill rows. Error: " + message);
+                onBillAnalyzerFailed();
+            }
+        });
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, mBillSummarizerFragment);
+        transaction.addToBackStack(null);
+
+        // Commit the transaction
+        transaction.commit();
+        mCurrentFragment = mBillSummarizerFragment;
+    }
+
+    @Override
+    public void onBillAnalyzerFailed() {
+        StartWelcomeScreen();
+    }
+
+    @Override
+    public void onBillAnalyzerFailed(byte[] image, String relativeDbAndStoragePath) {
+        UploadBillImageToStorage(image, relativeDbAndStoragePath);
+        mCurrentFragment = mWelcomeFragment;
+        onBillAnalyzerFailed();
     }
 }

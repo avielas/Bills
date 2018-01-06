@@ -1,63 +1,28 @@
 package com.bills.billslib.Fragments;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.ColorDrawable;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.bills.billslib.Contracts.Enums.LogsDestination;
-import com.bills.billslib.CustomViews.DragRectView;
 import com.bills.billslib.R;
 import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Camera.IOnCameraFinished;
-import com.bills.billslib.Contracts.BillRow;
-import com.bills.billslib.Contracts.Constants;
-import com.bills.billslib.Contracts.Enums.Language;
-import com.bills.billslib.Contracts.Enums.LogLevel;
-import com.bills.billslib.Contracts.Interfaces.IOcrEngine;
-import com.bills.billslib.Core.BillAreaDetector;
-import com.bills.billslib.Core.BillsLog;
-import com.bills.billslib.Core.ImageProcessingLib;
-import com.bills.billslib.Core.TemplateMatcher;
-import com.bills.billslib.Core.TesseractOCREngine;
-import com.bills.billslib.Utilities.Utilities;
-
-import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link CameraFragment.OnFragmentInteractionListener} interface
+ * {@link OnCameraFragmentInteractionListener} interface
  * to handle interaction events.
  */
 public class CameraFragment extends Fragment implements View.OnClickListener, IOnCameraFinished {
     protected String Tag = CameraFragment.class.getName();
-    private Handler mHandler;
-//    private Handler h = new Handler(mContext.getMainLooper());
-    private Dialog mProgressDialog;
-    private Context mContext;
-    private UUID _sessionId;
 
     //Camera Renderer
     private CameraRenderer mRenderer;
@@ -70,23 +35,10 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     private Button mCameraFlashMode = null;
     private Integer mCurrentFlashMode = R.drawable.camera_screen_flash_auto;
 
-    protected OnFragmentInteractionListener mListener;
-
-    protected IOcrEngine mOcrEngine;
-
-    protected Integer mPassCode;
-    protected String mRelativeDbAndStoragePath;
+    protected OnCameraFragmentInteractionListener mListener;
 
     public CameraFragment() {
         // Required empty public constructor
-    }
-
-    public void Init(UUID sessionId, Integer passCode, String relativeDbAndStoragePath, Context context){
-        mContext = context;
-        _sessionId = sessionId;
-        mPassCode = passCode;
-        mRelativeDbAndStoragePath = relativeDbAndStoragePath;
-        mHandler = new Handler();
     }
 
     @Override
@@ -105,11 +57,11 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof OnCameraFragmentInteractionListener) {
+            mListener = (OnCameraFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnCameraFragmentInteractionListener");
         }
     }
 
@@ -117,10 +69,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
     public void onDetach() {
         super.onDetach();
         mListener = null;
-        mContext = null;
-        mPassCode = null;
-        mRelativeDbAndStoragePath = null;
-        mHandler = null;
     }
 
     @Override
@@ -172,18 +120,6 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
                 mCameraFlashMode.setBackgroundResource(mCurrentFlashMode);
             }
         });
-
-        if(mOcrEngine == null) {
-            mOcrEngine = new TesseractOCREngine();
-            Thread t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mOcrEngine.Init(Constants.TESSERACT_SAMPLE_DIRECTORY, Language.Hebrew);
-                }
-            });
-            t.start();
-        }
-
     }
 
     @Override
@@ -194,199 +130,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
 
     @Override
     public void OnCameraFinished(final byte[] image) {
-        mProgressDialog = new Dialog(mContext);
-        Thread t = new Thread() {
-            public void run() {
-                try {
-                    mHandler.post(mShowProgressDialog);
-                    if (!OpenCVLoader.initDebug()) {
-                        String logMessage = "Failed to initialize OpenCV.";
-                        BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
-                        mListener.Finish();
-                        ErrorReporter(logMessage, logMessage);
-                        mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
-                        return;
-                    }
-                    Mat billMat = null;
-                    Mat billMatCopy = null;
-                    Bitmap processedBillBitmap = null;
-                    TemplateMatcher templateMatcher;
-                    int numOfItems;
-                    BillAreaDetector areaDetector = new BillAreaDetector(_sessionId);
-                    Point topLeft = new Point();
-                    Point topRight = new Point();
-                    Point buttomLeft = new Point();
-                    Point buttomRight = new Point();
-
-                    while (!mOcrEngine.Initialized()) {
-                        try {
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
-                            String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                            String toastMessage = "משהו השתבש... נא לנסות שוב";
-                            ErrorReporter(logMessage, toastMessage);
-                            mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
-                            return;
-                        }
-                    }
-
-                    try {
-//                        byte[ ] imageA = Utilities.ImageTxtFile2ByteArray("/storage/emulated/0/TesseractSample/samsung_GT-I9300/sinta1/ocrBytes.txt");
-                        billMat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, image);
-                        if(billMat == null){
-                            String logMessage = "failed to convert bytes to mat or rotating the image";
-                            String toastMessage = "משהו השתבש... נא לנסות שוב";
-                            ErrorReporter(logMessage, toastMessage);
-                            mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
-                            return;
-                        }
-
-                        DragRectView dragRectView = new DragRectView(getContext());
-                        if (!areaDetector.GetBillCorners(billMat, topRight, buttomRight, buttomLeft, topLeft)) {
-                            String logMessage = "failed to get bills corners";
-                            String toastMessage = "אזור החשבון לא זוהה, נא לסמן את אזור החשבונית";
-                            ErrorReporter(logMessage, toastMessage);
-                        }else{
-                            dragRectView.TopLeft = new android.graphics.Point(((Double)(topLeft.x)).intValue(),
-                                    ((Double)(topLeft.y)).intValue());
-
-                            dragRectView.TopRight = new android.graphics.Point(((Double)(topRight.x)).intValue(),
-                                    ((Double)(topRight.y)).intValue());
-
-                            dragRectView.ButtomRight = new android.graphics.Point(((Double)(buttomRight.x)).intValue(),
-                                    ((Double)(buttomRight.y)).intValue());
-
-                            dragRectView.ButtomLeft = new android.graphics.Point(((Double)(buttomLeft.x)).intValue(),
-                                    ((Double)(buttomLeft.y)).intValue());
-                        }
-
-                        final Object o = new Object();
-
-                        Thread dragRectViewWatcher = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                            }
-                        });
-                        dragRectViewWatcher.start();
-
-                        dragRectViewWatcher.join();
-
-                        try {
-                            billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
-                            billMatCopy = billMat.clone();
-                        } catch (Exception e) {
-                            String logMessage = "Warp perspective has been failed. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                            String toastMessage = "סיבוב החשבון נכשל... נא לנסות שנית";
-                            ErrorReporter(logMessage, toastMessage);
-                            mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
-                            return;
-                        }
-
-                        BillsLog.Log(_sessionId, LogLevel.Info, "Warped perspective successfully.", LogsDestination.BothUsers, Tag);
-
-                        processedBillBitmap = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
-                        ImageProcessingLib.PreprocessingForTM(billMat);
-                        Utils.matToBitmap(billMat, processedBillBitmap);
-
-                        templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
-                        try {
-                            templateMatcher.Match(_sessionId);
-                            BillsLog.Log(_sessionId, LogLevel.Info, "Template matcher succeeded.", LogsDestination.BothUsers, Tag);
-                        } catch (Exception e) {
-                            String logMessage = "Template matcher threw an exception. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                            String toastMessage = "החשבונית לא זוהתה... נא לנסות שנית";
-                            ErrorReporter(logMessage, toastMessage);
-                            mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
-                            return;
-                        }
-
-                        ImageProcessingLib.PreprocessingForParsing(billMatCopy);
-                        numOfItems = templateMatcher.priceAndQuantity.size();
-
-                        /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
-                        /***** Out Of Memory when running 4 threads parallel                                      *****/
-                        Utils.matToBitmap(billMatCopy, processedBillBitmap);
-                        templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
-                        templateMatcher.Parsing(_sessionId, numOfItems);
-
-                        List<BillRow> rows = new ArrayList<>();
-                        int index = 0;
-                        for (Double[] row : templateMatcher.priceAndQuantity) {
-                            Bitmap item = templateMatcher.itemLocationsByteArray.get(index);
-                            Bitmap finalItem = mOcrEngine.ChangeBackgroundColor(item, new Scalar(255, 93, 113));
-                            item.recycle();
-                            Double price = row[0];
-                            Integer quantity = row[1].intValue();
-                            rows.add(new BillRow(price, quantity, index, finalItem));
-                            index++;
-                        }
-                        BillsLog.Log(_sessionId, LogLevel.Info, "Parsing finished", LogsDestination.BothUsers, Tag);
-                        mListener.ProceedToSummarizerFragment(rows, image, mPassCode, mRelativeDbAndStoragePath);
-                    }catch (Exception e){
-                        String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
-                                                              "\nException Message: " + e.getMessage();
-                        String toastMessage = "משהו השתבש... נא לנסות שוב";
-                        ErrorReporter(logMessage, toastMessage);
-                        mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
-                        return;
-                    }
-                    finally {
-                        if(null != billMat){
-                            billMat.release();
-                        }
-                        if(null != processedBillBitmap){
-                            processedBillBitmap.recycle();
-                        }
-                        if(null != billMatCopy){
-                            billMatCopy.release();
-                        }
-                    }
-                } catch (Exception e) {
-                    String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
-                                                          "\nException Message: " + e.getMessage();
-                    BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
-                    mListener.ReturnToWelcomeScreen(image, mRelativeDbAndStoragePath);
-                    return;
-                }
-                finally {
-                    mHandler.post(mHideProgressDialog);
-                }
-            }
-        };
-        t.start();
-    }
-
-    // Create runnable for posting progress dialog
-    final Runnable mHideProgressDialog = new Runnable() {
-        public void run() {
-            if(mProgressDialog != null)
-            {
-                mProgressDialog.cancel();
-                mProgressDialog.hide();
-            }
-        }
-    };
-
-    // Create runnable for posting
-    final Runnable mShowProgressDialog = new Runnable() {
-        public void run() {
-            mProgressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            mProgressDialog.setContentView(R.layout.custom_dialog_progress);
-            mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.show();
-        }
-    };
-
-    private void ErrorReporter(String logMessage, final String toastMessage) {
-        BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(mContext, toastMessage, Toast.LENGTH_SHORT).show();
-            }
-        });
+        mListener.onCameraSuccess(image);
     }
 
     /**
@@ -399,10 +143,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
-        void ProceedToSummarizerFragment(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath);
-        void ReturnToWelcomeScreen();
-        void Finish();
-        void ReturnToWelcomeScreen(final byte[] image, String mRelativeDbAndStoragePath);
-    }
+    public interface OnCameraFragmentInteractionListener {
+        void onCameraSuccess(byte[] image);
+}
 }

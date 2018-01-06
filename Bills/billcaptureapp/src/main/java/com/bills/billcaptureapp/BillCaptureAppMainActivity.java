@@ -45,7 +45,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
         mStartScreenFragment = new StartScreenFragment();
         mProgressDialog = new Dialog(this);
         mHandler = new Handler();
-        ReturnToWelcomeScreen();
+        onFail();
     }
 
     public void StartCameraFragment() {
@@ -90,21 +90,21 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void ProceedToSummarizerFragment(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath) {
-        throw new UnsupportedOperationException(Tag + ": ProceedToSummarizerFragment");
+    public void onSuccess(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath) {
+        throw new UnsupportedOperationException(Tag + ": onCameraSuccess");
     }
 
     @Override
     public void onBackPressed(){
         if(mCurrentFragment == mCameraFragment || mCurrentFragment == mStartScreenFragment){
-            ReturnToWelcomeScreen();
+            onFail();
         }else{
             super.onBackPressed();
         }
     }
 
     @Override
-    public void ReturnToWelcomeScreen() {
+    public void onFail() {
         ReturnToWelcomeScreen(null);
     }
 
@@ -145,7 +145,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void ReturnToWelcomeScreen(final byte[] image, String mRelativeDbAndStoragePath) {
+    public void onFail(final byte[] image, String mRelativeDbAndStoragePath) {
         try {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, mStartScreenFragment);
