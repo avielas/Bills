@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
 
+import com.bills.billslib.Contracts.Interfaces.IOcrEngine;
 import com.bills.billslib.Core.TesseractOCREngine;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
  */
 
 public class TestsHelper {
-    public static Bitmap PrintWordsRects(TesseractOCREngine tesseractOCREngine, Bitmap warpedBill, Bitmap processedBill, String className) {
+    public static Bitmap PrintWordsRects(IOcrEngine tesseractOCREngine, Bitmap warpedBill, Bitmap processedBill, String className) {
         List<Rect> words;
         Bitmap printedBitmap = Bitmap.createBitmap(warpedBill);
         try {

@@ -187,10 +187,10 @@ public class BillAnalyzerFragment extends Fragment {
                         double factorX = 1.0 * mImageWidth / mDragRectViewWidth;
                         double factorY = 1.0 * mImageHeight / mDragRectViewHeight;
 
-                        mDragRectView.TopLeft = getScaledPoint(TopLeft, factorX, factorY);
-                        mDragRectView.TopRight = getScaledPoint(TopRight, factorX, factorY);
-                        mDragRectView.ButtomRight = getScaledPoint(BottomRight, factorX, factorY);
-                        mDragRectView.ButtomLeft = getScaledPoint(BottomLeft, factorX, factorY);
+                        mDragRectView.TopLeft = GetScaledPoint(TopLeft, factorX, factorY);
+                        mDragRectView.TopRight = GetScaledPoint(TopRight, factorX, factorY);
+                        mDragRectView.ButtomRight = GetScaledPoint(BottomRight, factorX, factorY);
+                        mDragRectView.ButtomLeft = GetScaledPoint(BottomLeft, factorX, factorY);
 
                     }
                 });
@@ -245,13 +245,13 @@ public class BillAnalyzerFragment extends Fragment {
     private void analyze(){
         mProgressDialog = new Dialog(mContext);
 
-        double factorX = 1.0 / (mImageWidth / mDragRectViewWidth);
-        double factorY = 1.0 / (mImageHeight / mDragRectViewHeight);
+        double factorX = 1.0*mDragRectViewWidth / mImageWidth;
+        double factorY = 1.0*mDragRectViewHeight / mImageHeight;
 
-        TopLeft = getScaledPoint(mDragRectView.TopLeft, factorX, factorY);
-        TopRight = getScaledPoint(mDragRectView.TopRight, factorX, factorY);
-        BottomRight = getScaledPoint(mDragRectView.ButtomRight, factorX, factorY);
-        BottomLeft = getScaledPoint(mDragRectView.ButtomLeft, factorX, factorY);
+        TopLeft = GetScaledPoint(mDragRectView.TopLeft, factorX, factorY);
+        TopRight = GetScaledPoint(mDragRectView.TopRight, factorX, factorY);
+        BottomRight = GetScaledPoint(mDragRectView.ButtomRight, factorX, factorY);
+        BottomLeft = GetScaledPoint(mDragRectView.ButtomLeft, factorX, factorY);
         try {
             mHandler.post(mShowProgressDialog);
             if (!OpenCVLoader.initDebug()) {
@@ -286,10 +286,10 @@ public class BillAnalyzerFragment extends Fragment {
                 try {
 
                     billMat = ImageProcessingLib.WarpPerspective(billMat,
-                            new org.opencv.core.Point(TopLeft.x, TopLeft.y),
-                            new org.opencv.core.Point(TopRight.x, TopRight.y),
-                            new org.opencv.core.Point(BottomRight.x, BottomRight.y),
-                            new org.opencv.core.Point(BottomLeft.x, BottomLeft.y));
+                            new org.opencv.core.Point(TopLeft.x + 20, TopLeft.y + 20),
+                            new org.opencv.core.Point(TopRight.x - 20, TopRight.y + 20),
+                            new org.opencv.core.Point(BottomRight.x - 20, BottomRight.y - 20),
+                            new org.opencv.core.Point(BottomLeft.x + 20, BottomLeft.y - 20));
 
                     billMatCopy = billMat.clone();
                 } catch (Exception e) {
@@ -419,7 +419,7 @@ public class BillAnalyzerFragment extends Fragment {
         });
     }
 
-    private Point getScaledPoint(Point p, Double factorX, Double factorY){
+    private Point GetScaledPoint(Point p, Double factorX, Double factorY){
         int x = ((Double)(p.x / factorX)).intValue();
         int y = ((Double)(p.y / factorY)).intValue();
         return new Point(x, y);

@@ -15,6 +15,7 @@ import com.bills.bills.firebase.FirebaseUploader;
 import com.bills.bills.firebase.PassCodeResolver;
 import com.bills.bills.fragments.BillAnalyzerFragment;
 import com.bills.bills.fragments.BillSummarizerFragment;
+import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Fragments.CameraFragment;
 import com.bills.bills.fragments.WelcomeScreenFragment;
 import com.bills.billslib.Contracts.BillRow;
@@ -26,6 +27,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -289,7 +291,12 @@ public class BillsMainActivity extends MainActivityBase implements
 
     @Override
     public void onCameraSuccess(final byte[] image) {
-
+//    byte[] imageTemp = new byte[0];
+//        try {
+//            imageTemp = Utilities.ImageTxtFile2ByteArray(mSessionId, Constants.CAPTURE_TXT);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         mBillAnalyzerFragment.Init(image, mSessionId, mCurPassCode, mCurRelativeDbAndStoragePath, mContext);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, mBillAnalyzerFragment);

@@ -43,6 +43,8 @@ public class TestBill extends Thread{
     private Queue<Pair> _passedResultsQueue;
     private Queue<Pair> _failedResultsQueue;
     private UUID _sessionId;
+    private int _dragRectViewWidth = 1440;
+    private int _dragRectViewHeight = 2308;
 
     public TestBill(final UUID sessionId, String rootBrandModelDirectory, String restaurant, String bill,
                     Boolean isRunJustTM, Queue<Pair> accuracyPercentQueue,
@@ -100,6 +102,24 @@ public class TestBill extends Thread{
                 if (!areaDetector.GetBillCorners(billMat, topRight, buttomRight, buttomLeft, topLeft)) {
                     throw new Exception();
                 }
+
+                /*** CONVERSION ***/
+                double factorX = billMat.width() / (1.0*_dragRectViewWidth);
+                double factorY = billMat.height() / (1.0*_dragRectViewHeight);
+
+                topRight = GetScaledPoint(topRight, factorX, factorY);
+                buttomRight = GetScaledPoint(buttomRight, factorX, factorY);
+                buttomLeft = GetScaledPoint(buttomLeft, factorX, factorY);
+                topLeft = GetScaledPoint(topLeft, factorX, factorY);
+
+                double factorXreverse = (1.0*_dragRectViewWidth) / billMat.width();
+                double factorYreverse = (1.0*_dragRectViewHeight) / billMat.height();
+
+                topRight = GetScaledPoint(topRight, factorXreverse, factorYreverse);
+                buttomRight = GetScaledPoint(buttomRight, factorXreverse, factorYreverse);
+                buttomLeft = GetScaledPoint(buttomLeft, factorXreverse, factorYreverse);
+                topLeft = GetScaledPoint(topLeft, factorXreverse, factorYreverse);
+                /*** END CONVERSION ***/
 
                 try {
                     billMat = ImageProcessingLib.WarpPerspective(billMat, topLeft, topRight, buttomRight, buttomLeft);
@@ -267,6 +287,12 @@ public class TestBill extends Thread{
         //calculate the accuracy percent
         accuracyPercent = ((lineNumber*2 - countInvalids)/(lineNumber*2)) * 100;
         return accuracyPercent;
+    }
+
+    private org.opencv.core.Point GetScaledPoint(org.opencv.core.Point p, Double factorX, Double factorY){
+        double x = Math.round((p.x / factorX));
+        double y = Math.round((p.y / factorY));
+        return new org.opencv.core.Point(x, y);
     }
 }
 

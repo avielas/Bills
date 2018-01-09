@@ -8,6 +8,8 @@ import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Contracts.Enums.LogsDestination;
 import com.bills.billslib.Contracts.Interfaces.IOcrEngine;
+import com.bills.billslib.Utilities.TestsHelper;
+import com.bills.billslib.Utilities.Utilities;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -65,6 +67,10 @@ public class TemplateMatcher  {
     public void Match(UUID sessionId) throws Exception {
         BillsLog.Log(sessionId, LogLevel.Info, "Entering Match function! ", LogsDestination.MainUser, Tag);
         ArrayList<ArrayList<Rect>> locations = GetWordLocations(mFullBillProcessedImage);
+
+//        Bitmap billWithPrintedRedLines = TestsHelper.PrintWordsRects(mOCREngine, mFullBillProcessedImage, mFullBillProcessedImage, this.getClass().getSimpleName());
+//        Utilities.SaveToPNGFile(sessionId, billWithPrintedRedLines, Constants.WARPED_RED_LINES_PNG_PHOTO_PATH);
+
         int lineIndex = 0;
         //print all word locations to Log
         for (ArrayList<Rect> line : locations) {
