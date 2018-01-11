@@ -24,13 +24,13 @@ allprojects {
         version_code = 17
         version_name = "0.013"
         //SDK Versions
-        compile_sdk_version = 26
+        compile_sdk_version = 27
         //compileSdkVersion - The compileSdkVersion is the version of the API the app is compiled against.
         //This means you can use Android API features included in that version of the API (as well as all previous versions, obviously).
         //If you try and use API 16 features but set compileSdkVersion to 15, you will get a compilation error. If you set compileSdkVersion
         //to 16 you can still run the app on a API 15 device as long as your app's execution paths do not attempt to invoke any APIs specific to API 16.
         min_sdk_version = 16
-        target_sdk_version = 26
+        target_sdk_version = 27
         //targetSdkVersion - The targetSdkVersion has nothing to do with how your app is compiled or what APIs you can utilize.
         //The targetSdkVersion is supposed to indicate that you have tested your app on (presumably up to and including) the version you specify.
         //This is more like a certification or sign off you are giving the Android OS as a hint to how it should handle your app in terms of OS features.
@@ -40,7 +40,7 @@ allprojects {
         //There are a few other known examples that are influenced by this value and that list is likely to only increase over time.
         //For all practical purposes, most apps are going to want to set targetSdkVersion to the latest released version of the API.
         //This will ensure your app looks as good as possible on the most recent Android devices. If you do not specify the targetSdkVersion, it defaults to the minSdkVersion.
-        build_tools_version = "27.0.0"
+        build_tools_version = "27.0.2"
         //Externals
         tess_two = 'com.rmtheis:tess-two:8.0.0'
         openCVLibrary = ':openCVLibrary330'
@@ -56,10 +56,10 @@ allprojects {
         android_support_test_runner_AndroidJUnitRunner = "android.support.test.runner.AndroidJUnitRunner"
         //Others
         firebase_ui_auth = 'com.firebaseui:firebase-ui-auth:3.0.0'
-        support_appcompat_v7 = 'com.android.support:appcompat-v7:26.1.0'
+        support_appcompat_v7 = 'com.android.support:appcompat-v7:27.0.2'
         google_play_services_auth = 'com.google.android.gms:play-services-auth:11.4.2'
         android_support_constraint_layout = 'com.android.support.constraint:constraint-layout:1.0.2'
-        android_support_card_view = 'com.android.support:cardview-v7:26.1.0'
+        android_support_card_view = 'com.android.support:cardview-v7:27.0.2'
     }
 }
 task clean(type: Delete) {

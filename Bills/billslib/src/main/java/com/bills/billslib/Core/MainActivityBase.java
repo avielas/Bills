@@ -12,6 +12,8 @@ import android.widget.Toast;
 import com.bills.billslib.Contracts.PreparingEnvironmentUtil;
 import com.bills.billslib.Utilities.GMailSender;
 
+import pub.devrel.easypermissions.EasyPermissions;
+
 /**
  * Created by avielavr on 6/10/2017.
  */
@@ -66,4 +68,12 @@ public class MainActivityBase extends AppCompatActivity {
             PreparingEnvironmentUtil.PrepareTesseract(this);
         }
     }
+//
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//
+//        // Forward results to EasyPermissions
+//        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+//    }
 }
