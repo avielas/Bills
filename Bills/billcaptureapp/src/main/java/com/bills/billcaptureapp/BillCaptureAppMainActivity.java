@@ -45,12 +45,11 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
         mStartScreenFragment = new StartScreenFragment();
         mProgressDialog = new Dialog(this);
         mHandler = new Handler();
-        onFail();
+        ReturnToWelcomeScreen(null);
     }
 
     public void StartCameraFragment() {
         try {
-            mCameraFragment.Init(mSessionId, 0, "", this);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, mCameraFragment);
             //addToBackStack because of the back button
@@ -90,22 +89,12 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void onSuccess(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath) {
-        throw new UnsupportedOperationException(Tag + ": onCameraSuccess");
-    }
-
-    @Override
     public void onBackPressed(){
         if(mCurrentFragment == mCameraFragment || mCurrentFragment == mStartScreenFragment){
-            onFail();
+            ReturnToWelcomeScreen(null);
         }else{
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public void onFail() {
-        ReturnToWelcomeScreen(null);
     }
 
     public void ReturnToWelcomeScreen(final byte[] image) {
@@ -133,44 +122,7 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
                 t.start();
             }
         } catch (Exception e) {
-//            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsPathToPrintTo.BothUsers);
-        }
-    }
-
-
-
-    @Override
-    public void Finish() {
-        throw new UnsupportedOperationException(Tag + ": Finish");
-    }
-
-    @Override
-    public void onFail(final byte[] image, String mRelativeDbAndStoragePath) {
-        try {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, mStartScreenFragment);
-            transaction.addToBackStack(null);
-            // Commit the transaction
-            transaction.commit();
-            mCurrentFragment = mStartScreenFragment;
-            mProgressDialog = new Dialog(this);
-            if (null != image) {
-                Thread t = new Thread() {
-                public void run() {
-                    try {
-                        mHandler.post(mShowProgressDialog);
-//                        Utilities.SaveBytesToPNGFile(image, currFileNameToSave);
-                        Utilities.SaveToTXTFile(mSessionId, image, currFileNameToSave);
-                        mHandler.post(mHideProgressDialog);
-                    } catch (Exception e) {
-                        BillsLog.Log(mSessionId, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers, Tag);
-                    }
-                }
-                };
-                t.start();
-            }
-        } catch (Exception e) {
-            BillsLog.Log(mSessionId, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers, Tag);
+//            BillsLog.Log(Tag, LogLevel.Error, "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage(), LogsDestination.BothUsers);
         }
     }
 
@@ -195,4 +147,9 @@ public class BillCaptureAppMainActivity extends MainActivityBase implements
             mProgressDialog.show();
         }
     };
+
+    @Override
+    public void onCameraSuccess(byte[] image) {
+        BillsLog.Log(mSessionId, LogLevel.Error, "StackTrace: " + "\nException Message: ", LogsDestination.BothUsers, Tag);
+    }
 }
