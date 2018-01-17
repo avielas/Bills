@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.bills.bills" >
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.bills.bills">
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -13,7 +14,8 @@
         android:allowBackup="true"
         android:icon="@mipmap/bills_icon"
         android:label="@string/app_name"
-        android:supportsRtl="true"
+        android:supportsRtl="false"
+        tools:replace="android:supportsRtl"
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:largeHeap="true"
         android:screenOrientation="portrait">
