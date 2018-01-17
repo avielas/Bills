@@ -107,18 +107,18 @@ public class TestBill extends Thread{
                 double factorX = billMat.width() / (1.0*_dragRectViewWidth);
                 double factorY = billMat.height() / (1.0*_dragRectViewHeight);
 
-                topRight = GetScaledPoint(topRight, factorX, factorY);
-                buttomRight = GetScaledPoint(buttomRight, factorX, factorY);
-                buttomLeft = GetScaledPoint(buttomLeft, factorX, factorY);
-                topLeft = GetScaledPoint(topLeft, factorX, factorY);
+                topRight = (org.opencv.core.Point)Utilities.GetScaledPoint(topRight, factorX, factorY);
+                buttomRight = (org.opencv.core.Point)Utilities.GetScaledPoint(buttomRight, factorX, factorY);
+                buttomLeft = (org.opencv.core.Point)Utilities.GetScaledPoint(buttomLeft, factorX, factorY);
+                topLeft = (org.opencv.core.Point)Utilities.GetScaledPoint(topLeft, factorX, factorY);
 
                 double factorXreverse = (1.0*_dragRectViewWidth) / billMat.width();
                 double factorYreverse = (1.0*_dragRectViewHeight) / billMat.height();
 
-                topRight = GetScaledPoint(topRight, factorXreverse, factorYreverse);
-                buttomRight = GetScaledPoint(buttomRight, factorXreverse, factorYreverse);
-                buttomLeft = GetScaledPoint(buttomLeft, factorXreverse, factorYreverse);
-                topLeft = GetScaledPoint(topLeft, factorXreverse, factorYreverse);
+                topRight = (org.opencv.core.Point) Utilities.GetScaledPoint(topRight, factorXreverse, factorYreverse);
+                buttomRight = (org.opencv.core.Point) Utilities.GetScaledPoint(buttomRight, factorXreverse, factorYreverse);
+                buttomLeft = (org.opencv.core.Point) Utilities.GetScaledPoint(buttomLeft, factorXreverse, factorYreverse);
+                topLeft = (org.opencv.core.Point) Utilities.GetScaledPoint(topLeft, factorXreverse, factorYreverse);
                 /*** END CONVERSION ***/
 
                 try {
@@ -287,12 +287,6 @@ public class TestBill extends Thread{
         //calculate the accuracy percent
         accuracyPercent = ((lineNumber*2 - countInvalids)/(lineNumber*2)) * 100;
         return accuracyPercent;
-    }
-
-    private org.opencv.core.Point GetScaledPoint(org.opencv.core.Point p, Double factorX, Double factorY){
-        double x = Math.round((p.x / factorX));
-        double y = Math.round((p.y / factorY));
-        return new org.opencv.core.Point(x, y);
     }
 }
 

@@ -187,10 +187,10 @@ public class BillAnalyzerFragment extends Fragment {
                         double factorX = 1.0 * mImageWidth / mDragRectViewWidth;
                         double factorY = 1.0 * mImageHeight / mDragRectViewHeight;
 
-                        mDragRectView.TopLeft = GetScaledPoint(TopLeft, factorX, factorY);
-                        mDragRectView.TopRight = GetScaledPoint(TopRight, factorX, factorY);
-                        mDragRectView.ButtomRight = GetScaledPoint(BottomRight, factorX, factorY);
-                        mDragRectView.ButtomLeft = GetScaledPoint(BottomLeft, factorX, factorY);
+                        mDragRectView.TopLeft = (android.graphics.Point) Utilities.GetScaledPoint(TopLeft, factorX, factorY);
+                        mDragRectView.TopRight = (android.graphics.Point) Utilities.GetScaledPoint(TopRight, factorX, factorY);
+                        mDragRectView.ButtomRight = (android.graphics.Point) Utilities.GetScaledPoint(BottomRight, factorX, factorY);
+                        mDragRectView.ButtomLeft = (android.graphics.Point) Utilities.GetScaledPoint(BottomLeft, factorX, factorY);
 
                     }
                 });
@@ -248,10 +248,10 @@ public class BillAnalyzerFragment extends Fragment {
         double factorX = 1.0*mDragRectViewWidth / mImageWidth;
         double factorY = 1.0*mDragRectViewHeight / mImageHeight;
 
-        TopLeft = GetScaledPoint(mDragRectView.TopLeft, factorX, factorY);
-        TopRight = GetScaledPoint(mDragRectView.TopRight, factorX, factorY);
-        BottomRight = GetScaledPoint(mDragRectView.ButtomRight, factorX, factorY);
-        BottomLeft = GetScaledPoint(mDragRectView.ButtomLeft, factorX, factorY);
+        TopLeft = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.TopLeft, factorX, factorY);
+        TopRight = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.TopRight, factorX, factorY);
+        BottomRight = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.ButtomRight, factorX, factorY);
+        BottomLeft = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.ButtomLeft, factorX, factorY);
         try {
             mHandler.post(mShowProgressDialog);
             if (!OpenCVLoader.initDebug()) {
@@ -417,11 +417,5 @@ public class BillAnalyzerFragment extends Fragment {
                 Toast.makeText(mContext, toastMessage, Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private Point GetScaledPoint(Point p, Double factorX, Double factorY){
-        int x = ((Double)(p.x / factorX)).intValue();
-        int y = ((Double)(p.y / factorY)).intValue();
-        return new Point(x, y);
     }
 }

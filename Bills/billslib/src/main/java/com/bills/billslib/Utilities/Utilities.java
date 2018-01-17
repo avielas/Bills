@@ -14,6 +14,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -333,5 +334,24 @@ public class Utilities {
         Bitmap commonItemBitmap = Bitmap.createBitmap(itemWidth, itemHeight, Bitmap.Config.ARGB_8888);
         commonItemBitmap.copyPixelsFromBuffer(buffer);
         return commonItemBitmap;
+    }
+
+    public static Object GetScaledPoint(Object object, Double factorX, Double factorY){
+        if(object instanceof org.opencv.core.Point) {
+            org.opencv.core.Point opencvPoint = (Point) object;
+            double x = Math.round((opencvPoint.x / factorX));
+            double y = Math.round((opencvPoint.y / factorY));
+            return new org.opencv.core.Point(x, y);
+        }
+        else if(object instanceof android.graphics.Point){
+            android.graphics.Point androidGraphicsPoint = (android.graphics.Point) object;
+            double x = Math.round((androidGraphicsPoint.x / factorX));
+            double y = Math.round((androidGraphicsPoint.y / factorY));
+            return new android.graphics.Point((int)x, (int)y);
+        }
+        else{
+            //BillsLog.Log(_sessionId, LogLevel.Error, "Unknown Object!", LogsDestination.BothUsers, Tag);
+        }
+        return null;
     }
 }
