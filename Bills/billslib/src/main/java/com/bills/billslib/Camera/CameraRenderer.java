@@ -120,7 +120,7 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
         /*** set capture to max resolution ***/
         List<Camera.Size> listSize = p.getSupportedPictureSizes();
         p.setPictureFormat(ImageFormat.JPEG);
-        Camera.Size size = GetMaxCameraResolution(listSize);
+        Camera.Size size = GetCameraSpecificResolution(listSize);
         p.setPictureSize(size.width, size.height);
         /*********** end ***********/
         p.setFlashMode(mFlashMode);
@@ -128,14 +128,45 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
         _renderThread.start();
     }
 
-    private Camera.Size GetMaxCameraResolution(List<Camera.Size> listSize) {
-        Camera.Size maxSize = listSize.get(listSize.size()-1);;
-        for (Camera.Size size : listSize) {
-            maxSize = size.width*size.height > maxSize.width*maxSize.height ? size : maxSize;
+    /***
+     * THe following function implemented to replace GetCameraSpecificResolution due to the following feature:
+     * #115 to define and implement standard resolution to use at all phones
+     * we are looking for (height = 2448, width = 3264) because it a
+     * @param listSize
+     * @return
+     */
+    private Camera.Size GetCameraSpecificResolution(List<Camera.Size> listSize) {
+        Camera.Size size = listSize.get(0);
+        for (Camera.Size currSize : listSize) {
+            size = currSize.width == 3264 && currSize.height == 2448 ? currSize : size;
         }
-        return maxSize;
+        if(size.width != 3264 || size.height != 2448){
+            size = GetNearestResolution(listSize);
+        }
+        return size;
     }
 
+    private Camera.Size GetNearestResolution(List<Camera.Size> listSize) {
+        long product = 3264 * 2448;
+        Camera.Size size = listSize.get(0);
+        long minProductRatio = Math.abs(product - (size.height * size.width));
+        long currProductRatio;
+
+        for (Camera.Size currSize : listSize) {
+            currProductRatio = Math.abs(product - (currSize.height * currSize.width));
+            size = currProductRatio < minProductRatio ? currSize : size;
+        }
+        return size;
+    }
+
+//    private Camera.Size GetMaxCameraResolution(List<Camera.Size> listSize) {
+//        Camera.Size maxSize = listSize.get(listSize.size()-1);;
+//        for (Camera.Size size : listSize) {
+//            maxSize = size.width*size.height > maxSize.width*maxSize.height ? size : maxSize;
+//        } //height = 2448, width = 3264
+//        return maxSize;
+//    }
+    
     public void set_selectedFilter(int id)   {
         _selectedFilterId = id;
         _selectedFilter = _cameraFilterMap.get(id);
