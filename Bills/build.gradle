@@ -21,8 +21,8 @@ allprojects {
     //Constants for buiild.gradle files
     project.ext {
         //Apps Version
-        version_code = 18
-        version_name = "0.014"
+        version_code = 17
+        version_name = "0.013"
         //SDK Versions
         compile_sdk_version = 27
         //compileSdkVersion - The compileSdkVersion is the version of the API the app is compiled against.
