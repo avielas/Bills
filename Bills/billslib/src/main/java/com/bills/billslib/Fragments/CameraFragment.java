@@ -106,24 +106,36 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
         mCameraFlashMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mCurrentFlashMode == R.drawable.camera_screen_flash_auto){
-                    mCurrentFlashMode = R.drawable.camera_screen_flash_on;
-                    mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_ON);
-
-                }else if(mCurrentFlashMode == R.drawable.camera_screen_flash_on){
-                    mCurrentFlashMode = R.drawable.camera_screen_flash_off;
-                    mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-                }else {
-                    mCurrentFlashMode = R.drawable.camera_screen_flash_auto;
-                    mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
-                }
+                UupdateFlashMode();
                 mCameraFlashMode.setBackgroundResource(mCurrentFlashMode);
             }
         });
     }
 
+    private void UupdateFlashMode() {
+        if(mCurrentFlashMode == R.drawable.camera_screen_flash_auto){
+            mCurrentFlashMode = R.drawable.camera_screen_flash_on;
+            mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_ON);
+
+        }else if(mCurrentFlashMode == R.drawable.camera_screen_flash_on){
+            mCurrentFlashMode = R.drawable.camera_screen_flash_off;
+            mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        }else {
+            mCurrentFlashMode = R.drawable.camera_screen_flash_auto;
+            mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+        }
+    }
+
     @Override
     public void onClick(View v) {
+        if(mCurrentFlashMode == R.drawable.camera_screen_flash_auto){
+            mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+        }else if(mCurrentFlashMode == R.drawable.camera_screen_flash_on){
+            mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_ON);
+        }else {
+            mRenderer.SetFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        }
+
         mRenderer.setAutoFocus();
         mRenderer.takePicture();
     }
