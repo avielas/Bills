@@ -30,7 +30,7 @@ public class CameraActivity extends AppCompatActivity implements IOnCameraFinish
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bills_main);
-        _renderer = new CameraRenderer(this);
+        _renderer = new CameraRenderer(_sessionId, this);
         _renderer.SetOnCameraFinishedListener(this);
 
         Bundle extras = getIntent().getExtras();

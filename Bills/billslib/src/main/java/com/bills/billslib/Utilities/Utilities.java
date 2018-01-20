@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -353,5 +354,18 @@ public class Utilities {
             //BillsLog.Log(_sessionId, LogLevel.Error, "Unknown Object!", LogsDestination.BothUsers, Tag);
         }
         return null;
+    }
+
+    /***
+     * Gcd - Greatest Common Divisor
+     * @param a
+     * @param b
+     * @return
+     */
+    public static int Gcd(int a, int b) {
+        BigInteger bi1 = BigInteger.valueOf(a);
+        BigInteger bi2 = BigInteger.valueOf(b);
+        BigInteger gcd = bi1.gcd(bi2);
+        return gcd.intValue();
     }
 }

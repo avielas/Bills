@@ -1,5 +1,6 @@
 package com.bills.billslib.Fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -15,6 +16,8 @@ import com.bills.billslib.R;
 import com.bills.billslib.Camera.CameraRenderer;
 import com.bills.billslib.Camera.IOnCameraFinished;
 
+import java.util.UUID;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -23,6 +26,7 @@ import com.bills.billslib.Camera.IOnCameraFinished;
  */
 public class CameraFragment extends Fragment implements View.OnClickListener, IOnCameraFinished {
     protected String Tag = CameraFragment.class.getName();
+    private UUID mSessionId;
 
     //Camera Renderer
     private CameraRenderer mRenderer;
@@ -39,6 +43,11 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
 
     public CameraFragment() {
         // Required empty public constructor
+    }
+
+    @SuppressLint("ValidFragment")
+    public CameraFragment(UUID sessionId) {
+        mSessionId = sessionId;
     }
 
     @Override
@@ -73,7 +82,7 @@ public class CameraFragment extends Fragment implements View.OnClickListener, IO
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        mRenderer = new CameraRenderer(getContext());
+        mRenderer = new CameraRenderer(mSessionId, getContext());
         mRenderer.SetOnCameraFinishedListener(this);
 
         mCameraPreviewView = (TextureView) getView().findViewById(R.id.camera_textureView);

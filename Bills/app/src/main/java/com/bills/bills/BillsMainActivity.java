@@ -84,7 +84,7 @@ public class BillsMainActivity extends MainActivityBase implements
 
         mBillSummarizerFragment = new BillSummarizerFragment();
         mWelcomeFragment = new WelcomeScreenFragment();
-        mCameraFragment = new CameraFragment();
+        mCameraFragment = new CameraFragment(mSessionId);
         mBillAnalyzerFragment = new BillAnalyzerFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, mWelcomeFragment).commit();
         mCurrentFragment = mWelcomeFragment;

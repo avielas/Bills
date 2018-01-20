@@ -30,11 +30,16 @@ import com.bills.billslib.Camera.filter.BarrelBlurFilter;
 import com.bills.billslib.Camera.filter.CameraFilter;
 import com.bills.billslib.Camera.filter.OriginalFilter;
 import com.bills.billslib.Camera.filter.TiltShiftBlurFilter;
+import com.bills.billslib.Contracts.Enums.LogLevel;
+import com.bills.billslib.Contracts.Enums.LogsDestination;
+import com.bills.billslib.Core.BillsLog;
 import com.bills.billslib.R;
+import com.bills.billslib.Utilities.Utilities;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.UUID;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -44,7 +49,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 
 
 public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListener {
-    private static final String TAG = CameraRenderer.class.getName();
+    private static final String Tag = CameraRenderer.class.getName();
     private static final int EGL_OPENGL_ES2_BIT = 4;
     private static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
     private static final int DRAW_INTERVAL = 1000 / 30;
@@ -58,6 +63,7 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
     private EGLSurface _eglSurface;
     private EGLContext _eglContext;
     private EGL10 _egl10;
+    private UUID _sessionId;
 
     private Camera _camera;
     private SurfaceTexture _cameraSurfaceTexture;
@@ -73,8 +79,9 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
 
     private IOnCameraFinished _cameraListener = null;
 
-    public CameraRenderer(Context context) {
+    public CameraRenderer(UUID sessionId, Context context) {
         _context = context;
+        _sessionId = sessionId;
     }
 
     @Override
@@ -117,45 +124,92 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
         final int backCameraId = backCamera.second;
         _camera = Camera.open(backCameraId);
         Camera.Parameters p = _camera.getParameters();
-        /*** set capture to max resolution ***/
-        List<Camera.Size> listSize = p.getSupportedPictureSizes();
+
+        /*** set capture and preview resolution ***/
         p.setPictureFormat(ImageFormat.JPEG);
-        Camera.Size size = GetCameraSpecificResolution(listSize);
-        p.setPictureSize(size.width, size.height);
+
+        List<Camera.Size> supportedPictureSizes = p.getSupportedPictureSizes();
+        Camera.Size captureSize = GetCaptureSpecificResolution(supportedPictureSizes);
+        p.setPictureSize(captureSize.width, captureSize.height);
+
+        List<Camera.Size> supportedPreviewSizes = p.getSupportedPreviewSizes();
+        Camera.Size previewSize = GetAppropriatePreviewResolution(supportedPreviewSizes, captureSize);
+        p.setPreviewSize(previewSize.width, previewSize.height);
         /*********** end ***********/
+
         p.setFlashMode(mFlashMode);
         _camera.setParameters(p);
         _renderThread.start();
     }
 
+    private Camera.Size GetAppropriatePreviewResolution(List<Camera.Size> sizes, Camera.Size captureSize) {
+        Camera.Size size = sizes.get(0);
+        long product = captureSize.height * captureSize.width;
+        long currProductRatio;
+        long minProductRatio = Long.MAX_VALUE;
+        int captureSizeGcd = Utilities.Gcd(captureSize.height, captureSize.width);
+        int captureSizeRatioNumerator = captureSize.height / captureSizeGcd;
+        int captureSizeRatioDenominator = captureSize.width / captureSizeGcd;
+
+        for (Camera.Size currSize : sizes) {
+            int currSizeGcd = Utilities.Gcd(currSize.height, currSize.width);
+            int currSizeRatioNumerator = currSize.height / currSizeGcd;
+            int currSizeRatioDenominator = currSize.width / currSizeGcd;
+
+            if(currSizeRatioNumerator == captureSizeRatioNumerator &&
+               currSizeRatioDenominator == captureSizeRatioDenominator){
+                currProductRatio = Math.abs(product - (currSize.height * currSize.width));
+                if(currProductRatio < minProductRatio){
+                    size = currSize;
+                    minProductRatio = currProductRatio;
+                }
+            }
+        }
+
+        if(minProductRatio == Long.MAX_VALUE){
+            BillsLog.Log(_sessionId, LogLevel.Warning, "Preview resolution setted to some random (" + sizes.get(0) +
+                            ") value due to failure of GetAppropriatePreviewResolution", LogsDestination.BothUsers, Tag);
+            return sizes.get(0);
+        }
+
+        return size;
+    }
+
     /***
-     * THe following function implemented to replace GetCameraSpecificResolution due to the following feature:
+     * THe following function implemented to replace GetCaptureSpecificResolution due to the following feature:
      * #115 to define and implement standard resolution to use at all phones
      * we are looking for (height = 2448, width = 3264) because it a
-     * @param listSize
+     * @param sizes
      * @return
      */
-    private Camera.Size GetCameraSpecificResolution(List<Camera.Size> listSize) {
-        Camera.Size size = listSize.get(0);
-        for (Camera.Size currSize : listSize) {
+    private Camera.Size GetCaptureSpecificResolution(List<Camera.Size> sizes) {
+        Camera.Size size = sizes.get(0);
+        for (Camera.Size currSize : sizes) {
             size = currSize.width == 3264 && currSize.height == 2448 ? currSize : size;
         }
         if(size.width != 3264 || size.height != 2448){
-            size = GetNearestResolution(listSize);
+            size = GetNearestResolution(sizes);
         }
         return size;
     }
 
-    private Camera.Size GetNearestResolution(List<Camera.Size> listSize) {
+    private Camera.Size GetNearestResolution(List<Camera.Size> sizes) {
         long product = 3264 * 2448;
-        Camera.Size size = listSize.get(0);
-        long minProductRatio = Math.abs(product - (size.height * size.width));
+        Camera.Size size = sizes.get(0);
+        long minProductRatio = Long.MAX_VALUE;
         long currProductRatio;
 
-        for (Camera.Size currSize : listSize) {
+        for (Camera.Size currSize : sizes) {
             currProductRatio = Math.abs(product - (currSize.height * currSize.width));
             size = currProductRatio < minProductRatio ? currSize : size;
         }
+
+        if(minProductRatio == Long.MAX_VALUE){
+            BillsLog.Log(_sessionId, LogLevel.Warning, "Capture resolution setted to some random (" + sizes.get(0) +
+                    ") value due to failure of GetAppropriatePreviewResolution", LogsDestination.BothUsers, Tag);
+            return sizes.get(0);
+        }
+
         return size;
     }
 
@@ -275,7 +329,7 @@ public class CameraRenderer implements Runnable, TextureView.SurfaceTextureListe
         if (_eglSurface == null || _eglSurface == EGL10.EGL_NO_SURFACE) {
             int error = _egl10.eglGetError();
             if (error == EGL10.EGL_BAD_NATIVE_WINDOW) {
-                Log.e(TAG, "eglCreateWindowSurface returned EGL10.EGL_BAD_NATIVE_WINDOW");
+                Log.e(Tag, "eglCreateWindowSurface returned EGL10.EGL_BAD_NATIVE_WINDOW");
                 return;
             }
             throw new RuntimeException("eglCreateWindowSurface failed " +
