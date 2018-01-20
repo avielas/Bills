@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,6 +79,8 @@ public class BillAnalyzerFragment extends Fragment {
     private Point BottomRight;
     private Point BottomLeft;
 
+    private ViewTreeObserver mViewTreeObserver;
+
     public void Init(byte[] image, UUID sessionId, Integer passCode, String relativeDbAndStoragePath, Context context){
         mImage = image;
         mContext = context;
@@ -100,110 +103,130 @@ public class BillAnalyzerFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        mProgressDialog = new Dialog(mContext);
 
-        mDragRectView = getActivity().findViewById(R.id.dragRectView);
-
-        Mat billMat = null;
-
-        try {
-            billMat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, mImage);
-        }catch(Exception ex){
-
-        }
-
-        mImageWidth = billMat.width();
-        mImageHeight = billMat.height();
-
-        Bitmap imageBmp = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(billMat, imageBmp);
-
-        if (android.os.Build.VERSION.SDK_INT >= 16){
-            mDragRectView.setBackground(new BitmapDrawable(getActivity().getResources(), imageBmp));
-        }
-        else{
-            mDragRectView.setBackgroundDrawable(new BitmapDrawable(imageBmp));
-        }
-
-        if(mHandler == null){
-            mHandler = new Handler();
-        }
-
-        Button doneButton = getActivity().findViewById(R.id.dragRectFragmentDone);
-        doneButton.setOnClickListener(new View.OnClickListener() {
+        final Thread t = new Thread(new Runnable() {
             @Override
-            public void onClick(View v) {
-                analyze();
-            }
-        });
+            public void run() {
+                mDragRectView = getActivity().findViewById(R.id.dragRectView);
+                mViewTreeObserver = mDragRectView.getViewTreeObserver();
+                if (mViewTreeObserver.isAlive()) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
 
-        try {
-            if (billMat == null) {
-                String logMessage = "failed to convert bytes to mat or rotating the image";
-                String toastMessage = "משהו השתבש... נא לנסות שוב";
-                ReportError(logMessage, toastMessage);
-                mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
-                return;
-            }
+                            mViewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                                @Override
+                                public void onGlobalLayout() {
+                                    mDragRectView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-            BillAreaDetector areaDetector = new BillAreaDetector(_sessionId);
-            org.opencv.core.Point topLeft = new org.opencv.core.Point();
-            org.opencv.core.Point topRight = new org.opencv.core.Point();
-            org.opencv.core.Point buttomLeft = new org.opencv.core.Point();
-            org.opencv.core.Point buttomRight = new org.opencv.core.Point();
+                                    mDragRectViewWidth = mDragRectView.getWidth();
+                                    mDragRectViewHeight = mDragRectView.getHeight();
 
-            if (!areaDetector.GetBillCorners(billMat, topRight, buttomRight, buttomLeft, topLeft)) {
-                String logMessage = "failed to get bills corners";
-                String toastMessage = "אזור החשבון לא זוהה, נא לסמן את אזור החשבונית";
-                ReportError(logMessage, toastMessage);
-                TopLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() / 3);
-                TopRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() / 3);
-                BottomRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() * 2 / 3);
-                BottomLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() * 2 / 3);
+                                    double factorX = 1.0 * mImageWidth / mDragRectViewWidth;
+                                    double factorY = 1.0 * mImageHeight / mDragRectViewHeight;
 
-            } else {
-                TopLeft = new android.graphics.Point(((Double) (topLeft.x)).intValue(),
-                        ((Double) (topLeft.y)).intValue());
+                                    mDragRectView.TopLeft = (android.graphics.Point) Utilities.GetScaledPoint(TopLeft, factorX, factorY);
+                                    mDragRectView.TopRight = (android.graphics.Point) Utilities.GetScaledPoint(TopRight, factorX, factorY);
+                                    mDragRectView.ButtomRight = (android.graphics.Point) Utilities.GetScaledPoint(BottomRight, factorX, factorY);
+                                    mDragRectView.ButtomLeft = (android.graphics.Point) Utilities.GetScaledPoint(BottomLeft, factorX, factorY);
 
-                TopRight = new android.graphics.Point(((Double) (topRight.x)).intValue(),
-                        ((Double) (topRight.y)).intValue());
+                                    synchronized (mViewTreeObserver) {
+                                        mViewTreeObserver.notifyAll();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+                mHandler.post(mShowProgressDialog);
 
-                BottomRight = new android.graphics.Point(((Double) (buttomRight.x)).intValue(),
-                        ((Double) (buttomRight.y)).intValue());
+                Mat billMat = null;
 
-                BottomLeft = new android.graphics.Point(((Double) (buttomLeft.x)).intValue(),
-                        ((Double) (buttomLeft.y)).intValue());
-            }
+                try {
+                    billMat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, mImage);
+                } catch (Exception ex) {
 
-            final ViewTreeObserver viewTreeObserver = mDragRectView.getViewTreeObserver();
-            if (viewTreeObserver.isAlive()) {
-                viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                }
+
+                mImageWidth = billMat.width();
+                mImageHeight = billMat.height();
+
+                Bitmap imageBmp = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(billMat, imageBmp);
+
+                final Bitmap imageForDRV = imageBmp;
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
-                    public void onGlobalLayout() {
-                        mDragRectView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    public void run() {
 
-                        mDragRectViewWidth = mDragRectView.getWidth();
-                        mDragRectViewHeight = mDragRectView.getHeight();
-
-                        double factorX = 1.0 * mImageWidth / mDragRectViewWidth;
-                        double factorY = 1.0 * mImageHeight / mDragRectViewHeight;
-
-                        mDragRectView.TopLeft = (android.graphics.Point) Utilities.GetScaledPoint(TopLeft, factorX, factorY);
-                        mDragRectView.TopRight = (android.graphics.Point) Utilities.GetScaledPoint(TopRight, factorX, factorY);
-                        mDragRectView.ButtomRight = (android.graphics.Point) Utilities.GetScaledPoint(BottomRight, factorX, factorY);
-                        mDragRectView.ButtomLeft = (android.graphics.Point) Utilities.GetScaledPoint(BottomLeft, factorX, factorY);
+                        if (android.os.Build.VERSION.SDK_INT >= 16) {
+                            mDragRectView.setBackground(new BitmapDrawable(getActivity().getResources(), imageForDRV));
+                        } else {
+                            mDragRectView.setBackgroundDrawable(new BitmapDrawable(imageForDRV));
+                        }
 
                     }
                 });
+
+                Button doneButton = getActivity().findViewById(R.id.dragRectFragmentDone);
+                doneButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        analyze();
+                    }
+                });
+
+                try {
+                    if (billMat == null) {
+                        String logMessage = "failed to convert bytes to mat or rotating the image";
+                        String toastMessage = "משהו השתבש... נא לנסות שוב";
+                        ReportError(logMessage, toastMessage);
+                        mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
+                        return;
+                    }
+
+                    BillAreaDetector areaDetector = new BillAreaDetector(_sessionId);
+                    org.opencv.core.Point topLeft = new org.opencv.core.Point();
+                    org.opencv.core.Point topRight = new org.opencv.core.Point();
+                    org.opencv.core.Point buttomLeft = new org.opencv.core.Point();
+                    org.opencv.core.Point buttomRight = new org.opencv.core.Point();
+
+                    if (!areaDetector.GetBillCorners(billMat, topRight, buttomRight, buttomLeft, topLeft)) {
+                        String logMessage = "failed to get bills corners";
+                        String toastMessage = "אזור החשבון לא זוהה, נא לסמן את אזור החשבונית";
+                        ReportError(logMessage, toastMessage);
+                        TopLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() / 3);
+                        TopRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() / 3);
+                        BottomRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() * 2 / 3);
+                        BottomLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() * 2 / 3);
+
+                    } else {
+                        TopLeft = new android.graphics.Point(((Double) (topLeft.x)).intValue(),
+                                ((Double) (topLeft.y)).intValue());
+
+                        TopRight = new android.graphics.Point(((Double) (topRight.x)).intValue(),
+                                ((Double) (topRight.y)).intValue());
+
+                        BottomRight = new android.graphics.Point(((Double) (buttomRight.x)).intValue(),
+                                ((Double) (buttomRight.y)).intValue());
+
+                        BottomLeft = new android.graphics.Point(((Double) (buttomLeft.x)).intValue(),
+                                ((Double) (buttomLeft.y)).intValue());
+                    }
+                } catch (Exception ex) {
+                    mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
+                    return;
+                } finally {
+                    mHandler.post(mHideProgressDialog);
+                    if (billMat != null) {
+                        billMat.release();
+                    }
+                }
             }
-        }catch(Exception ex){
-            mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
-            return;
-        }finally {
-            if(billMat != null){
-                billMat.release();
-                billMat = null;
-            }
-        }
+        });
+
+        t.start();
     }
 
     @Override
@@ -239,136 +262,158 @@ public class BillAnalyzerFragment extends Fragment {
         _sessionId = null;
         mPassCode = null;
         mRelativeDbAndStoragePath = null;
+        mHandler.post(mHideProgressDialog);
         mHandler = null;
     }
 
-    private void analyze(){
+    private void analyze() {
         mProgressDialog = new Dialog(mContext);
+        mHandler.post(mShowProgressDialog);
 
-        double factorX = 1.0*mDragRectViewWidth / mImageWidth;
-        double factorY = 1.0*mDragRectViewHeight / mImageHeight;
-
-        TopLeft = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.TopLeft, factorX, factorY);
-        TopRight = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.TopRight, factorX, factorY);
-        BottomRight = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.ButtomRight, factorX, factorY);
-        BottomLeft = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.ButtomLeft, factorX, factorY);
-        try {
-            mHandler.post(mShowProgressDialog);
-            if (!OpenCVLoader.initDebug()) {
-                String logMessage = "Failed to initialize OpenCV.";
-                BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
-                ReportError(logMessage, logMessage);
-                mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
-                return;
-            }
-            Mat billMatCopy = null;
-            Mat billMat = null;
-            Bitmap processedBillBitmap = null;
-            TemplateMatcher templateMatcher;
-            int numOfItems;
-
-
-            try {
-                mOcrEngineInitThread.join(2 * 1000);
-            }catch (Exception ex) {}
-
-            if (!mOcrEngine.Initialized()) {
-                String logMessage = "OCR Engine initialization failed.";
-                String toastMessage = "משהו השתבש... נא לנסות שוב";
-                ReportError(logMessage, toastMessage);
-                mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
-                return;
-            }
-
-            try {
-                billMat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, mImage);
-
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
                 try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-                    billMat = ImageProcessingLib.WarpPerspective(billMat,
-                            new org.opencv.core.Point(TopLeft.x + 20, TopLeft.y + 20),
-                            new org.opencv.core.Point(TopRight.x - 20, TopRight.y + 20),
-                            new org.opencv.core.Point(BottomRight.x - 20, BottomRight.y - 20),
-                            new org.opencv.core.Point(BottomLeft.x + 20, BottomLeft.y - 20));
+                synchronized (mViewTreeObserver) {
+                    try {
+                        mViewTreeObserver.wait(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
 
-                    billMatCopy = billMat.clone();
+                double factorX = 1.0 * mDragRectViewWidth / mImageWidth;
+                double factorY = 1.0 * mDragRectViewHeight / mImageHeight;
+
+                TopLeft = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.TopLeft, factorX, factorY);
+                TopRight = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.TopRight, factorX, factorY);
+                BottomRight = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.ButtomRight, factorX, factorY);
+                BottomLeft = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.ButtomLeft, factorX, factorY);
+                try {
+                    if (!OpenCVLoader.initDebug()) {
+                        String logMessage = "Failed to initialize OpenCV.";
+                        BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
+                        ReportError(logMessage, logMessage);
+                        mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
+                        return;
+                    }
+                    Mat billMatCopy = null;
+                    Mat billMat = null;
+                    Bitmap processedBillBitmap = null;
+                    TemplateMatcher templateMatcher;
+                    int numOfItems;
+
+
+                    try {
+                        mOcrEngineInitThread.join(2 * 1000);
+                    } catch (Exception ex) {
+                        ReportError("MM", "MMM");
+                    }
+
+                    if (!mOcrEngine.Initialized()) {
+                        String logMessage = "OCR Engine initialization failed.";
+                        String toastMessage = "משהו השתבש... נא לנסות שוב";
+                        ReportError(logMessage, toastMessage);
+                        mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
+                        return;
+                    }
+
+                    try {
+                        billMat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, mImage);
+
+                        try {
+
+                            billMat = ImageProcessingLib.WarpPerspective(billMat,
+                                    new org.opencv.core.Point(TopLeft.x + 20, TopLeft.y + 20),
+                                    new org.opencv.core.Point(Math.max(TopRight.x - 20, 0), TopRight.y + 20),
+                                    new org.opencv.core.Point(Math.max(BottomRight.x - 20, 0), Math.max(BottomRight.y - 20, 0)),
+                                    new org.opencv.core.Point(BottomLeft.x + 20, Math.max(BottomLeft.y - 20, 0)));
+
+                            billMatCopy = billMat.clone();
+                        } catch (Exception e) {
+                            String logMessage = "Warp perspective has been failed. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                            String toastMessage = "סיבוב החשבון נכשל... נא לנסות שנית";
+                            ReportError(logMessage, toastMessage);
+                            mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
+                            return;
+                        }
+
+                        BillsLog.Log(_sessionId, LogLevel.Info, "Warped perspective successfully.", LogsDestination.BothUsers, Tag);
+
+                        processedBillBitmap = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
+                        ImageProcessingLib.PreprocessingForTM(billMat);
+                        Utils.matToBitmap(billMat, processedBillBitmap);
+
+                        templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
+                        try {
+                            templateMatcher.Match(_sessionId);
+                            BillsLog.Log(_sessionId, LogLevel.Info, "Template matcher succeeded.", LogsDestination.BothUsers, Tag);
+                        } catch (Exception e) {
+                            String logMessage = "Template matcher threw an exception. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
+                            String toastMessage = "החשבונית לא זוהתה... נא לנסות שנית";
+                            ReportError(logMessage, toastMessage);
+                            mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
+                            return;
+                        }
+
+                        ImageProcessingLib.PreprocessingForParsing(billMatCopy);
+                        numOfItems = templateMatcher.priceAndQuantity.size();
+
+                        /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
+                        /***** Out Of Memory when running 4 threads parallel                                      *****/
+                        Utils.matToBitmap(billMatCopy, processedBillBitmap);
+                        templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
+                        templateMatcher.Parsing(_sessionId, numOfItems);
+
+                        List<BillRow> rows = new ArrayList<>();
+                        int index = 0;
+                        for (Double[] row : templateMatcher.priceAndQuantity) {
+                            Bitmap item = templateMatcher.itemLocationsByteArray.get(index);
+                            Bitmap finalItem = mOcrEngine.ChangeBackgroundColor(item, new Scalar(255, 93, 113));
+                            item.recycle();
+                            Double price = row[0];
+                            Integer quantity = row[1].intValue();
+                            rows.add(new BillRow(price, quantity, index, finalItem));
+                            index++;
+                        }
+                        BillsLog.Log(_sessionId, LogLevel.Info, "Parsing finished", LogsDestination.BothUsers, Tag);
+                        mListener.onBillAnalyzerSucceed(rows, mImage, mPassCode, mRelativeDbAndStoragePath);
+                    } catch (Exception e) {
+                        String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
+                                "\nException Message: " + e.getMessage();
+                        String toastMessage = "משהו השתבש... נא לנסות שוב";
+                        ReportError(logMessage, toastMessage);
+                        mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
+                        return;
+                    } finally {
+                        if (null != billMat) {
+                            billMat.release();
+                        }
+                        if (null != processedBillBitmap) {
+                            processedBillBitmap.recycle();
+                        }
+                        if (null != billMatCopy) {
+                            billMatCopy.release();
+                        }
+                    }
                 } catch (Exception e) {
-                    String logMessage = "Warp perspective has been failed. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                    String toastMessage = "סיבוב החשבון נכשל... נא לנסות שנית";
-                    ReportError(logMessage, toastMessage);
+                    String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
+                            "\nException Message: " + e.getMessage();
+                    BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
                     mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
                     return;
+                } finally {
+                    mHandler.post(mHideProgressDialog);
                 }
 
-                BillsLog.Log(_sessionId, LogLevel.Info, "Warped perspective successfully.", LogsDestination.BothUsers, Tag);
-
-                processedBillBitmap = Bitmap.createBitmap(billMat.width(), billMat.height(), Bitmap.Config.ARGB_8888);
-                ImageProcessingLib.PreprocessingForTM(billMat);
-                Utils.matToBitmap(billMat, processedBillBitmap);
-
-                templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
-                try {
-                    templateMatcher.Match(_sessionId);
-                    BillsLog.Log(_sessionId, LogLevel.Info, "Template matcher succeeded.", LogsDestination.BothUsers, Tag);
-                } catch (Exception e) {
-                    String logMessage = "Template matcher threw an exception. \nStackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
-                    String toastMessage = "החשבונית לא זוהתה... נא לנסות שנית";
-                    ReportError(logMessage, toastMessage);
-                    mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
-                    return;
-                }
-
-                ImageProcessingLib.PreprocessingForParsing(billMatCopy);
-                numOfItems = templateMatcher.priceAndQuantity.size();
-
-                /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
-                /***** Out Of Memory when running 4 threads parallel                                      *****/
-                Utils.matToBitmap(billMatCopy, processedBillBitmap);
-                templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
-                templateMatcher.Parsing(_sessionId, numOfItems);
-
-                List<BillRow> rows = new ArrayList<>();
-                int index = 0;
-                for (Double[] row : templateMatcher.priceAndQuantity) {
-                    Bitmap item = templateMatcher.itemLocationsByteArray.get(index);
-                    Bitmap finalItem = mOcrEngine.ChangeBackgroundColor(item, new Scalar(255, 93, 113));
-                    item.recycle();
-                    Double price = row[0];
-                    Integer quantity = row[1].intValue();
-                    rows.add(new BillRow(price, quantity, index, finalItem));
-                    index++;
-                }
-                BillsLog.Log(_sessionId, LogLevel.Info, "Parsing finished", LogsDestination.BothUsers, Tag);
-                mListener.onBillAnalyzerSucceed(rows, mImage, mPassCode, mRelativeDbAndStoragePath);
-            }catch (Exception e){
-                String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
-                        "\nException Message: " + e.getMessage();
-                String toastMessage = "משהו השתבש... נא לנסות שוב";
-                ReportError(logMessage, toastMessage);
-                mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
-                return;
             }
-            finally {
-                if(null != billMat){
-                    billMat.release();
-                }
-                if(null != processedBillBitmap){
-                    processedBillBitmap.recycle();
-                }
-                if(null != billMatCopy){
-                    billMatCopy.release();
-                }
-            }
-        } catch (Exception e) {
-            String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
-                    "\nException Message: " + e.getMessage();
-            BillsLog.Log(_sessionId, LogLevel.Error, logMessage, LogsDestination.BothUsers, Tag);
-            mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
-            return;
-        }
-        finally {
-            mHandler.post(mHideProgressDialog);
-        }
+        });
+        t.start();
     }
 
     /**
@@ -401,11 +446,15 @@ public class BillAnalyzerFragment extends Fragment {
     // Create runnable for posting progress dialog
     private final Runnable mShowProgressDialog = new Runnable() {
         public void run() {
-            mProgressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            mProgressDialog.setContentView(com.bills.billslib.R.layout.custom_dialog_progress);
-            mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.show();
+            try {
+                mProgressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                mProgressDialog.setContentView(com.bills.billslib.R.layout.custom_dialog_progress);
+                mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.show();
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
         }
     };
 
