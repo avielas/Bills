@@ -1,15 +1,21 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'BillsKey'
+            keyPassword 'bill!key@application#password$is%hard^'
+            storeFile file('/home/aviel/Desktop/BS/keystores/signedApkPrivateKey.jks')
+            storePassword 'bill!split@application#is$the%best^'
+        }
+    }
     compileSdkVersion compile_sdk_version
     buildToolsVersion build_tools_version
     flavorDimensions "default"
-
     sourceSets.main {
         jniLibs.srcDir 'libs'
         jni.srcDirs = []
     }
-
     defaultConfig {
         applicationId "com.bills.bills"
         minSdkVersion min_sdk_version
@@ -27,6 +33,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+        debug {
+            signingConfig signingConfigs.config
         }
     }
     productFlavors {
@@ -51,7 +61,6 @@ android {
             path "CMakeLists.txt"
         }
     }
-
     splits {
         abi {
             enable true
@@ -104,13 +113,11 @@ android.applicationVariants.all { variant ->
 
 dependencies {
     //implementation 'com.android.support:support-v4:27.0.2'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile(android_support_test_espresso_core, {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile project(openCVLibrary)
     compile project(path: ':billslib')
-
     compile support_appcompat_v7
     compile firebase_database
     compile firebase_ui_auth
