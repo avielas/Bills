@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'BillsKey'
             keyPassword 'bill!key@application#password$is%hard^'
-            storeFile file('/home/aviel/Desktop/BS/keystores/signedApkPrivateKey.jks')
+            storeFile file('signedApkPrivateKey.jks')
             storePassword 'bill!split@application#is$the%best^'
         }
     }
