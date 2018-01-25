@@ -32,6 +32,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
+import org.opencv.core.Scalar;
+
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -615,13 +617,11 @@ public class UiUpdater implements View.OnClickListener {
         myItemRow.addView(space);
 
         ImageView commonImageView = new ImageView(mContext);
-        Bitmap commonItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), 500, 60, false);
-        commonImageView.setImageBitmap(commonItemBitmap);
+        commonImageView.setImageBitmap(row.GetItem());
         commonItemRow.addView(commonImageView);
 
         ImageView myImageView = new ImageView(mContext);
-        Bitmap myItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), 500, 60, false);
-        myImageView.setImageBitmap(myItemBitmap);
+        myImageView.setImageBitmap(row.GetItem());
         myItemRow.addView(myImageView);
 
         mCommonItemsArea.addView(commonItemRow);
