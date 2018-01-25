@@ -32,6 +32,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -327,18 +333,23 @@ public class UiUpdater implements View.OnClickListener {
                                     myItemRow.addView(space);
 
                                     Bitmap tmpBitmap = Utilities.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
-                                    Bitmap commonItemBitmap = Bitmap.createScaledBitmap(tmpBitmap, 500, 60, false);
+                                    Bitmap scaledCommonItemBitmap = Bitmap.createScaledBitmap(tmpBitmap, 500, 60, false);
                                     tmpBitmap.recycle();
+                                    Bitmap finalCommonItem = ChangeBackgroundColor(scaledCommonItemBitmap, new Scalar(255, 93, 113));
+                                    scaledCommonItemBitmap.recycle();
 
                                     tmpBitmap = Utilities.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
-                                    Bitmap myItemBitmap = Bitmap.createScaledBitmap(tmpBitmap, 500, 60, false);
+                                    Bitmap scaledMyItemBitmap = Bitmap.createScaledBitmap(tmpBitmap, 500, 60, false);
+                                    tmpBitmap.recycle();
+                                    Bitmap finalMyItem = ChangeBackgroundColor(scaledMyItemBitmap, new Scalar(255, 93, 113));
+                                    scaledMyItemBitmap.recycle();
                                     ImageView commonImageView = new ImageView(mContext);
 
-                                    commonImageView.setImageBitmap(commonItemBitmap);
+                                    commonImageView.setImageBitmap(finalCommonItem);
                                     commonItemRow.addView(commonImageView);
 
                                     ImageView myImageView = new ImageView(mContext);
-                                    myImageView.setImageBitmap(myItemBitmap);
+                                    myImageView.setImageBitmap(finalMyItem);
                                     myItemRow.addView(myImageView);
 
                                     int rowIndexInUi = GetRowUiIndex(rowIndex);
@@ -615,13 +626,17 @@ public class UiUpdater implements View.OnClickListener {
         myItemRow.addView(space);
 
         ImageView commonImageView = new ImageView(mContext);
-        Bitmap commonItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), 500, 60, false);
-        commonImageView.setImageBitmap(commonItemBitmap);
+        Bitmap scaledCommonItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), 500, 60, false);
+        Bitmap finalCommonItemBitmap = ChangeBackgroundColor(scaledCommonItemBitmap, new Scalar(255, 93, 113));
+        scaledCommonItemBitmap.recycle();
+        commonImageView.setImageBitmap(finalCommonItemBitmap);
         commonItemRow.addView(commonImageView);
 
         ImageView myImageView = new ImageView(mContext);
-        Bitmap myItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), 500, 60, false);
-        myImageView.setImageBitmap(myItemBitmap);
+        Bitmap scaledMyItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), 500, 60, false);
+        Bitmap finalMyItemBitmap = ChangeBackgroundColor(scaledMyItemBitmap, new Scalar(255, 93, 113));
+        scaledMyItemBitmap.recycle();
+        myImageView.setImageBitmap(finalMyItemBitmap);
         myItemRow.addView(myImageView);
 
         mCommonItemsArea.addView(commonItemRow);
@@ -737,6 +752,36 @@ public class UiUpdater implements View.OnClickListener {
                     return;
                 }
             }
+        }
+    }
+
+    private Bitmap ChangeBackgroundColor(Bitmap src, Scalar color) {
+        if(!OpenCVLoader.initDebug()){
+            throw new RuntimeException("failed to init opencv");
+        }
+        Mat srcMat = new Mat();
+        Mat grayscaleMat = new Mat();
+        Mat mask = new Mat();
+
+        try {
+            Utils.bitmapToMat(src, srcMat);
+
+            Imgproc.cvtColor(srcMat, grayscaleMat, Imgproc.COLOR_RGBA2GRAY);
+
+            Imgproc.threshold(grayscaleMat, mask, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+
+            srcMat.setTo(color, mask);
+
+            Bitmap dst = Bitmap.createBitmap(src.getWidth(), src.getHeight(), src.getConfig());
+
+            Utils.matToBitmap(srcMat, dst);
+            return dst;
+        }catch (Exception ex){
+            throw ex;
+        }finally {
+            srcMat.release();
+            grayscaleMat.release();
+            mask.release();
         }
     }
 

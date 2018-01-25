@@ -374,11 +374,9 @@ public class BillAnalyzerFragment extends Fragment {
                         int index = 0;
                         for (Double[] row : templateMatcher.priceAndQuantity) {
                             Bitmap item = templateMatcher.itemLocationsByteArray.get(index);
-                            Bitmap finalItem = mOcrEngine.ChangeBackgroundColor(item, new Scalar(255, 93, 113));
-                            item.recycle();
                             Double price = row[0];
                             Integer quantity = row[1].intValue();
-                            rows.add(new BillRow(price, quantity, index, finalItem));
+                            rows.add(new BillRow(price, quantity, index, item));
                             index++;
                         }
                         BillsLog.Log(_sessionId, LogLevel.Info, "Parsing finished", LogsDestination.BothUsers, Tag);
