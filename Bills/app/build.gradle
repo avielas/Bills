@@ -2,12 +2,6 @@ apply plugin: 'com.android.application'
 
 android {
     signingConfigs {
-        config {
-            keyAlias 'BillsKey'
-            keyPassword 'bill!key@application#password$is%hard^'
-            storeFile file('/home/aviel/Desktop/BS/keystores/signedApkPrivateKey.jks')
-            storePassword 'bill!split@application#is$the%best^'
-        }
     }
     compileSdkVersion compile_sdk_version
     buildToolsVersion build_tools_version
@@ -33,10 +27,6 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.config
-        }
-        debug {
-            signingConfig signingConfigs.config
         }
     }
     productFlavors {
