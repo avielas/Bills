@@ -1,5 +1,6 @@
 package com.bills.bills.firebase;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
@@ -9,9 +10,11 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Space;
 import android.widget.TextView;
@@ -58,8 +61,7 @@ public class UiUpdater implements View.OnClickListener {
     private final String ImageHeight = "height";
     private final String Price = "Price";
     private final UUID mSessionId;
-
-    private Context mContext;
+    private int mDefaultScreenWidth = 500;
 
     private DatabaseReference mUsersDatabaseReference;
     private FirebaseDatabase mFirebaseDatabase;
@@ -90,8 +92,54 @@ public class UiUpdater implements View.OnClickListener {
     private Double mMyTotalSum = 0.0;
     private Double mCommonTotalSum = 0.0;
 
-    public UiUpdater(final UUID sessionId) {
+    private int mScreenWidth = Integer.MIN_VALUE;
+    private Context mContext;
+    public UiUpdater(final UUID sessionId, final Context context, final Activity activity) {
         mSessionId = sessionId;
+        mContext = context;
+        final RelativeLayout summarizerRootLayout = activity.findViewById(R.id.bill_summarizer_frame_layout);
+
+        final ViewTreeObserver viewTreeObserver = summarizerRootLayout.getViewTreeObserver();
+        if (viewTreeObserver.isAlive()) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            summarizerRootLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                            mScreenWidth = summarizerRootLayout.getWidth();
+
+                            synchronized (viewTreeObserver) {
+                                viewTreeObserver.notifyAll();
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        Thread screenWidthUpdater = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                if(mScreenWidth < 0){
+                    try {
+                        for(int i = 0; i < 10; i++) {
+                            viewTreeObserver.wait(200);
+                        }
+                    }catch (Exception ex){}
+                    if(mScreenWidth < 0){
+                        BillsLog.Log(sessionId,
+                                LogLevel.Error,
+                                "Failed to get screen size, setting to default: " + mDefaultScreenWidth,
+                                LogsDestination.BothUsers, Tag);
+                    }
+                }
+            }
+        });
+        screenWidthUpdater.start();
     }
 
     private TextView mCommonTotalSumView;
@@ -112,8 +160,7 @@ public class UiUpdater implements View.OnClickListener {
     ScrollView mCommonItemsContainer;
     ScrollView mMyItemsContainer;
 
-    public void StartMainUser(Context context,
-                              String dbPath,
+    public void StartMainUser(String dbPath,
                               LinearLayout commonItemsArea,
                               LinearLayout myItemsArea,
                               ScrollView commonItemsContainer,
@@ -126,7 +173,6 @@ public class UiUpdater implements View.OnClickListener {
                               TextView commonItemsCount,
                               TextView myItemsCount,
                               ImageView screenSpliter){
-        mContext = context;
         mCommonItemsArea = commonItemsArea;
         mMyItemsArea = myItemsArea;
         mCommonTotalSumView = commonTotalSumView;
@@ -199,8 +245,7 @@ public class UiUpdater implements View.OnClickListener {
         BillsLog.Log(mSessionId, LogLevel.Info, "StartMainUser succeeded!", LogsDestination.BothUsers, Tag);
     }
 
-    public void StartSecondaryUser(final Context context,
-                                   String dbPath,
+    public void StartSecondaryUser(String dbPath,
                                    String storagePath,
                                    LinearLayout commonItemsArea,
                                    LinearLayout myItemsArea,
@@ -213,7 +258,6 @@ public class UiUpdater implements View.OnClickListener {
                                    TextView commonItemsCount,
                                    TextView myItemsCount,
                                    ImageView screenSpliter){
-        mContext = context;
         mCommonItemsArea = commonItemsArea;
         mMyItemsArea = myItemsArea;
         mCommonTotalSumView = commonTotalSumView;
@@ -332,14 +376,17 @@ public class UiUpdater implements View.OnClickListener {
                                     space.setMinimumWidth(130);
                                     myItemRow.addView(space);
 
+                                    if(mScreenWidth < 0){
+                                        mScreenWidth = mDefaultScreenWidth;
+                                    }
                                     Bitmap tmpBitmap = Utilities.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
-                                    Bitmap scaledCommonItemBitmap = Bitmap.createScaledBitmap(tmpBitmap, 500, 60, false);
+                                    Bitmap scaledCommonItemBitmap = Bitmap.createScaledBitmap(tmpBitmap, mScreenWidth / 2, 60, false);
                                     tmpBitmap.recycle();
                                     Bitmap finalCommonItem = ChangeBackgroundColor(scaledCommonItemBitmap, new Scalar(255, 93, 113));
                                     scaledCommonItemBitmap.recycle();
 
                                     tmpBitmap = Utilities.ConvertFirebaseBytesToBitmap(bytes, itemWidth, itemHeight);
-                                    Bitmap scaledMyItemBitmap = Bitmap.createScaledBitmap(tmpBitmap, 500, 60, false);
+                                    Bitmap scaledMyItemBitmap = Bitmap.createScaledBitmap(tmpBitmap, mScreenWidth / 2, 60, false);
                                     tmpBitmap.recycle();
                                     Bitmap finalMyItem = ChangeBackgroundColor(scaledMyItemBitmap, new Scalar(255, 93, 113));
                                     scaledMyItemBitmap.recycle();
@@ -625,15 +672,18 @@ public class UiUpdater implements View.OnClickListener {
         space.setMinimumWidth(130);
         myItemRow.addView(space);
 
+        if(mScreenWidth < 0){
+            mScreenWidth = mDefaultScreenWidth;
+        }
         ImageView commonImageView = new ImageView(mContext);
-        Bitmap scaledCommonItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), 500, 60, false);
+        Bitmap scaledCommonItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), mScreenWidth / 2, 60, false);
         Bitmap finalCommonItemBitmap = ChangeBackgroundColor(scaledCommonItemBitmap, new Scalar(255, 93, 113));
         scaledCommonItemBitmap.recycle();
         commonImageView.setImageBitmap(finalCommonItemBitmap);
         commonItemRow.addView(commonImageView);
 
         ImageView myImageView = new ImageView(mContext);
-        Bitmap scaledMyItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), 500, 60, false);
+        Bitmap scaledMyItemBitmap = Bitmap.createScaledBitmap(row.GetItem(), mScreenWidth / 2, 60, false);
         Bitmap finalMyItemBitmap = ChangeBackgroundColor(scaledMyItemBitmap, new Scalar(255, 93, 113));
         scaledMyItemBitmap.recycle();
         myImageView.setImageBitmap(finalMyItemBitmap);

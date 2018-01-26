@@ -98,13 +98,13 @@ public class BillSummarizerFragment extends Fragment {
         ScrollView mMyItemsContainer = (ScrollView) getView().findViewById(R.id.my_summary_area);
 
         if(mMainUserMode){
-            mUiUpdater = new UiUpdater(mSessionId);
-            mUiUpdater.StartMainUser(mContext, mDbPath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer, mBillRows, mMyTotalSumView, mCommonTotalSumView,
+            mUiUpdater = new UiUpdater(mSessionId, mContext, getActivity());
+            mUiUpdater.StartMainUser(mDbPath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer, mBillRows, mMyTotalSumView, mCommonTotalSumView,
                     mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
             mPassCodeView.setText("מס' חשבון: " + Integer.toString(mPassCode));
         }else {
-            mUiUpdater = new UiUpdater(mSessionId);
-            mUiUpdater.StartSecondaryUser(mContext, mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer,  mMyTotalSumView, mCommonTotalSumView,
+            mUiUpdater = new UiUpdater(mSessionId, mContext, getActivity());
+            mUiUpdater.StartSecondaryUser(mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer,  mMyTotalSumView, mCommonTotalSumView,
                     mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
             mPassCodeView.setText("מס' חשבון: " + Integer.toString(mPassCode));
         }
