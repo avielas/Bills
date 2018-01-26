@@ -22,32 +22,27 @@
             android:layout_height="46dp"
             android:background="@drawable/summary_screen_header"
             android:orientation="horizontal">
-            <Space
-                android:layout_width="70dp"
-                android:layout_height="match_parent" />
 
             <TextView
                 android:id="@+id/passcode_textview"
-                android:layout_width="50dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:fontFamily="@fonts/secular_one"
-                android:gravity="bottom"
+                android:gravity="end"
+                android:textAlignment="viewEnd"
                 android:textColor="@color/summarizer_medium"
-                android:textSize="12sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/heading"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="bottom|left"
-                android:fontFamily="@fonts/secular_one"
-                android:gravity="bottom|left"
-                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="חשבון"
                 android:textColor="@color/summarizer_medium"
-                android:textColorLink="@color/summarizer_light"
                 android:textSize="36sp"
-                android:textStyle="bold"
-                tools:text="חשבון" />
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout

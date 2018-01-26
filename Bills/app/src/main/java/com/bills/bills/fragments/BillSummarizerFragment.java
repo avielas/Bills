@@ -101,13 +101,12 @@ public class BillSummarizerFragment extends Fragment {
             mUiUpdater = new UiUpdater(mSessionId);
             mUiUpdater.StartMainUser(mContext, mDbPath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer, mBillRows, mMyTotalSumView, mCommonTotalSumView,
                     mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
-            mPassCodeView.setText(Integer.toString(mPassCode)
-            );
+            mPassCodeView.setText("מס' חשבון: " + Integer.toString(mPassCode));
         }else {
             mUiUpdater = new UiUpdater(mSessionId);
             mUiUpdater.StartSecondaryUser(mContext, mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer,  mMyTotalSumView, mCommonTotalSumView,
                     mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
-            mPassCodeView.setText(Integer.toString(mPassCode));
+            mPassCodeView.setText("מס' חשבון: " + Integer.toString(mPassCode));
         }
     }
 
