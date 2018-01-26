@@ -91,7 +91,8 @@
                 android:textDirection="ltr"
                 android:textStyle="bold"
                 android:tooltipText="הזן קוד"
-                android:visibility="visible" />
+                android:visibility="visible"
+                android:paddingRight="40dp"/>
         </LinearLayout>
 
     </LinearLayout>
