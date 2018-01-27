@@ -339,6 +339,7 @@ public class UiUpdater implements View.OnClickListener {
                                     myPrice.setText("" + rowPrice);
                                     myPrice.setTextSize(20);
                                     myPrice.setBackgroundColor(mContext.getResources().getColor(R.color.summarizer_light));
+                                    myPrice.setTextColor(mContext.getResources().getColor(R.color.summarizer_dark));
                                     myPrice.setTypeface(fontRegular);
                                     myPrice.setGravity(Gravity.RIGHT);
                                     myItemRow.addView(myPrice);
@@ -634,10 +635,9 @@ public class UiUpdater implements View.OnClickListener {
         TextView myPrice = new TextView(mContext);
         myPrice.setText(format(row.GetPrice()));
         myPrice.setBackgroundColor(mContext.getResources().getColor(R.color.summarizer_light));
+        myPrice.setTextColor(mContext.getResources().getColor(R.color.summarizer_dark));
         myPrice.setTypeface(fontRegular);
         myPrice.setGravity(Gravity.RIGHT);
-        myPrice.setTextColor(mContext.getResources().getColor(R.color.summarizer_dark));
-
         myItemRow.addView(myPrice);
 
         Space space = new Space(mContext);
