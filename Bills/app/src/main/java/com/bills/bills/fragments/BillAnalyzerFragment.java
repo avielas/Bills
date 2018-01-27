@@ -131,14 +131,6 @@ public class BillAnalyzerFragment extends Fragment {
                                     mDragRectView.ButtomRight = (android.graphics.Point) Utilities.GetScaledPoint(BottomRight, factorX, factorY);
                                     mDragRectView.ButtomLeft = (android.graphics.Point) Utilities.GetScaledPoint(BottomLeft, factorX, factorY);
 
-                                    android.graphics.Point zeroPoint = new android.graphics.Point(0,0);
-                                    if(TopLeft == zeroPoint && TopRight == zeroPoint && BottomRight == zeroPoint && BottomLeft == zeroPoint){
-                                        TopLeft = new Point(mDragRectViewWidth / 3, mDragRectViewHeight / 3);
-                                        TopRight = new Point(2 * mDragRectViewWidth / 3, mDragRectViewHeight / 3);
-                                        BottomLeft = new Point(mDragRectViewWidth / 3, 2 * mDragRectViewHeight / 3);
-                                        BottomRight = new Point(2 * mDragRectViewWidth / 3, 2 * mDragRectViewHeight / 3);
-                                    }
-
                                     synchronized (mViewTreeObserver) {
                                         mViewTreeObserver.notifyAll();
                                     }
@@ -200,16 +192,15 @@ public class BillAnalyzerFragment extends Fragment {
                     org.opencv.core.Point buttomLeft = new org.opencv.core.Point();
                     org.opencv.core.Point buttomRight = new org.opencv.core.Point();
 
-                    //init rect to default
-                    TopLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() / 3);
-                    TopRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() / 3);
-                    BottomRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() * 2 / 3);
-                    BottomLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() * 2 / 3);
-
                     if (!areaDetector.GetBillCorners(billMat, topRight, buttomRight, buttomLeft, topLeft)) {
                         String logMessage = "failed to get bills corners";
                         String toastMessage = "אזור החשבון לא זוהה, נא לסמן את אזור החשבונית";
                         ReportError(logMessage, toastMessage);
+                        TopLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() / 3);
+                        TopRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() / 3);
+                        BottomRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() * 2 / 3);
+                        BottomLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() * 2 / 3);
+
                     } else {
                         TopLeft = new android.graphics.Point(((Double) (topLeft.x)).intValue(),
                                 ((Double) (topLeft.y)).intValue());
