@@ -25,6 +25,8 @@ public class DragRectView extends View {
 
     private boolean mFirstCall = true;
 
+    private long mRadius;
+
     private int mStartX = 0;
     private int mStartY = 0;
     private int mEndX = 0;
@@ -68,18 +70,18 @@ public class DragRectView extends View {
      */
     private void init() {
         mRectPaint = new Paint();
-        mRectPaint.setColor(getContext().getResources().getColor(android.R.color.holo_green_light));
+        mRectPaint.setColor(getContext().getResources().getColor(android.R.color.holo_blue_bright));
         mRectPaint.setStyle(Paint.Style.STROKE);
         mRectPaint.setStrokeWidth(5); // TODO: should take from resources
 
         mCircePaint = new Paint();
-        mCircePaint.setColor(getContext().getResources().getColor(android.R.color.holo_green_light));
+        mCircePaint.setColor(getContext().getResources().getColor(android.R.color.holo_blue_dark));
         mCircePaint.setStrokeWidth(10);
         mCircePaint.setStyle(Paint.Style.FILL);
         mCircePaint.setAntiAlias(true);
 
         mTextPaint = new TextPaint();
-        mTextPaint.setColor(getContext().getResources().getColor(android.R.color.holo_green_light));
+        mTextPaint.setColor(getContext().getResources().getColor(android.R.color.holo_blue_dark));
         mTextPaint.setTextSize(20);
     }
 
@@ -179,7 +181,7 @@ public class DragRectView extends View {
     }
 
     private Point GetSelectedPoint(int x, int y) {
-        int radius = 30;
+        int radius = (int) (mRadius * 1.5);
         if(Math.abs(TopLeft.x - x) < radius && Math.abs(TopLeft.y - y) < radius){
             return TopLeft;
         }
@@ -198,6 +200,8 @@ public class DragRectView extends View {
     @Override
     protected void onDraw(final Canvas canvas) {
         super.onDraw(canvas);
+        long radius = Math.max( Math.round(canvas.getWidth()/18.0), Math.round(canvas.getHeight()/31.0)) / 2;
+        mRadius = radius;
 
         if(mFirstCall){
             if(TopLeft == null || TopRight == null ||
@@ -213,10 +217,10 @@ public class DragRectView extends View {
             canvas.drawLine(ButtomRight.x, ButtomRight.y, ButtomLeft.x, ButtomLeft.y, mRectPaint);
             canvas.drawLine(ButtomLeft.x, ButtomLeft.y, TopLeft.x, TopLeft.y, mRectPaint);
 
-            canvas.drawCircle(TopLeft.x, TopLeft.y, 20, mCircePaint);
-            canvas.drawCircle(TopRight.x, TopRight.y, 20, mCircePaint);
-            canvas.drawCircle(ButtomRight.x, ButtomRight.y, 20, mCircePaint);
-            canvas.drawCircle(ButtomLeft.x, ButtomLeft.y, 20, mCircePaint);
+            canvas.drawCircle(TopLeft.x, TopLeft.y, radius, mCircePaint);
+            canvas.drawCircle(TopRight.x, TopRight.y, radius, mCircePaint);
+            canvas.drawCircle(ButtomRight.x, ButtomRight.y, radius, mCircePaint);
+            canvas.drawCircle(ButtomLeft.x, ButtomLeft.y, radius, mCircePaint);
 
             mFirstCall = false;
 
@@ -227,10 +231,10 @@ public class DragRectView extends View {
             canvas.drawLine(ButtomRight.x, ButtomRight.y, ButtomLeft.x, ButtomLeft.y, mRectPaint);
             canvas.drawLine(ButtomLeft.x, ButtomLeft.y, TopLeft.x, TopLeft.y, mRectPaint);
 
-            canvas.drawCircle(TopLeft.x, TopLeft.y, 20, mCircePaint);
-            canvas.drawCircle(TopRight.x, TopRight.y, 20, mCircePaint);
-            canvas.drawCircle(ButtomRight.x, ButtomRight.y, 20, mCircePaint);
-            canvas.drawCircle(ButtomLeft.x, ButtomLeft.y, 20, mCircePaint);
+            canvas.drawCircle(TopLeft.x, TopLeft.y, radius, mCircePaint);
+            canvas.drawCircle(TopRight.x, TopRight.y, radius, mCircePaint);
+            canvas.drawCircle(ButtomRight.x, ButtomRight.y, radius, mCircePaint);
+            canvas.drawCircle(ButtomLeft.x, ButtomLeft.y, radius, mCircePaint);
         }
     }
 
