@@ -94,6 +94,7 @@ public class UiUpdater implements View.OnClickListener {
 
     private int mScreenWidth = Integer.MIN_VALUE;
     private Context mContext;
+
     public UiUpdater(final UUID sessionId, final Context context, final Activity activity) {
         mSessionId = sessionId;
         mContext = context;
@@ -172,7 +173,8 @@ public class UiUpdater implements View.OnClickListener {
                               EditText mTipSumView,
                               TextView commonItemsCount,
                               TextView myItemsCount,
-                              ImageView screenSpliter){
+                              ImageView screenSpliter,
+                              int screenWidth){
         mCommonItemsArea = commonItemsArea;
         mMyItemsArea = myItemsArea;
         mCommonTotalSumView = commonTotalSumView;
@@ -187,6 +189,8 @@ public class UiUpdater implements View.OnClickListener {
 
         mCommonItemsContainer = commonItemsContainer;
         mMyItemsContainer = myItemsContainer;
+
+        mScreenWidth = screenWidth;
 
         InitScreenSplitter(screenSpliter);
         InitTipFields();
@@ -617,9 +621,11 @@ public class UiUpdater implements View.OnClickListener {
 
         LinearLayout commonItemRow = new LinearLayout(mContext);
         commonItemRow.setOrientation(LinearLayout.HORIZONTAL);
+        commonItemRow.setGravity(Gravity.RIGHT);
 
         LinearLayout myItemRow = new LinearLayout(mContext);
         myItemRow.setOrientation(LinearLayout.HORIZONTAL);
+        myItemRow.setGravity(Gravity.RIGHT);
 
         mCommonTotalSum += (row.GetPrice() * row.GetQuantity());
         mCommonLineNumberToPriceMapper.put(row.GetRowIndex(), row.GetPrice());

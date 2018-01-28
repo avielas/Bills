@@ -342,10 +342,10 @@ public class BillsMainActivity extends MainActivityBase implements
     }
 
     @Override
-    public void onBillAnalyzerSucceed(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath) {
+    public void onBillAnalyzerSucceed(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath, int screenWidth) {
 
         String rowDbKeyPath = UsersDbKey + "/" + mCurRelativeDbAndStoragePath + "/" + RowsDbKey;
-        mBillSummarizerFragment.Init(mSessionId, BillsMainActivity.this.getApplicationContext(), mCurPassCode, rowDbKeyPath, rows);
+        mBillSummarizerFragment.Init(mSessionId, BillsMainActivity.this.getApplicationContext(), mCurPassCode, rowDbKeyPath, rows, screenWidth);
 
         FirebaseUploader uploader = new FirebaseUploader(mSessionId, rowDbKeyPath, mAppStoragePath, BillsMainActivity.this);
         uploader.UploadRows(rows, image, new FirebaseUploader.IFirebaseUploaderCallback() {

@@ -55,6 +55,7 @@ public class BillSummarizerFragment extends Fragment {
     private List<BillRow> mBillRows;
     private ImageView mScreenSpliter;
 
+    private int mScreenWidth;
     public BillSummarizerFragment() {
         // Required empty public constructor
     }
@@ -69,13 +70,14 @@ public class BillSummarizerFragment extends Fragment {
         mSessionId = sessionId;
     }
 
-    public void Init(UUID sessionId, Context context, Integer passCode, String dbPath, List<BillRow> rows) {
+    public void Init(UUID sessionId, Context context, Integer passCode, String dbPath, List<BillRow> rows, int screenWidth) {
         mPassCode = passCode;
         mDbPath = dbPath;
         mContext = context;
         mBillRows = rows;
         mMainUserMode = true;
         mSessionId = sessionId;
+        mScreenWidth = screenWidth;
     }
 
     @Override
@@ -97,16 +99,15 @@ public class BillSummarizerFragment extends Fragment {
         ScrollView mCommonItemsContainer = (ScrollView) getView().findViewById(R.id.common_summary_area);
         ScrollView mMyItemsContainer = (ScrollView) getView().findViewById(R.id.my_summary_area);
 
+        mUiUpdater = new UiUpdater(mSessionId, mContext, getActivity());
+        mPassCodeView.setText("מס' חשבון: " + Integer.toString(mPassCode));
+
         if(mMainUserMode){
-            mUiUpdater = new UiUpdater(mSessionId, mContext, getActivity());
             mUiUpdater.StartMainUser(mDbPath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer, mBillRows, mMyTotalSumView, mCommonTotalSumView,
-                    mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
-            mPassCodeView.setText("מס' חשבון: " + Integer.toString(mPassCode));
+                    mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter, mScreenWidth);
         }else {
-            mUiUpdater = new UiUpdater(mSessionId, mContext, getActivity());
             mUiUpdater.StartSecondaryUser(mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer,  mMyTotalSumView, mCommonTotalSumView,
                     mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
-            mPassCodeView.setText("מס' חשבון: " + Integer.toString(mPassCode));
         }
     }
 

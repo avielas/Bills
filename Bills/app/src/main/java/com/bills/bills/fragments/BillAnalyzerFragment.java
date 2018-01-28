@@ -380,7 +380,7 @@ public class BillAnalyzerFragment extends Fragment {
                             index++;
                         }
                         BillsLog.Log(_sessionId, LogLevel.Info, "Parsing finished", LogsDestination.BothUsers, Tag);
-                        mListener.onBillAnalyzerSucceed(rows, mImage, mPassCode, mRelativeDbAndStoragePath);
+                        mListener.onBillAnalyzerSucceed(rows, mImage, mPassCode, mRelativeDbAndStoragePath, mDragRectViewWidth);
                     } catch (Exception e) {
                         String logMessage = "Exception has been thrown. StackTrace: " + e.getStackTrace() +
                                 "\nException Message: " + e.getMessage();
@@ -425,7 +425,7 @@ public class BillAnalyzerFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnBillAnalyzernteractionListener {
-        void onBillAnalyzerSucceed(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath);
+        void onBillAnalyzerSucceed(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath, int screenWidth);
         void onBillAnalyzerFailed();
         void onBillAnalyzerFailed(final byte[] image, String mRelativeDbAndStoragePath);
     }
