@@ -38,6 +38,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +79,8 @@ public class BillAnalyzerFragment extends Fragment {
     private Point TopRight;
     private Point BottomRight;
     private Point BottomLeft;
+
+    private Mat _matToPrintOn;
 
     private ViewTreeObserver mViewTreeObserver;
 
@@ -202,6 +205,15 @@ public class BillAnalyzerFragment extends Fragment {
                         BottomLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() * 2 / 3);
 
                     } else {
+                        //print point on image
+                        Mat matToPrintOn = billMat.clone();
+                        _matToPrintOn = billMat.clone();
+                        Imgproc.circle(matToPrintOn, topLeft, 30, new Scalar(0,255,0), 10);
+                        Imgproc.circle(matToPrintOn, topRight, 30, new Scalar(0,255,0), 10);
+                        Imgproc.circle(matToPrintOn, buttomRight, 30, new Scalar(0,255,0), 10);
+                        Imgproc.circle(matToPrintOn, buttomLeft, 30, new Scalar(0,255,0), 10);
+                        Utilities.SaveMatToPNGFile(_sessionId, matToPrintOn, Constants.BEFORE_BILLS_CORNER_PNG_PHOTO_PATH);
+
                         TopLeft = new android.graphics.Point(((Double) (topLeft.x)).intValue(),
                                 ((Double) (topLeft.y)).intValue());
 
@@ -294,6 +306,15 @@ public class BillAnalyzerFragment extends Fragment {
                 TopRight = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.TopRight, factorX, factorY);
                 BottomRight = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.ButtomRight, factorX, factorY);
                 BottomLeft = (android.graphics.Point) Utilities.GetScaledPoint(mDragRectView.ButtomLeft, factorX, factorY);
+
+                //print point on image
+                Mat matToPrintOn = _matToPrintOn;
+                Imgproc.circle(matToPrintOn, new org.opencv.core.Point(TopLeft.x, TopLeft.y), 30, new Scalar(0,255,0), 10);
+                Imgproc.circle(matToPrintOn, new org.opencv.core.Point(TopRight.x, TopRight.y), 30, new Scalar(0,255,0), 10);
+                Imgproc.circle(matToPrintOn, new org.opencv.core.Point(BottomRight.x, BottomRight.y), 30, new Scalar(0,255,0), 10);
+                Imgproc.circle(matToPrintOn, new org.opencv.core.Point(BottomLeft.x, BottomLeft.y), 30, new Scalar(0,255,0), 10);
+                Utilities.SaveMatToPNGFile(_sessionId, matToPrintOn, Constants.AFTER_BILLS_CORNER_PNG_PHOTO_PATH);
+
                 try {
                     if (!OpenCVLoader.initDebug()) {
                         String logMessage = "Failed to initialize OpenCV.";

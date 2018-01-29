@@ -19,7 +19,7 @@
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:largeHeap="true"
         android:screenOrientation="portrait">
-        <activity android:name=".BillsMainActivity" >
+        <activity android:name=".BillsMainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

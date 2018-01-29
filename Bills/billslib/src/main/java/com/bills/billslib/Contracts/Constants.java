@@ -23,6 +23,8 @@ public final class Constants
     public static final String FIREBASE_LOCAL_STORAGE = STORAGE_DIRECTORY + "/TesseractSample/fb_storage";
 //    public static final String CAMERA_CAPTURED_PNG_PHOTO_PATH = IMAGES_PATH + "/camera.png";
     public static final String WARPED_PNG_PHOTO_PATH = IMAGES_PATH + "/warped.png";
+    public static final String BEFORE_BILLS_CORNER_PNG_PHOTO_PATH = IMAGES_PATH + "/before_bill_corners.png";
+    public static final String AFTER_BILLS_CORNER_PNG_PHOTO_PATH = IMAGES_PATH + "/after_bill_corners.png";
     public static final String TESSDATA = "tessdata";
     public static final String TESSERACT_SAMPLE_DIRECTORY = STORAGE_DIRECTORY + "/TesseractSample/";
     public static final String TEST_OUTPUT_FILE = TESSERACT_SAMPLE_DIRECTORY + "/TestsOutput.txt";
