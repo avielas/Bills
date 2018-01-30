@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -86,8 +87,28 @@ public class BillSummarizerFragment extends Fragment {
         mMyItemsArea = (LinearLayout)getView().findViewById(R.id.my_items_area_linearlayout);
         mCommonTotalSumView = (TextView)getView().findViewById(R.id.common_total_sum_edittext);
         mMyTotalSumView = (TextView)getView().findViewById(R.id.my_total_sum_edittext);
+
         mTipPercentView = (EditText)getView().findViewById(R.id.tip_percent_edittext);
+        mTipPercentView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    InputMethodManager input = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    input.hideSoftInputFromWindow(mTipPercentView.getWindowToken(), 0);
+                }
+            }
+        });
+
         mTipSumView = (EditText)getView().findViewById(R.id.tip_sum_edittext);
+        mTipSumView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    InputMethodManager input = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    input.hideSoftInputFromWindow(mTipSumView.getWindowToken(), 0);
+                }
+            }
+        });
 
         mPassCodeView = (TextView)getView().findViewById(R.id.passcode_textview);
 
