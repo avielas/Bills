@@ -203,13 +203,13 @@
             android:layout_weight="0.21"
             android:background="@android:color/transparent"
             android:ems="10"
+            android:focusable="false"
+            android:fontFamily="@fonts/highland_gothic_flf"
             android:gravity="left|center_vertical"
-            android:hint="10"
+            android:hint="0"
             android:inputType="none"
             android:textColor="@color/summarizer_dark"
-            android:textColorHint="@color/summarizer_dark"
-            android:fontFamily="@fonts/highland_gothic_flf"
-            android:focusable="false"/>
+            android:textColorHint="@color/summarizer_dark" />
 
         <EditText
             android:id="@+id/tip_percent_edittext"
@@ -218,13 +218,13 @@
             android:layout_weight="0.21"
             android:background="@android:color/transparent"
             android:ems="10"
+            android:focusable="false"
+            android:fontFamily="@fonts/highland_gothic_flf"
             android:gravity="right|center"
-            android:hint="10"
+            android:hint="0"
             android:inputType="none"
             android:textColor="@color/summarizer_dark"
-            android:textColorHint="@color/summarizer_dark"
-            android:fontFamily="@fonts/highland_gothic_flf"
-            android:focusable="false"/>
+            android:textColorHint="@color/summarizer_dark" />
 
         <TextView
             android:layout_width="30dp"

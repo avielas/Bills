@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="64dp" />
+        android:layout_marginTop="64dp"
+        android:theme="@style/DefaultNumberPickerTheme"/>
 
     <Button
         android:id="@+id/cancel"
@@ -21,7 +22,8 @@
         android:layout_marginLeft="20dp"
         android:layout_marginTop="98dp"
         android:layout_toRightOf="@+id/numberPicker"
-        android:text="Cancel"/>
+        android:textColor="@color/summarizer_light"
+        android:text="בטל"/>
 
     <Button
         android:id="@+id/set"
@@ -31,5 +33,6 @@
         android:layout_alignBottom="@+id/cancel"
         android:layout_marginRight="16dp"
         android:layout_toLeftOf="@+id/numberPicker"
-        android:text="Set"/>
+        android:textColor="@color/summarizer_light"
+        android:text="בחר"/>
 </RelativeLayout>

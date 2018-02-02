@@ -5,11 +5,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -535,16 +538,19 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
     }
 
     private void InitTipFields() {
+        mTipPercent = 0;
+
         mMyPercentTipView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Show(mMyPercentTipView, "Tip Percent", 0, 100);
+                Show(TipFieldTipe.tipPercent, "Tip Percent", 0, 100);
             }
         });
+
         mMySumTipView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Show(mMySumTipView, "Tip Sum", 0, 1000);
+                Show(TipFieldTipe.tipSum, "Tip Sum", 0, 1000);
             }
         });
     }
@@ -709,8 +715,8 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
                     mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));
 
                     mMyTotalSum -= mMyLineNumToPriceMapper.get(index);
-                    mMyTotalSumView.setText(format(mMyTotalSum *(1+ mTipPercent)));
-                    mTipSum =  mMyTotalSum * mTipPercent;
+                    mMyTotalSumView.setText(format(mMyTotalSum *(1+ mTipPercent / 100)));
+                    mTipSum =  mMyTotalSum * mTipPercent / 100;
                     mMySumTipView.setText(format(mTipSum));
                     return;
                 }
@@ -756,8 +762,8 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
                     mMyTotalSum += mMyLineNumToPriceMapper.get(index);
 
 
-                    mMyTotalSumView.setText(format(mMyTotalSum *(1+ mTipPercent)));
-                    mTipSum =  mMyTotalSum * mTipPercent;
+                    mMyTotalSumView.setText(format(mMyTotalSum *(1+ mTipPercent / 100)));
+                    mTipSum =  mMyTotalSum * mTipPercent / 100;
                     mMySumTipView.setText(format(mTipSum));
                     return;
                 }
@@ -806,9 +812,9 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
     }
 
-    public void Show(final EditText editTextView, String title, int min, int max)
-    {
+    public void Show(final TipFieldTipe tipType, String title, int min, int max) {
         final Dialog dialog = new Dialog(mContext);
+        dialog.requestWindowFeature(Window.FEATURE_LEFT_ICON);
         dialog.setTitle(title);
         dialog.setContentView(R.layout.dialog);
         Button set = (Button) dialog.findViewById(R.id.set);
@@ -822,7 +828,21 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
         {
             @Override
             public void onClick(View v) {
-                editTextView.setText(String.valueOf(numberPicker.getValue())); //set the value to textview
+                switch (tipType){
+                    case tipPercent:
+                        mTipPercent = numberPicker.getValue();
+                        mTipSum = mTipPercent * mMyTotalSum / 100;
+                        break;
+                    case tipSum:
+                        mTipSum = numberPicker.getValue();
+                        mTipPercent = mMyTotalSum == 0 ? mTipPercent : mTipSum / mMyTotalSum * 100;
+                        break;
+                    default:
+                        break;
+                }
+                mMyPercentTipView.setText(format(mTipPercent));
+                mMySumTipView.setText(format(mTipSum));
+                mMyTotalSumView.setText(format(mMyTotalSum + mTipSum));
                 dialog.dismiss();
             }
         });
@@ -834,5 +854,10 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
             }
         });
         dialog.show();
+    }
+
+    private enum TipFieldTipe{
+        tipSum,
+        tipPercent
     }
 }
