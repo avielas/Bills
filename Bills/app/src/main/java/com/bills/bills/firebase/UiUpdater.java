@@ -165,6 +165,7 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
     ScrollView mCommonItemsContainer;
     ScrollView mMyItemsContainer;
 
+    private final Object mItemsUpdateLock = new Object();
     public void StartMainUser(String dbPath,
                               LinearLayout commonItemsArea,
                               LinearLayout myItemsArea,
@@ -216,28 +217,31 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Integer index = Integer.parseInt(dataSnapshot.getKey());
-                Integer newQuantity = dataSnapshot.getValue(Integer.class);
+                synchronized (mItemsUpdateLock) {
+                    Integer index = Integer.parseInt(dataSnapshot.getKey());
+                    Integer newQuantity = dataSnapshot.getValue(Integer.class);
 
-                if(newQuantity < mCommonLineToQuantityMapper.get(index)) {
-                    mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
-                }else{
-                    mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
-                }
-                mCommonTotalSumView.setText(format(mCommonTotalSum));
-
-                if(newQuantity <= 0){
-                    //nothing to update at common items view
-                    if(!mCommonLineNumToLineView.containsKey(index)){
-                        return;
+                    if (newQuantity < mCommonLineToQuantityMapper.get(index)) {
+                        mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
+                    } else {
+                        mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
                     }
+                    mCommonTotalSumView.setText(format(mCommonTotalSum));
 
-                    mCommonLineNumberToQuantityView.get(index).setText("0");
-                    mCommonLineNumToLineView.get(index).setVisibility(GONE);
-                    return;
-                }else{
-                    mCommonLineNumberToQuantityView.get(index).setText(""+newQuantity);
-                    mCommonLineToQuantityMapper.put(index, newQuantity);
+                    if (newQuantity <= 0) {
+                        //nothing to update at common items view
+                        if (!mCommonLineNumToLineView.containsKey(index)) {
+                            return;
+                        }
+
+                        mCommonLineNumberToQuantityView.get(index).setText("0");
+                        mCommonLineNumToLineView.get(index).setVisibility(GONE);
+                        mCommonLineToQuantityMapper.put(index, 0);
+                        return;
+                    } else {
+                        mCommonLineNumberToQuantityView.get(index).setText("" + newQuantity);
+                        mCommonLineToQuantityMapper.put(index, newQuantity);
+                    }
                 }
             }
 
@@ -441,32 +445,34 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Integer index = Integer.parseInt(dataSnapshot.getKey());
-                Integer newQuantity = dataSnapshot.getValue(Integer.class);
+                synchronized (mItemsUpdateLock) {
+                    Integer index = Integer.parseInt(dataSnapshot.getKey());
+                    Integer newQuantity = dataSnapshot.getValue(Integer.class);
 
-                mCommonItemsCount.addAndGet(newQuantity - mCommonLineToQuantityMapper.get(index));
-                if(newQuantity < mCommonLineToQuantityMapper.get(index)) {
-                    mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
-                    mCommonTotalSumView.setText(format(mCommonTotalSum));
-                }else if(newQuantity > mCommonLineToQuantityMapper.get(index)){
-                    mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
-                    mCommonTotalSumView.setText(format(mCommonTotalSum));
-                }
-
-                if(newQuantity <= 0){
-                    //nothing to update at common items view
-                    if(!mCommonLineNumToLineView.containsKey(index)){
-                        return;
+                    mCommonItemsCount.addAndGet(newQuantity - mCommonLineToQuantityMapper.get(index));
+                    if (newQuantity < mCommonLineToQuantityMapper.get(index)) {
+                        mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
+                    } else if (newQuantity > mCommonLineToQuantityMapper.get(index)) {
+                        mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
                     }
+                    mCommonTotalSumView.setText(format(mCommonTotalSum));
 
-                    mCommonLineNumberToQuantityView.get(index).setText("0");
-                    mCommonLineNumToLineView.get(index).setVisibility(GONE);
-                    return;
-                }else{
+                    if (newQuantity <= 0) {
+                        //nothing to update at common items view
+                        if (!mCommonLineNumToLineView.containsKey(index)) {
+                            return;
+                        }
 
-                    mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                    mCommonLineNumberToQuantityView.get(index).setText(""+newQuantity);
-                    mCommonLineToQuantityMapper.put(index, newQuantity);
+                        mCommonLineNumberToQuantityView.get(index).setText("0");
+                        mCommonLineNumToLineView.get(index).setVisibility(GONE);
+                        mCommonLineToQuantityMapper.put(index, 0);
+                        return;
+                    } else {
+
+                        mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
+                        mCommonLineNumberToQuantityView.get(index).setText("" + newQuantity);
+                        mCommonLineToQuantityMapper.put(index, newQuantity);
+                    }
                 }
             }
 
