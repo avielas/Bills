@@ -108,45 +108,7 @@ public class BillAnalyzerFragment extends Fragment {
         final Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                mDragRectView = getActivity().findViewById(R.id.dragRectView);
-                mViewTreeObserver = mDragRectView.getViewTreeObserver();
-                if (mViewTreeObserver.isAlive()) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
 
-                            mViewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                                @Override
-                                public void onGlobalLayout() {
-                                    mDragRectView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-                                    mDragRectViewWidth = mDragRectView.getWidth();
-                                    mDragRectViewHeight = mDragRectView.getHeight();
-
-                                    double factorX = 1.0 * mImageWidth / mDragRectViewWidth;
-                                    double factorY = 1.0 * mImageHeight / mDragRectViewHeight;
-
-                                    mDragRectView.TopLeft = (android.graphics.Point) Utilities.GetScaledPoint(TopLeft, factorX, factorY);
-                                    mDragRectView.TopRight = (android.graphics.Point) Utilities.GetScaledPoint(TopRight, factorX, factorY);
-                                    mDragRectView.ButtomRight = (android.graphics.Point) Utilities.GetScaledPoint(BottomRight, factorX, factorY);
-                                    mDragRectView.ButtomLeft = (android.graphics.Point) Utilities.GetScaledPoint(BottomLeft, factorX, factorY);
-
-//                                    android.graphics.Point zeroPoint = new android.graphics.Point(0,0);
-//                                    if(TopLeft == zeroPoint && TopRight == zeroPoint && BottomRight == zeroPoint && BottomLeft == zeroPoint){
-//                                        TopLeft = new Point(mDragRectViewWidth / 3, mDragRectViewHeight / 3);
-//                                        TopRight = new Point(2 * mDragRectViewWidth / 3, mDragRectViewHeight / 3);
-//                                        BottomLeft = new Point(mDragRectViewWidth / 3, 2 * mDragRectViewHeight / 3);
-//                                        BottomRight = new Point(2 * mDragRectViewWidth / 3, 2 * mDragRectViewHeight / 3);
-//                                    }
-
-                                    synchronized (mViewTreeObserver) {
-                                        mViewTreeObserver.notifyAll();
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
                 mHandler.post(mShowProgressDialog);
 
                 Mat billMat = null;
@@ -164,18 +126,7 @@ public class BillAnalyzerFragment extends Fragment {
                 Utils.matToBitmap(billMat, imageBmp);
 
                 final Bitmap imageForDRV = imageBmp;
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
 
-                        if (android.os.Build.VERSION.SDK_INT >= 16) {
-                            mDragRectView.setBackground(new BitmapDrawable(getActivity().getResources(), imageForDRV));
-                        } else {
-                            mDragRectView.setBackgroundDrawable(new BitmapDrawable(imageForDRV));
-                        }
-
-                    }
-                });
 
                 Button doneButton = getActivity().findViewById(R.id.dragRectFragmentDone);
                 doneButton.setOnClickListener(new View.OnClickListener() {
@@ -199,12 +150,6 @@ public class BillAnalyzerFragment extends Fragment {
                     org.opencv.core.Point topRight = new org.opencv.core.Point();
                     org.opencv.core.Point buttomLeft = new org.opencv.core.Point();
                     org.opencv.core.Point buttomRight = new org.opencv.core.Point();
-
-//                    //init rect to default
-//                    TopLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() / 3);
-//                    TopRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() / 3);
-//                    BottomRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() * 2 / 3);
-//                    BottomLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() * 2 / 3);
 
                     if (!areaDetector.GetBillCorners(billMat, topRight, buttomRight, buttomLeft, topLeft)) {
                         String logMessage = "failed to get bills corners";
@@ -230,12 +175,64 @@ public class BillAnalyzerFragment extends Fragment {
                     }
                 } catch (Exception ex) {
                     mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
+                    //init to default values
+                    if(null != imageBmp) {
+                        TopLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() / 3);
+                        TopRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() / 3);
+                        BottomRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() * 2 / 3);
+                        BottomLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() * 2 / 3);
+                    }
                     return;
                 } finally {
-                    mHandler.post(mHideProgressDialog);
+                    mDragRectView = getActivity().findViewById(R.id.dragRectView);
+                    mViewTreeObserver = mDragRectView.getViewTreeObserver();
+                    if (mViewTreeObserver.isAlive()) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                mViewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                                    @Override
+                                    public void onGlobalLayout() {
+                                        mDragRectView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                                        mDragRectViewWidth = mDragRectView.getWidth();
+                                        mDragRectViewHeight = mDragRectView.getHeight();
+
+                                        double factorX = 1.0 * mImageWidth / mDragRectViewWidth;
+                                        double factorY = 1.0 * mImageHeight / mDragRectViewHeight;
+
+                                        mDragRectView.TopLeft = (android.graphics.Point) Utilities.GetScaledPoint(TopLeft, factorX, factorY);
+                                        mDragRectView.TopRight = (android.graphics.Point) Utilities.GetScaledPoint(TopRight, factorX, factorY);
+                                        mDragRectView.ButtomRight = (android.graphics.Point) Utilities.GetScaledPoint(BottomRight, factorX, factorY);
+                                        mDragRectView.ButtomLeft = (android.graphics.Point) Utilities.GetScaledPoint(BottomLeft, factorX, factorY);
+
+                                        synchronized (mViewTreeObserver) {
+                                            mViewTreeObserver.notifyAll();
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if (android.os.Build.VERSION.SDK_INT >= 16) {
+                                mDragRectView.setBackground(new BitmapDrawable(getActivity().getResources(), imageForDRV));
+                            } else {
+                                mDragRectView.setBackgroundDrawable(new BitmapDrawable(imageForDRV));
+                            }
+
+                        }
+                    });
+
                     if (billMat != null) {
                         billMat.release();
                     }
+                    mHandler.post(mHideProgressDialog);
                 }
             }
         });
