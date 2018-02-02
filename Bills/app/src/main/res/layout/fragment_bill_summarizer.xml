@@ -205,10 +205,11 @@
             android:ems="10"
             android:gravity="left|center_vertical"
             android:hint="10"
-            android:inputType="number"
+            android:inputType="none"
             android:textColor="@color/summarizer_dark"
             android:textColorHint="@color/summarizer_dark"
-            android:fontFamily="@fonts/highland_gothic_flf" />
+            android:fontFamily="@fonts/highland_gothic_flf"
+            android:focusable="false"/>
 
         <EditText
             android:id="@+id/tip_percent_edittext"
@@ -219,10 +220,11 @@
             android:ems="10"
             android:gravity="right|center"
             android:hint="10"
-            android:inputType="number"
+            android:inputType="none"
             android:textColor="@color/summarizer_dark"
             android:textColorHint="@color/summarizer_dark"
-            android:fontFamily="@fonts/highland_gothic_flf" />
+            android:fontFamily="@fonts/highland_gothic_flf"
+            android:focusable="false"/>
 
         <TextView
             android:layout_width="30dp"

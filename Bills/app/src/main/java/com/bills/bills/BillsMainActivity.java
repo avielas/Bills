@@ -28,6 +28,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -81,7 +84,6 @@ public class BillsMainActivity extends MainActivityBase implements
         SetDefaultUncaughtExceptionHandler();
         setContentView(R.layout.activity_bills_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
         mBillSummarizerFragment = new BillSummarizerFragment();
         mWelcomeFragment = new WelcomeScreenFragment();
         mCameraFragment = new CameraFragment(mSessionId);
@@ -266,7 +268,7 @@ public class BillsMainActivity extends MainActivityBase implements
             public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath, String userUid) {
                 InitPrivateSessionSecondUser(userUid, relativeDbAndStoragePath);
                 mBillSummarizerFragment.Init(mSessionId,
-                        BillsMainActivity.this.getApplicationContext(),
+                        BillsMainActivity.this,
                         passCode,
                         "users/" + relativeDbAndStoragePath + "/" + RowsDbKey,
                         "BillsPerUser/" + relativeDbAndStoragePath);
@@ -321,10 +323,18 @@ public class BillsMainActivity extends MainActivityBase implements
                         try  {
                             GMailSender sender = new GMailSender("billsplitapplication@gmail.com", "billsplitapplicationisthebest");
                             try {
+                                String cause = paramThrowable.getCause() != null ? paramThrowable.getCause().toString() : "unknown cause";
+                                String message = paramThrowable.getMessage() != null ? paramThrowable.getMessage().toString() : "unknown message";
+                                StringWriter sw = new StringWriter();
+                                PrintWriter pw = new PrintWriter(sw);
+                                paramThrowable.printStackTrace(pw);
+                                String stackTrace = sw.toString();
                                 String userDetails = Build.MANUFACTURER + "-" + Build.MODEL +
                                         ". OS is " + Build.VERSION.RELEASE;
                                 sender.SendEmail("Uncaught exception has been thrown from " + userDetails,
-                                        paramThrowable.getMessage().toString(),
+                                        "\nMessage: " + message +
+                                             "\n\nCause: " + cause +
+                                             "\n\nStackTrace: " + stackTrace,
                                         "billsplitapplication@gmail.com",
                                         "billsplitapplication@gmail.com");
                             } catch (MessagingException e) {
