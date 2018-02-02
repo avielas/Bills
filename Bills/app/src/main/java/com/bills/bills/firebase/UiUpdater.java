@@ -1,19 +1,20 @@
 package com.bills.bills.firebase;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Space;
@@ -55,7 +56,7 @@ import static android.view.View.GONE;
  * Created by michaelvalershtein on 01/08/2017.
  */
 
-public class UiUpdater implements View.OnClickListener {
+public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChangeListener {
     private static String Tag = UiUpdater.class.getName();
     private final String ImageWidth = "width";
     private final String ImageHeight = "height";
@@ -534,65 +535,18 @@ public class UiUpdater implements View.OnClickListener {
     }
 
     private void InitTipFields() {
-        mMySumTipView.setText("0");
-        mMyPercentTipView.addTextChangedListener(new TextWatcher() {
-            public void afterTextChanged(Editable s) {
-                if (s.toString().equalsIgnoreCase("")) {
-                    mTipPercent = 0;
-                    mTipSum = 0;
-                    mMySumTipView.setText("0");
-                } else {
-
-                    double newTip = Double.parseDouble(s.toString());
-                    if (newTip != mTipPercent) {
-                        String curTip = s.toString();
-                        mTipPercent = (1.0 * newTip) / 100;
-                        mTipSum = mMyTotalSum * mTipPercent;
-                        mMySumTipView.setText(format(mTipSum));
-                        mMyTotalSumView.setText(format(mMyTotalSum + mTipSum));
-                    }
-                }
-
-            }
-
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-
-            }
-
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
+        mMyPercentTipView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Show(mMyPercentTipView, "Tip Percent", 0, 100);
             }
         });
-
-        mMySumTipView.addTextChangedListener(new TextWatcher() {
-            public void afterTextChanged(Editable s) {
-                if (s.toString().equalsIgnoreCase("")) {
-                    mTipSum = 0;
-                    mTipPercent = 0;
-                    mMyPercentTipView.setText("0");
-                } else {
-                    double newTip = Double.parseDouble(s.toString());
-                    if (newTip != mTipSum) {
-                        mTipPercent = (1.0 * newTip) / mMyTotalSum;
-                        mMyPercentTipView.setText(format(mTipPercent));
-                        mMyTotalSumView.setText(format(mMyTotalSum + newTip));
-
-                    }
-                }
-
-            }
+        mMySumTipView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+            public void onClick(View v) {
+                Show(mMySumTipView, "Tip Sum", 0, 1000);
             }
         });
-
     }
 
     private int GetRowUiIndex(Integer newRowIndex) {
@@ -846,5 +800,39 @@ public class UiUpdater implements View.OnClickListener {
         nf.setMinimumFractionDigits(2);
         nf.setMaximumFractionDigits(2);
         return nf.format(d);
+    }
+
+    @Override
+    public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+    }
+
+    public void Show(final EditText editTextView, String title, int min, int max)
+    {
+        final Dialog dialog = new Dialog(mContext);
+        dialog.setTitle(title);
+        dialog.setContentView(R.layout.dialog);
+        Button set = (Button) dialog.findViewById(R.id.set);
+        Button cancel = (Button) dialog.findViewById(R.id.cancel);
+        final NumberPicker numberPicker = (NumberPicker) dialog.findViewById(R.id.numberPicker);
+        numberPicker.setMaxValue(max); // max value 100
+        numberPicker.setMinValue(min);   // min value 0
+        numberPicker.setWrapSelectorWheel(false);
+        numberPicker.setOnValueChangedListener(this);
+        set.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                editTextView.setText(String.valueOf(numberPicker.getValue())); //set the value to textview
+                dialog.dismiss();
+            }
+        });
+        cancel.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss(); // dismiss the dialog
+            }
+        });
+        dialog.show();
     }
 }

@@ -268,7 +268,7 @@ public class BillsMainActivity extends MainActivityBase implements
             public void OnPassCodeResovled(Integer passCode, String relativeDbAndStoragePath, String userUid) {
                 InitPrivateSessionSecondUser(userUid, relativeDbAndStoragePath);
                 mBillSummarizerFragment.Init(mSessionId,
-                        BillsMainActivity.this.getApplicationContext(),
+                        BillsMainActivity.this,
                         passCode,
                         "users/" + relativeDbAndStoragePath + "/" + RowsDbKey,
                         "BillsPerUser/" + relativeDbAndStoragePath);
@@ -323,6 +323,8 @@ public class BillsMainActivity extends MainActivityBase implements
                         try  {
                             GMailSender sender = new GMailSender("billsplitapplication@gmail.com", "billsplitapplicationisthebest");
                             try {
+                                String cause = paramThrowable.getCause() != null ? paramThrowable.getCause().toString() : "unknown cause";
+                                String message = paramThrowable.getMessage() != null ? paramThrowable.getMessage().toString() : "unknown message";
                                 StringWriter sw = new StringWriter();
                                 PrintWriter pw = new PrintWriter(sw);
                                 paramThrowable.printStackTrace(pw);
@@ -330,8 +332,8 @@ public class BillsMainActivity extends MainActivityBase implements
                                 String userDetails = Build.MANUFACTURER + "-" + Build.MODEL +
                                         ". OS is " + Build.VERSION.RELEASE;
                                 sender.SendEmail("Uncaught exception has been thrown from " + userDetails,
-                                        "\nMessage: " + paramThrowable.getMessage().toString()+
-                                             "\n\nCause: " + paramThrowable.getCause().toString() +
+                                        "\nMessage: " + message +
+                                             "\n\nCause: " + cause +
                                              "\n\nStackTrace: " + stackTrace,
                                         "billsplitapplication@gmail.com",
                                         "billsplitapplication@gmail.com");
