@@ -95,6 +95,25 @@ public class UiUpdater implements View.OnClickListener {
     private int mScreenWidth = Integer.MIN_VALUE;
     private Context mContext;
 
+    private TextView mCommonTotalSumView;
+    private TextView mMyTotalSumView;
+    private EditText mMyPercentTipView;
+    private EditText mMySumTipView;
+    private double mTipPercent = 0.1;
+    private double mTipSum = 0;
+
+    private TextView mCommonItemsCountTV = null;
+    private AtomicInteger mCommonItemsCount = new AtomicInteger(0);
+
+    private TextView mMyItemsCountTV = null;
+    private AtomicInteger mMyItemsCount = new AtomicInteger(0);
+
+    private ImageView mScreenSplitter;
+
+    ScrollView mCommonItemsContainer;
+    ScrollView mMyItemsContainer;
+
+
     public UiUpdater(final UUID sessionId, final Context context, final Activity activity) {
         mSessionId = sessionId;
         mContext = context;
@@ -142,24 +161,6 @@ public class UiUpdater implements View.OnClickListener {
         });
         screenWidthUpdater.start();
     }
-
-    private TextView mCommonTotalSumView;
-    private TextView mMyTotalSumView;
-    private EditText mMyPercentTipView;
-    private EditText mMySumTipView;
-    private double mTipPercent = 0.1;
-    private double mTipSum = 0;
-
-    private TextView mCommonItemsCountTV = null;
-    private AtomicInteger mCommonItemsCount = new AtomicInteger(0);
-
-    private TextView mMyItemsCountTV = null;
-    private AtomicInteger mMyItemsCount = new AtomicInteger(0);
-
-    private ImageView mScreenSplitter;
-
-    ScrollView mCommonItemsContainer;
-    ScrollView mMyItemsContainer;
 
     public void StartMainUser(String dbPath,
                               LinearLayout commonItemsArea,
@@ -217,7 +218,7 @@ public class UiUpdater implements View.OnClickListener {
 
                 if(newQuantity < mCommonLineToQuantityMapper.get(index)) {
                     mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
-                }else{
+                }else if(newQuantity > mCommonLineToQuantityMapper.get(index)){
                     mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
                 }
                 mCommonTotalSumView.setText(format(mCommonTotalSum));
@@ -443,11 +444,10 @@ public class UiUpdater implements View.OnClickListener {
                 mCommonItemsCount.addAndGet(newQuantity - mCommonLineToQuantityMapper.get(index));
                 if(newQuantity < mCommonLineToQuantityMapper.get(index)) {
                     mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
-                    mCommonTotalSumView.setText(format(mCommonTotalSum));
                 }else if(newQuantity > mCommonLineToQuantityMapper.get(index)){
                     mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
-                    mCommonTotalSumView.setText(format(mCommonTotalSum));
                 }
+                mCommonTotalSumView.setText(format(mCommonTotalSum));
 
                 if(newQuantity <= 0){
                     //nothing to update at common items view
@@ -538,21 +538,22 @@ public class UiUpdater implements View.OnClickListener {
         mMyPercentTipView.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 if (s.toString().equalsIgnoreCase("")) {
-                    mTipPercent = 0;
-                    mTipSum = 0;
-                    mMySumTipView.setText("0");
+                    mMyTotalSumView.setText(format(mMyTotalSum));
                 } else {
-
-                    double newTip = Double.parseDouble(s.toString());
-                    if (newTip != mTipPercent) {
-                        String curTip = s.toString();
-                        mTipPercent = (1.0 * newTip) / 100;
-                        mTipSum = mMyTotalSum * mTipPercent;
-                        mMySumTipView.setText(format(mTipSum));
-                        mMyTotalSumView.setText(format(mMyTotalSum + mTipSum));
-                    }
+                    try {
+                        double newTip = Double.parseDouble(s.toString());
+                        if (newTip != mTipPercent) {
+                            String curTip = s.toString();
+                            mTipPercent = (1.0 * newTip) / 100;
+                            if(mTipPercent != mMyTotalSum * mTipPercent) {
+                                mTipSum = mMyTotalSum * mTipPercent;
+                                mMySumTipView.setText(format(mTipSum));
+                            }
+                            mMyPercentTipView.setText(format(mTipPercent * 100));
+                            mMyTotalSumView.setText(format(mMyTotalSum + mTipSum));
+                        }
+                    }catch (Exception ex){}
                 }
-
             }
 
             public void beforeTextChanged(CharSequence s, int start,
@@ -565,22 +566,25 @@ public class UiUpdater implements View.OnClickListener {
             }
         });
 
+        mMySumTipView.setText("0");
         mMySumTipView.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 if (s.toString().equalsIgnoreCase("")) {
-                    mTipSum = 0;
-                    mTipPercent = 0;
-                    mMyPercentTipView.setText("0");
+                    mMyTotalSumView.setText(format(mMyTotalSum));
                 } else {
-                    double newTip = Double.parseDouble(s.toString());
-                    if (newTip != mTipSum) {
-                        mTipPercent = (1.0 * newTip) / mMyTotalSum;
-                        mMyPercentTipView.setText(format(mTipPercent));
-                        mMyTotalSumView.setText(format(mMyTotalSum + newTip));
-
-                    }
+                    try {
+                        double newTip = Double.parseDouble(s.toString());
+                        if (newTip != mTipSum && mMyTotalSum != 0) {
+                            if(mTipPercent != (100.0 * newTip) / mMyTotalSum) {
+                                mTipPercent = (100.0 * newTip) / mMyTotalSum;
+                                mMyPercentTipView.setText(format(mTipPercent));
+                            }
+                            mTipSum = newTip;
+                            mMySumTipView.setText(format(mTipSum));
+                            mMyTotalSumView.setText(format(mMyTotalSum + mTipSum));
+                        }
+                    }catch (Exception ex){}
                 }
-
             }
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
