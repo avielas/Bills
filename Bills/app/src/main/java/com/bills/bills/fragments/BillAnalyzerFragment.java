@@ -116,7 +116,10 @@ public class BillAnalyzerFragment extends Fragment {
                 try {
                     billMat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, mImage);
                 } catch (Exception ex) {
-
+                    String logMessage = "failed to convert bytes to mat or rotating the image";
+                    String toastMessage = "משהו השתבש... נא לנסות שוב";
+                    ReportError(logMessage, toastMessage);
+                    mListener.onBillAnalyzerFailed(mImage, mRelativeDbAndStoragePath);
                 }
 
                 mImageWidth = billMat.width();
@@ -184,6 +187,17 @@ public class BillAnalyzerFragment extends Fragment {
                     }
                     return;
                 } finally {
+                    Point zeroPoint = new Point(0, 0);
+                    if(TopLeft.equals(zeroPoint)    && TopRight.equals(zeroPoint) &&
+                       BottomLeft.equals(zeroPoint) && BottomRight.equals(zeroPoint)) {
+                       String logMessage = "failed to get bills corners";
+                       String toastMessage = "אזור החשבון לא זוהה, נא לסמן את אזור החשבונית";
+                       ReportError(logMessage, toastMessage);
+                       TopLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() / 3);
+                       TopRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() / 3);
+                       BottomRight = new android.graphics.Point(imageBmp.getWidth() * 2 / 3, imageBmp.getHeight() * 2 / 3);
+                       BottomLeft = new android.graphics.Point(imageBmp.getWidth() / 3, imageBmp.getHeight() * 2 / 3);
+                    }
                     mDragRectView = getActivity().findViewById(R.id.dragRectView);
                     mViewTreeObserver = mDragRectView.getViewTreeObserver();
                     if (mViewTreeObserver.isAlive()) {
