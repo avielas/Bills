@@ -5,8 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -98,10 +97,12 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
 
     private int mScreenWidth = Integer.MIN_VALUE;
     private Context mContext;
+    private Activity mActivity;
 
     public UiUpdater(final UUID sessionId, final Context context, final Activity activity) {
         mSessionId = sessionId;
         mContext = context;
+        mActivity = activity;
         final RelativeLayout summarizerRootLayout = activity.findViewById(R.id.bill_summarizer_frame_layout);
 
         final ViewTreeObserver viewTreeObserver = summarizerRootLayout.getViewTreeObserver();
@@ -165,6 +166,7 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
     ScrollView mCommonItemsContainer;
     ScrollView mMyItemsContainer;
 
+    TextView mDotsTextView;
     private final Object mItemsUpdateLock = new Object();
     public void StartMainUser(String dbPath,
                               LinearLayout commonItemsArea,
@@ -559,6 +561,8 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
                 Show(TipFieldTipe.tipSum, "Tip Sum", 0, 1000);
             }
         });
+
+        mDotsTextView = new TextView(mContext);
     }
 
     private int GetRowUiIndex(Integer newRowIndex) {
@@ -681,6 +685,7 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
 
     @Override
     public void onClick(View v) {
+
         //move item from my Bill to common Bill
         if(((LinearLayout)v.getParent()).getId() == R.id.my_items_area_linearlayout) {
             mMyItemsCountTV.setText("[" + Integer.toString(mMyItemsCount.decrementAndGet()) + "]");
@@ -865,5 +870,126 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
     private enum TipFieldTipe{
         tipSum,
         tipPercent
+    }
+
+    private void StartDots(){
+        mCommonItemsArea.addView(mDotsTextView);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 100; i++) {
+                    //shows:  .->..->...
+                    for (int j = 0; j < 3; j++) {
+
+                        String s = "";
+                        for(int k = 0; k < j; k++){
+                            s += ". ";
+                        }
+                        for(int k = j; k < 3; k++){
+                            s += " ";
+                        }
+                        final String fs = s;
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    mDotsTextView.setText(fs);
+                                    synchronized (mDotsTextView) {
+                                        mDotsTextView.notifyAll();
+                                    }
+                                }catch(Exception ex){
+                                    ex.printStackTrace();
+                                }
+                            }
+                        });
+                        try {
+                            Thread.sleep(300);
+                        } catch (InterruptedException e) {
+                            Log.d("", "");
+                        }
+                        try{
+                            mDotsTextView.wait(300);
+                        }catch(Exception ex){
+                            ex.printStackTrace();
+                        }
+
+                    }
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                mDotsTextView.setText("");
+                                synchronized (mDotsTextView) {
+                                    mDotsTextView.notifyAll();
+                                }
+                            }catch(Exception ex){
+                                ex.printStackTrace();
+
+                            }
+                        }
+                    });
+                    try{
+                        mDotsTextView.wait(1000);
+                    }catch(Exception ex){
+                        ex.printStackTrace();
+                    }
+
+                    for(int j = 0; j < 3;j++){
+                        String s = "";
+                        for(int k = 0; k < j; k++){
+                            s += " ";
+                        }
+                        for(int k = j; k < 3; k++){
+                            s += ". ";
+                        }
+                        final String fs = s;
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    mDotsTextView.setText(fs);
+                                    synchronized (mDotsTextView) {
+                                        mDotsTextView.notifyAll();
+                                    }
+                                }catch(Exception ex){
+                                    ex.printStackTrace();
+                                }
+                            }
+                        });
+                        try{
+                            mDotsTextView.wait(1000);
+                        }catch(Exception ex){
+                            ex.printStackTrace();
+                        }
+                        try {
+                            Thread.sleep(300);
+                        } catch (InterruptedException e) {
+                            Log.d("", "");
+                        }
+                    }
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                mDotsTextView.setText("");
+                                synchronized (mDotsTextView) {
+                                    mDotsTextView.notifyAll();
+                                }
+                            }catch(Exception ex){
+                                ex.printStackTrace();
+
+                            }
+                        }
+                    });
+                    try{
+                        mDotsTextView.wait(1000);
+                    }catch(Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        });
+        t.start();
+
     }
 }
