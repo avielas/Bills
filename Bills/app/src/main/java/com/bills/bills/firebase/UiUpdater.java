@@ -867,6 +867,9 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
         dialog.show();
     }
 
+    public void MoveMyItemsToCommonItems() {
+    }
+
     private enum TipFieldTipe{
         tipSum,
         tipPercent

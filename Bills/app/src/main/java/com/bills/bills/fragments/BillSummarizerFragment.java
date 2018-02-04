@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,8 +94,10 @@ public class BillSummarizerFragment extends Fragment{
         mTipPercentView = (EditText)getView().findViewById(R.id.tip_percent_edittext);
         mTipSumView = (EditText)getView().findViewById(R.id.tip_sum_edittext);
         mPassCodeView = (TextView)getView().findViewById(R.id.passcode_textview);
+
         mCommonItemsCount = (TextView)getView().findViewById(R.id.common_items_count);
         mMyItemsCount = (TextView)getView().findViewById(R.id.my_items_count);
+
         mScreenSpliter = (ImageView)getView().findViewById(R.id.summary_screen_spliter);
 
         ScrollView mCommonItemsContainer = (ScrollView) getView().findViewById(R.id.common_summary_area);
@@ -110,6 +113,21 @@ public class BillSummarizerFragment extends Fragment{
             mUiUpdater.StartSecondaryUser(mDbPath, mStoragePath, mCommonItemsArea, mMyItemsArea, mCommonItemsContainer, mMyItemsContainer,  mMyTotalSumView, mCommonTotalSumView,
                     mTipPercentView, mTipSumView, mCommonItemsCount, mMyItemsCount, mScreenSpliter);
         }
+
+        getView().setFocusableInTouchMode(true);
+        getView().requestFocus();
+        getView().setOnKeyListener( new View.OnKeyListener()
+        {
+            @Override
+            public boolean onKey( View v, int keyCode, KeyEvent event )
+            {
+            if(keyCode == KeyEvent.KEYCODE_BACK){
+                mUiUpdater.MoveMyItemsToCommonItems();
+                return true;
+            }
+            return false;
+            }
+        } );
     }
 
     @Override
