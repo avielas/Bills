@@ -121,10 +121,10 @@ public class BillSummarizerFragment extends Fragment{
             @Override
             public boolean onKey( View v, int keyCode, KeyEvent event )
             {
-            if(keyCode == KeyEvent.KEYCODE_BACK){
-                mUiUpdater.MoveMyItemsToCommonItems();
-                return true;
-            }
+//            if(keyCode == KeyEvent.KEYCODE_BACK){
+//                mUiUpdater.MoveMyItemsToCommonItems();
+//                return true;
+//            }
             return false;
             }
         } );
