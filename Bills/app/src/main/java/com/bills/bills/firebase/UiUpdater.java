@@ -21,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bills.bills.R;
 import com.bills.billslib.Contracts.BillRow;
@@ -34,6 +35,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
@@ -55,7 +59,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static android.view.View.GONE;
 
 /**
- * Created by michaelvalershtein on 01/08/2017.
+ * Created by michaelvalershtein on 23/02/2018.
  */
 
 public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChangeListener {
@@ -98,6 +102,27 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
     private int mScreenWidth = Integer.MIN_VALUE;
     private Context mContext;
     private Activity mActivity;
+
+    private TextView mCommonTotalSumView;
+    private TextView mMyTotalSumView;
+    private EditText mMyPercentTipView;
+    private EditText mMySumTipView;
+    private double mTipPercent = 0.1;
+    private double mTipSum = 0;
+
+    private TextView mCommonItemsCountTV = null;
+    private AtomicInteger mCommonItemsCount = new AtomicInteger(0);
+
+    private TextView mMyItemsCountTV = null;
+    private AtomicInteger mMyItemsCount = new AtomicInteger(0);
+
+    private ImageView mScreenSplitter;
+
+    ScrollView mCommonItemsContainer;
+    ScrollView mMyItemsContainer;
+
+    TextView mDotsTextView;
+    private final Object mItemsUpdateLock = new Object();
 
     public UiUpdater(final UUID sessionId, final Context context, final Activity activity) {
         mSessionId = sessionId;
@@ -148,26 +173,7 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
         screenWidthUpdater.start();
     }
 
-    private TextView mCommonTotalSumView;
-    private TextView mMyTotalSumView;
-    private EditText mMyPercentTipView;
-    private EditText mMySumTipView;
-    private double mTipPercent = 0.1;
-    private double mTipSum = 0;
 
-    private TextView mCommonItemsCountTV = null;
-    private AtomicInteger mCommonItemsCount = new AtomicInteger(0);
-
-    private TextView mMyItemsCountTV = null;
-    private AtomicInteger mMyItemsCount = new AtomicInteger(0);
-
-    private ImageView mScreenSplitter;
-
-    ScrollView mCommonItemsContainer;
-    ScrollView mMyItemsContainer;
-
-    TextView mDotsTextView;
-    private final Object mItemsUpdateLock = new Object();
     public void StartMainUser(String dbPath,
                               LinearLayout commonItemsArea,
                               LinearLayout myItemsArea,
@@ -223,11 +229,10 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
                     Integer index = Integer.parseInt(dataSnapshot.getKey());
                     Integer newQuantity = dataSnapshot.getValue(Integer.class);
 
-                    if (newQuantity < mCommonLineToQuantityMapper.get(index)) {
-                        mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
-                    } else {
-                        mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
-                    }
+                    Integer curQuantity = mCommonLineToQuantityMapper.get(index);
+                    int quanttityDiff = newQuantity - curQuantity;
+                    mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index) * quanttityDiff;
+
                     mCommonTotalSumView.setText(format(mCommonTotalSum));
 
                     if (newQuantity <= 0) {
@@ -294,6 +299,33 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
 
         mFirebaseStorage = FirebaseStorage.getInstance();
         mBillsPerUserStorageReference = mFirebaseStorage.getReference().child(storagePath);
+
+        mUsersDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int commonQuanity = 0;
+                double commonTotalSum = 0;
+                for(DataSnapshot childData : dataSnapshot.getChildren()){
+                    Double linePrice = mCommonLineNumberToPriceMapper.get(Integer.parseInt(childData.getKey()));
+                    if(linePrice == null){
+                        continue;
+                    }
+                    commonQuanity += childData.getValue(Integer.class);
+                    commonTotalSum += childData.getValue(Integer.class) * linePrice;
+                }
+                mCommonTotalSum = commonTotalSum;
+                mCommonItemsCount.set(commonQuanity);
+
+                mCommonTotalSumView.setText(format(mCommonTotalSum));
+                mCommonItemsCount.set(commonQuanity);
+                mCommonItemsCountTV.setText("[" + Integer.toString(mCommonItemsCount.get()) + "]");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         mUsersDatabaseReference.addChildEventListener(new ChildEventListener() {
             @Override
@@ -451,13 +483,7 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
                     Integer index = Integer.parseInt(dataSnapshot.getKey());
                     Integer newQuantity = dataSnapshot.getValue(Integer.class);
 
-                    mCommonItemsCount.addAndGet(newQuantity - mCommonLineToQuantityMapper.get(index));
-                    if (newQuantity < mCommonLineToQuantityMapper.get(index)) {
-                        mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
-                    } else if (newQuantity > mCommonLineToQuantityMapper.get(index)) {
-                        mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
-                    }
-                    mCommonTotalSumView.setText(format(mCommonTotalSum));
+                    Integer curQuantity = mCommonLineToQuantityMapper.get(index);
 
                     if (newQuantity <= 0) {
                         //nothing to update at common items view
@@ -551,14 +577,14 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
         mMyPercentTipView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Show(TipFieldTipe.tipPercent, "Tip Percent", 0, 100);
+                Show(UiUpdater.TipFieldTipe.tipPercent, "Tip Percent", 0, 100);
             }
         });
 
         mMySumTipView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Show(TipFieldTipe.tipSum, "Tip Sum", 0, 1000);
+                Show(UiUpdater.TipFieldTipe.tipSum, "Tip Sum", 0, 1000);
             }
         });
 
@@ -683,99 +709,149 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
         mMyLineNumberToQuantityView.put(row.GetRowIndex(), myQuantityView);
     }
 
+    /**
+     * Expected behavior:
+     *  - MyItem clicked:
+     *      - UI updated instantly
+     *      - DB updated in background
+     *  - CommonIten clicked:
+     *      - clicked item grayed out
+     *      - flickering three dots appear next to clicked item
+     *      - after DB updated, UI updated as follows:
+     *          - if transaction succeed the item is added to MyItems and removed from CommonItems
+     *          - if transaction fails the item removed from CommonItems and message to user pops out
+     */
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
+        synchronized (mItemsUpdateLock) {
+            //move item from my Bill to common Bill
+            if (((LinearLayout) v.getParent()).getId() == R.id.my_items_area_linearlayout) {
+                //find relevant entry
+                for (final HashMap.Entry<Integer, LinearLayout> entry : mMyLineNumToLineView.entrySet()) {
+                    if (entry.getValue() == v) {
+                        final Integer index = entry.getKey();
+                        mMyItemsCountTV.setText("[" + Integer.toString(mMyItemsCount.decrementAndGet()) + "]");
 
-        //move item from my Bill to common Bill
-        if(((LinearLayout)v.getParent()).getId() == R.id.my_items_area_linearlayout) {
-            mMyItemsCountTV.setText("[" + Integer.toString(mMyItemsCount.decrementAndGet()) + "]");
-            mCommonItemsCountTV.setText("[" + Integer.toString(mCommonItemsCount.incrementAndGet()) + "]");
-            //find relevant entry
-            for (HashMap.Entry<Integer, LinearLayout> entry : mMyLineNumToLineView.entrySet()) {
-                if(entry.getValue() == v){
-                    Integer index = entry.getKey();
-                    mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
-                    mCommonTotalSumView.setText(format(mCommonTotalSum));
+                        if (mMyLineToQuantityMapper.get(index) == 1) { // Line should be removed from my view and added to common view
+                            mMyLineNumToLineView.get(index).setVisibility(GONE);
+                            mMyLineToQuantityMapper.put(index, 0);
+                            mMyLineNumberToQuantityView.get(index).setText("0");
+                            BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " removed from My view and added to Common view", LogsDestination.BothUsers, Tag);
+                        } else if (mMyLineToQuantityMapper.get(index) > 1) { //Line should be moved to common view
+                            mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) - 1);
+                            mMyLineNumberToQuantityView.get(index).setText("" + mMyLineToQuantityMapper.get(index));
+                            BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " removed from My view and added to Common view", LogsDestination.BothUsers, Tag);
+                            mMyLineNumberToQuantityView.get(index).setText("" + mMyLineToQuantityMapper.get(index));
+                            BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " moved from My to Common view (in case of quantity > 1)", LogsDestination.BothUsers, Tag);
+                        }
 
-                    if(mMyLineToQuantityMapper.get(index) == 1){ // Line should be removed from my view and added to common view
-                        mMyLineNumToLineView.get(index).setVisibility(GONE);
-                        mMyLineToQuantityMapper.put(index, 0);
-                        mMyLineNumberToQuantityView.get(index).setText("0");
-                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " removed from My view and added to Common view", LogsDestination.BothUsers, Tag);
-                    }else if(mMyLineToQuantityMapper.get(index) > 1){ //Line should be moved to common view
-                        mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) - 1);
-                        mMyLineNumberToQuantityView.get(index).setText("" + mMyLineToQuantityMapper.get(index));
-                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " removed from My view and added to Common view", LogsDestination.BothUsers, Tag);
-                        mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
-                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " moved from My to Common view (in case of quantity > 1)", LogsDestination.BothUsers, Tag);
+                        mMyTotalSum -= mMyLineNumToPriceMapper.get(index);
+                        mMyTotalSumView.setText(format(mMyTotalSum * (1 + mTipPercent / 100)));
+                        mTipSum = mMyTotalSum * mTipPercent / 100;
+                        mMySumTipView.setText(format(mTipSum));
+
+                        mUsersDatabaseReference.runTransaction(new Transaction.Handler() {
+                            @Override
+                            public Transaction.Result doTransaction(MutableData mutableData) {
+                                Integer curValue = mutableData.child(Integer.toString(index)).getValue(Integer.class);
+                                mutableData.child(Integer.toString(index)).setValue(curValue + 1);
+                                return Transaction.success(mutableData);
+                            }
+
+                            @Override
+                            public void onComplete(DatabaseError databaseError, boolean commited, DataSnapshot dataSnapshot) {
+//                                if(databaseError == null && commited) {
+//
+//                                    mCommonItemsCountTV.setText("[" + Integer.toString(mCommonItemsCount.incrementAndGet()) + "]");
+//
+//                                    mCommonTotalSum += mCommonLineNumberToPriceMapper.get(index);
+//                                    mCommonTotalSumView.setText(format(mCommonTotalSum));
+//
+//                                    //Line in common view should be updated
+//                                    if (mCommonLineToQuantityMapper.get(index) > 0) {
+//                                        mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
+//                                        mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) + 1);
+//                                        mCommonLineNumberToQuantityView.get(index).setText("" + mCommonLineToQuantityMapper.get(index));
+//                                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + ", in Common view, updated", LogsDestination.BothUsers, Tag);
+//                                    } else { //Line in common view shlould be added
+//                                        mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
+//                                        mCommonLineNumberToQuantityView.get(index).setText("1");
+//                                        mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) + 1);
+//                                        BillsLog.Log(mSessionId, LogLevel.Info, "Added line " + index + " to Common view", LogsDestination.BothUsers, Tag);
+//                                    }
+//
+//                                    return;
+//                                }
+                            }
+                        });
                     }
-
-                    //Line in common view should be updated
-                    if(mCommonLineToQuantityMapper.get(index) > 0){
-                        mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                        mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index ) + 1);
-                        mCommonLineNumberToQuantityView.get(index).setText(""+mCommonLineToQuantityMapper.get(index));
-                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + ", in Common view, updated", LogsDestination.BothUsers, Tag);
-                    }else{ //Line in common view shlould be added
-                        mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                        mCommonLineNumberToQuantityView.get(index).setText("1");
-                        mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) + 1);
-                        BillsLog.Log(mSessionId, LogLevel.Info, "Added line " + index + " to Common view", LogsDestination.BothUsers, Tag);
-                    }
-
-                    mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));
-
-                    mMyTotalSum -= mMyLineNumToPriceMapper.get(index);
-                    mMyTotalSumView.setText(format(mMyTotalSum *(1+ mTipPercent / 100)));
-                    mTipSum =  mMyTotalSum * mTipPercent / 100;
-                    mMySumTipView.setText(format(mTipSum));
-                    return;
                 }
             }
         }
-
         //move item from common Bill to my Bill and substract 1 from item's quantity
         if(((LinearLayout) v.getParent()).getId() == R.id.common_items_area_linearlayout){
-            mMyItemsCountTV.setText("[" + Integer.toString(mMyItemsCount.incrementAndGet()) + "]");
-            mCommonItemsCountTV.setText("[" + Integer.toString(mCommonItemsCount.decrementAndGet()) + "]");
-            for (HashMap.Entry<Integer, LinearLayout> entry : mCommonLineNumToLineView.entrySet()) {
+            for (final HashMap.Entry<Integer, LinearLayout> entry : mCommonLineNumToLineView.entrySet()) {
                 if(entry.getValue() == v){
-                    Integer index = entry.getKey();
-                    mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
-                    mCommonTotalSumView.setText(format(mCommonTotalSum));
+                    final Integer index = entry.getKey();
+                    v.setAlpha((float)0.5);
+                    mUsersDatabaseReference.runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            Integer curValue = mutableData.child(Integer.toString(index)).getValue(Integer.class);
+                            if(curValue > 0) {
+                                mutableData.child(Integer.toString(index)).setValue(curValue - 1);
+                                return Transaction.success(mutableData);
+                            }else{
+                                return Transaction.abort();
+                            }
+                        }
 
-                    if(mCommonLineToQuantityMapper.get(index) <= 1){ // Line should be removed from common view and added to my view
-                        mCommonLineNumToLineView.get(index).setVisibility(GONE);
-                        mCommonLineToQuantityMapper.put(index, 0);
-                        mCommonLineNumberToQuantityView.get(index).setText("0");
-                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " removed from Common view and added to My view", LogsDestination.BothUsers, Tag);
-                    }else{ //Line should be moved to my view
-                        mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) - 1);
-                        mCommonLineNumberToQuantityView.get(index).setText(""+mCommonLineToQuantityMapper.get(index));
-                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " moved from Common to My view (in case of quantity > 1)", LogsDestination.BothUsers, Tag);
-                    }
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean commited, DataSnapshot dataSnapshot) {
+                            synchronized (mItemsUpdateLock) {
+                                if (databaseError == null && commited) {
+                                    mMyItemsCountTV.setText("[" + Integer.toString(mMyItemsCount.incrementAndGet()) + "]");
+//                                    mCommonItemsCountTV.setText("[" + Integer.toString(mCommonItemsCount.decrementAndGet()) + "]");
+//
+//                                    mCommonTotalSum -= mCommonLineNumberToPriceMapper.get(index);
+//                                    mCommonTotalSumView.setText(format(mCommonTotalSum));
+//
+//                                    if (mCommonLineToQuantityMapper.get(index) <= 1) { // Line should be removed from common view and added to my view
+//                                        mCommonLineNumToLineView.get(index).setVisibility(GONE);
+//                                        mCommonLineToQuantityMapper.put(index, 0);
+//                                        mCommonLineNumberToQuantityView.get(index).setText("0");
+//                                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " removed from Common view and added to My view", LogsDestination.BothUsers, Tag);
+//                                    } else { //Line should be moved to my view
+//                                        mCommonLineToQuantityMapper.put(index, mCommonLineToQuantityMapper.get(index) - 1);
+//                                        mCommonLineNumberToQuantityView.get(index).setText("" + mCommonLineToQuantityMapper.get(index));
+//                                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + " moved from Common to My view (in case of quantity > 1)", LogsDestination.BothUsers, Tag);
+//                                    }
 
-                    //Line in my view should be updated
-                    if(mMyLineToQuantityMapper.get(index) > 0){
-                        mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                        mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index ) + 1);
-                        mMyLineNumberToQuantityView.get(index).setText(""+mMyLineToQuantityMapper.get(index));
-                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + ", in My view, updated", LogsDestination.BothUsers, Tag);
-                    }else{ //Line in My view shlould be added
-                        mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
-                        mMyLineNumberToQuantityView.get(index).setText("1");
-                        mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) + 1);
-                        BillsLog.Log(mSessionId, LogLevel.Info, "Added line " + index + " to My view", LogsDestination.BothUsers, Tag);
-                    }
+                                    //Line in my view should be updated
+                                    if (mMyLineToQuantityMapper.get(index) > 0) {
+                                        mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
+                                        mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) + 1);
+                                        mMyLineNumberToQuantityView.get(index).setText("" + mMyLineToQuantityMapper.get(index));
+                                        BillsLog.Log(mSessionId, LogLevel.Info, "Line " + index + ", in My view, updated", LogsDestination.BothUsers, Tag);
+                                    } else { //Line in My view shlould be added
+                                        mMyLineNumToLineView.get(index).setVisibility(View.VISIBLE);
+                                        mMyLineNumberToQuantityView.get(index).setText("1");
+                                        mMyLineToQuantityMapper.put(index, mMyLineToQuantityMapper.get(index) + 1);
+                                        BillsLog.Log(mSessionId, LogLevel.Info, "Added line " + index + " to My view", LogsDestination.BothUsers, Tag);
+                                    }
 
-                    mUsersDatabaseReference.child(Integer.toString(index)).setValue(mCommonLineToQuantityMapper.get(index));
+                                    mMyTotalSum += mMyLineNumToPriceMapper.get(index);
 
-                    mMyTotalSum += mMyLineNumToPriceMapper.get(index);
-
-
-                    mMyTotalSumView.setText(format(mMyTotalSum *(1+ mTipPercent / 100)));
-                    mTipSum =  mMyTotalSum * mTipPercent / 100;
-                    mMySumTipView.setText(format(mTipSum));
+                                    mMyTotalSumView.setText(format(mMyTotalSum * (1 + mTipPercent / 100)));
+                                    mTipSum = mMyTotalSum * mTipPercent / 100;
+                                    mMySumTipView.setText(format(mTipSum));
+                                } else {
+                                    Toast.makeText(mContext, "מישהו הקדים אותך :)", Toast.LENGTH_SHORT);
+                                }
+                                v.setAlpha((float) 1);
+                            }
+                        }
+                    });
                     return;
                 }
             }
@@ -823,7 +899,7 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
     }
 
-    public void Show(final TipFieldTipe tipType, String title, int min, int max) {
+    public void Show(final UiUpdater.TipFieldTipe tipType, String title, int min, int max) {
         final Dialog dialog = new Dialog(mContext);
         dialog.requestWindowFeature(Window.FEATURE_LEFT_ICON);
         dialog.setTitle(title);
@@ -865,9 +941,6 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
             }
         });
         dialog.show();
-    }
-
-    public void MoveMyItemsToCommonItems() {
     }
 
     private enum TipFieldTipe{
