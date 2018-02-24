@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Custom_progress_dialog</string>
     <string name="loading">טוען&#8230;</string>
+    <string name="start_camera_button_title">סרוק חשבון</string>
+    <string name="start_camera_button_description">לחץ כדי לצלם את החשבונית. לאחר שתוצג, תוכל לשתף עם האחרים בשולחן</string>
+    <string name="check_pass_code_button_title">הצטרף לחשבון</string>
+    <string name="check_pass_code_button_description">הזן את קוד החשבון ולחץ כדי לצפות בו</string>
+    <string name="close">סגור</string>
+    <string name="next_desc">הבא</string>
 </resources>
