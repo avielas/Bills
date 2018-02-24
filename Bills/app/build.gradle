@@ -115,6 +115,7 @@ dependencies {
     compile firebase_storage
     compile firebase_messaging
     compile android_support_card_view
+    compile github_amlcurran_showcaseview
     testCompile junit
 }
 apply plugin: 'com.google.gms.google-services'

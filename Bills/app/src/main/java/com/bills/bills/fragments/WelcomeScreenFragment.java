@@ -6,14 +6,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bills.bills.R;
+import com.bills.bills.howToUse.HowToUseWelcomeScreen;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,7 +19,7 @@ import com.bills.bills.R;
  * {@link WelcomeScreenFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  */
-public class WelcomeScreenFragment extends Fragment implements View.OnClickListener{
+public class WelcomeScreenFragment extends Fragment{
 
     private OnFragmentInteractionListener mListener;
 
@@ -59,15 +57,7 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
     }
 
     @Override
-    public void onClick(View v) {
-        
-
-    }
-
-    @Override
     public void onViewCreated(View view, Bundle savedInstanceState)     {
-
-
         /*
         //Removed for BETA, need to improve performance before reviving
 
@@ -85,10 +75,13 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
         view.findViewById(R.id.start_camera_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 mListener.StartCamera();
             }
         });
+
+        HowToUseWelcomeScreen howToUseWelcomeScreen = new HowToUseWelcomeScreen(getActivity());
+        howToUseWelcomeScreen.SetShowcaseViewStartCamera();
+
         view.findViewById(R.id.check_pass_code_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -129,7 +122,5 @@ public class WelcomeScreenFragment extends Fragment implements View.OnClickListe
         void StartCamera();
 
         void StartSummarizer(int passCode);
-
-
     }
 }
