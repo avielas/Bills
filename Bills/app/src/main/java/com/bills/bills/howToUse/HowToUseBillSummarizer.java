@@ -1,11 +1,13 @@
 package com.bills.bills.howToUse;
 
 import android.app.Activity;
+import android.text.Layout;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.bills.bills.R;
+import com.bills.bills.fragments.BillSummarizerFragment;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
@@ -24,15 +26,15 @@ public class HowToUseBillSummarizer {
         mActivity = activity;
     }
 
-    public void SetShowcaseViewStartCamera() {
-        mViewTarget = new ViewTarget(R.id.start_camera_button, mActivity);
+    public void SetShowcaseViewBillSummarizer() {
+        mViewTarget = new ViewTarget(R.id.common_bill_heading, mActivity);
         mShowcaseView = new ShowcaseView.Builder(mActivity)
                 .setTarget(mViewTarget)
                 .setOnClickListener(onClickListener)
-                .setContentTitle(R.string.start_camera_button_title)
+                .setContentTitle(R.string.common_bill_heading_text_view_title)
                 .setStyle(R.style.CustomShowcaseTheme)
-                .setContentText(R.string.start_camera_button_description)
-                .singleShot(42)
+                .setContentText(R.string.common_bill_heading_text_view_description)
+                .singleShot(BillSummarizerFragment.class.hashCode())
                 .build();
         mShowcaseView.setButtonText(mActivity.getString(R.string.next_desc));
 
@@ -43,6 +45,7 @@ public class HowToUseBillSummarizer {
         int margin = ((Number) (mActivity.getResources().getDisplayMetrics().density * 18)).intValue();
         lps.setMargins(margin, margin, margin, margin);
         mShowcaseView.setButtonPosition(lps);
+
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -50,13 +53,22 @@ public class HowToUseBillSummarizer {
         public void onClick(View view) {
             switch (mCounter) {
                 case 0:
-                    mViewTarget = new ViewTarget(R.id.check_pass_code_button, mActivity);
+                    mViewTarget = new ViewTarget(R.id.my_bill_heading, mActivity);
                     mShowcaseView.setShowcase(mViewTarget, true);
-                    mShowcaseView.setContentTitle(mActivity.getString(R.string.check_pass_code_button_title));
-                    mShowcaseView.setContentText(mActivity.getString(R.string.check_pass_code_button_description));
-                    mShowcaseView.setButtonText(mActivity.getString(R.string.close));
+                    mShowcaseView.setContentTitle(mActivity.getString(R.string.my_bill_heading_text_view_title));
+                    mShowcaseView.setContentText(mActivity.getString(R.string.my_bill_heading_text_view_description));
+                    mShowcaseView.setButtonText(mActivity.getString(R.string.next_desc));
+                    mShowcaseView.forceTextPosition(ShowcaseView.BELOW_SHOWCASE);
                     break;
                 case 1:
+                    mViewTarget = new ViewTarget(R.id.tip_heading, mActivity);
+                    mShowcaseView.setShowcase(mViewTarget, true);
+                    mShowcaseView.setContentTitle(mActivity.getString(R.string.tip_heading_text_view_title));
+                    mShowcaseView.setContentText(mActivity.getString(R.string.tip_heading_text_view_description));
+                    mShowcaseView.setButtonText(mActivity.getString(R.string.close));
+                    mShowcaseView.forceTextPosition(ShowcaseView.ABOVE_SHOWCASE);
+                    break;
+                case 2:
                     mShowcaseView.hide();
                     break;
             }

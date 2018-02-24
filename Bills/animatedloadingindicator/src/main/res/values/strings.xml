@@ -5,6 +5,12 @@
     <string name="start_camera_button_description">לחץ כדי לצלם את החשבונית. לאחר שתוצג, תוכל לשתף עם האחרים בשולחן</string>
     <string name="check_pass_code_button_title">הצטרף לחשבון</string>
     <string name="check_pass_code_button_description">הזן את קוד החשבון ולחץ כדי לצפות בו</string>
+    <string name="common_bill_heading_text_view_title">מוצרים משותפים</string>
+    <string name="common_bill_heading_text_view_description">לחץ על מוצר כדי להעביר אותו למוצרים שלי</string>
+    <string name="my_bill_heading_text_view_title">המוצרים שלי</string>
+    <string name="my_bill_heading_text_view_description">לחץ על מוצר כדי להחזיר אותו למוצרים משותפים</string>
+    <string name="tip_heading_text_view_title">טיפ</string>
+    <string name="tip_heading_text_view_description">הזן את הטיפ באחוזים או שקלים</string>
     <string name="close">סגור</string>
     <string name="next_desc">הבא</string>
 </resources>

@@ -239,7 +239,7 @@
 
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/tip_heading"
             android:layout_width="114dp"
             android:layout_height="match_parent"
             android:background="@android:color/transparent"

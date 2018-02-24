@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.bills.bills.R;
+import com.bills.bills.fragments.WelcomeScreenFragment;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
@@ -32,7 +33,7 @@ public class HowToUseWelcomeScreen {
                 .setContentTitle(R.string.start_camera_button_title)
                 .setStyle(R.style.CustomShowcaseTheme)
                 .setContentText(R.string.start_camera_button_description)
-                .singleShot(42)
+                .singleShot(WelcomeScreenFragment.class.hashCode())
                 .build();
         mShowcaseView.setButtonText(mActivity.getString(R.string.next_desc));
 

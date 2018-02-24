@@ -1,6 +1,5 @@
 package com.bills.bills.fragments;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,18 +7,15 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bills.bills.R;
 import com.bills.bills.firebase.UiUpdater;
+import com.bills.bills.howToUse.HowToUseBillSummarizer;
 import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Contracts.Enums.LogsDestination;
@@ -128,6 +124,9 @@ public class BillSummarizerFragment extends Fragment{
             return false;
             }
         } );
+
+        HowToUseBillSummarizer howToUseBillSummarizer = new HowToUseBillSummarizer(getActivity());
+        howToUseBillSummarizer.SetShowcaseViewBillSummarizer();
     }
 
     @Override
