@@ -1,12 +1,14 @@
 package com.bills.bills.howToUse;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.bills.bills.R;
 import com.bills.bills.fragments.WelcomeScreenFragment;
+import com.bills.billslib.Contracts.Constants;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
@@ -33,9 +35,10 @@ public class HowToUseWelcomeScreen {
                 .setContentTitle(R.string.start_camera_button_title)
                 .setStyle(R.style.CustomShowcaseTheme)
                 .setContentText(R.string.start_camera_button_description)
-                .singleShot(WelcomeScreenFragment.class.hashCode())
+                .singleShot(Constants.SHOT_ID_WELCOME_SCREEN)
                 .build();
         mShowcaseView.setButtonText(mActivity.getString(R.string.next_desc));
+
 
         //set margin of next_desc button
         RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);

@@ -30,7 +30,7 @@ import java.util.UUID;
  * {@link BillSummarizerFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  */
-public class BillSummarizerFragment extends Fragment{
+public class BillSummarizerFragment extends Fragment implements HowToUseBillSummarizer.onFinishedListener {
     private static String Tag = BillSummarizerFragment.class.getName();
     private int mPassCode;
     private String mDbPath;
@@ -83,6 +83,43 @@ public class BillSummarizerFragment extends Fragment{
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        HowToUseBillSummarizer howToUseBillSummarizer = new HowToUseBillSummarizer(getActivity(), this);
+        howToUseBillSummarizer.SetShowcaseViewBillSummarizer();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_bill_summarizer, container, false);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            BillsLog.Log(mSessionId, LogLevel.Error, context.toString() + " must implement OnCameraFragmentInteractionListener", LogsDestination.BothUsers, Tag);
+            throw new RuntimeException(context.toString() + " must implement OnCameraFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mBillRows = null;
+        mListener = null;
+    }
+
+    @Override
+    public void finished() {
+
         mCommonItemsArea = (LinearLayout)getView().findViewById(R.id.common_items_area_linearlayout);
         mMyItemsArea = (LinearLayout)getView().findViewById(R.id.my_items_area_linearlayout);
         mCommonTotalSumView = (TextView)getView().findViewById(R.id.common_total_sum_edittext);
@@ -121,42 +158,9 @@ public class BillSummarizerFragment extends Fragment{
 //                mUiUpdater.MoveMyItemsToCommonItems();
 //                return true;
 //            }
-            return false;
+                return false;
             }
         } );
-
-        HowToUseBillSummarizer howToUseBillSummarizer = new HowToUseBillSummarizer(getActivity());
-        howToUseBillSummarizer.SetShowcaseViewBillSummarizer();
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_bill_summarizer, container, false);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            BillsLog.Log(mSessionId, LogLevel.Error, context.toString() + " must implement OnCameraFragmentInteractionListener", LogsDestination.BothUsers, Tag);
-            throw new RuntimeException(context.toString() + " must implement OnCameraFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mBillRows = null;
-        mListener = null;
     }
 
     /**
@@ -170,6 +174,7 @@ public class BillSummarizerFragment extends Fragment{
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
+
     }
 
 

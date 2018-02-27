@@ -101,7 +101,7 @@ public class BillsMainActivity extends MainActivityBase implements
                     //user is signed in
                     mUid = user.getUid();
                     InitPrivateSession();
-                    Toast.makeText(BillsMainActivity.this, "You are now signed in. Welcome", Toast.LENGTH_LONG).show();
+                    Toast.makeText(BillsMainActivity.this, "ההזדהות עברה בהצלחה", Toast.LENGTH_LONG).show();
                 }else{
                     //user is signed out
                     startActivityForResult(

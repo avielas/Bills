@@ -28,5 +28,7 @@ public final class Constants
     public static final String TEST_OUTPUT_FILE = TESSERACT_SAMPLE_DIRECTORY + "/TestsOutput.txt";
     public static final String FAILED_TEST_OUTPUT_FILE = TESSERACT_SAMPLE_DIRECTORY + "/FailedTestsOutput.txt";
     public static final int ENLARGE_RECT_VALUE = 3;
+    public static final int SHOT_ID_WELCOME_SCREEN = 1;
+    public static final int SHOT_ID_BILL_SUMMARIZER = 2;
 }
 
