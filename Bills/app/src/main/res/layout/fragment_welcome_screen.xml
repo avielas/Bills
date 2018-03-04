@@ -63,8 +63,7 @@
                     android:layout_height="120dp"
                     android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:background="@drawable/ic_scan_bill"
-                    android:drawableLeft="@drawable/ic_action_icon___camera" />
+                    android:background="@drawable/ic_scan_bill"/>
 
                 <Button
                     android:id="@+id/check_pass_code_button"
