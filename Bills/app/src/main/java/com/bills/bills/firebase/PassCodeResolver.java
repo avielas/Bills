@@ -8,6 +8,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,7 +76,8 @@ public class PassCodeResolver {
                     //find an unused pass code
                     for (int i = 0; i < 10000; i++) {
                         if (!usedPassCodes.contains(i)) {
-                            String timeStamp = Utilities.GetTimeStamp();
+                            String timeStamp = Utilities.GetTimeStamp().replace(":", "_").replace(" ", "__");
+
                             mBillRelativePath = mUid + "/" + timeStamp;
                             Map<String, Object> userIdsValue = new HashMap<>();
                             userIdsValue.put(mPassCodeDbKey, i);

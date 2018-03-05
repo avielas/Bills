@@ -219,6 +219,33 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
         mUsersDatabaseReference = mFirebaseDatabase.getReference().child(dbPath);
         mUsersDatabaseReference.keepSynced(true);
 
+        mUsersDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int commonQuanity = 0;
+                double commonTotalSum = 0;
+                for(DataSnapshot childData : dataSnapshot.getChildren()){
+                    Double linePrice = mCommonLineNumberToPriceMapper.get(Integer.parseInt(childData.getKey()));
+                    if(linePrice == null){
+                        continue;
+                    }
+                    commonQuanity += childData.getValue(Integer.class);
+                    commonTotalSum += childData.getValue(Integer.class) * linePrice;
+                }
+                mCommonTotalSum = commonTotalSum;
+                mCommonItemsCount.set(commonQuanity);
+
+                mCommonTotalSumView.setText(format(mCommonTotalSum));
+                mCommonItemsCount.set(commonQuanity);
+                mCommonItemsCountTV.setText("[" + Integer.toString(mCommonItemsCount.get()) + "]");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         mUsersDatabaseReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {}
@@ -246,6 +273,7 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
                         mCommonLineToQuantityMapper.put(index, 0);
                         return;
                     } else {
+                        mCommonLineNumToLineView.get(index).setVisibility(View.VISIBLE);
                         mCommonLineNumberToQuantityView.get(index).setText("" + newQuantity);
                         mCommonLineToQuantityMapper.put(index, newQuantity);
                     }
