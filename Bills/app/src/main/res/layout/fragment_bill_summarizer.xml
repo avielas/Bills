@@ -111,7 +111,7 @@
         <ImageView
             android:id="@+id/summary_screen_spliter"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="20dp"
             android:src="@drawable/summary_screen_spliter" />
 
         <LinearLayout
