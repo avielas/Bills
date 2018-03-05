@@ -232,6 +232,7 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
                     commonQuanity += childData.getValue(Integer.class);
                     commonTotalSum += childData.getValue(Integer.class) * linePrice;
                 }
+
                 mCommonTotalSum = commonTotalSum;
                 mCommonItemsCount.set(commonQuanity);
 

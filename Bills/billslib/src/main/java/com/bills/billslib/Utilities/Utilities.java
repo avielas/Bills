@@ -290,7 +290,7 @@ public class Utilities {
     }
 
     public static String GetTimeStamp() {
-        DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy HH:mm:ss_SSS");
+        DateFormat sdf = new SimpleDateFormat("dd_MM_yyyy__HH_mm_ss__SSS");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Jerusalem"));
         Date date = new Date();
         return sdf.format(date);

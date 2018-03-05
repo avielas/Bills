@@ -76,7 +76,7 @@ public class PassCodeResolver {
                     //find an unused pass code
                     for (int i = 0; i < 10000; i++) {
                         if (!usedPassCodes.contains(i)) {
-                            String timeStamp = Utilities.GetTimeStamp().replace(":", "_").replace(" ", "__");
+                            String timeStamp = Utilities.GetTimeStamp();
 
                             mBillRelativePath = mUid + "/" + timeStamp;
                             Map<String, Object> userIdsValue = new HashMap<>();

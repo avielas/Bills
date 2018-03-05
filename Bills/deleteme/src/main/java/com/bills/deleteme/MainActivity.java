@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //user is signed in
                     //onSignedInInitialize(user.getDisplayName());
                     mUid = user.getUid();
-                    String timeStamp = Utilities.GetTimeStamp();;
+                    String timeStamp = Utilities.GetTimeStamp();
 
                     mBillStoragePath = mUid + "/" + timeStamp;
 
