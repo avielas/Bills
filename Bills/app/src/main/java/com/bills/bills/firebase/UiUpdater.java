@@ -3,9 +3,11 @@ package com.bills.bills.firebase;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -644,13 +646,32 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
         Typeface fontRegular = Typeface.createFromAsset(mContext.getAssets(),"fonts/highland_gothic_flf.ttf");
         Typeface fontLight = Typeface.createFromAsset(mContext.getAssets(),"fonts/highland_gothic_light_flf.ttf");
 
+        Resources r = mContext.getResources();
+        int mariginsInPixels = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                5,
+                r.getDisplayMetrics()
+        );
+
         LinearLayout commonItemRow = new LinearLayout(mContext);
         commonItemRow.setOrientation(LinearLayout.HORIZONTAL);
         commonItemRow.setGravity(Gravity.RIGHT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, mariginsInPixels, 0, mariginsInPixels);
+        commonItemRow.setLayoutParams(params);
 
         LinearLayout myItemRow = new LinearLayout(mContext);
         myItemRow.setOrientation(LinearLayout.HORIZONTAL);
         myItemRow.setGravity(Gravity.RIGHT);
+        params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, mariginsInPixels, 0, mariginsInPixels);
+        myItemRow.setLayoutParams(params);
 
         mCommonTotalSum += (row.GetPrice() * row.GetQuantity());
         mCommonLineNumberToPriceMapper.put(row.GetRowIndex(), row.GetPrice());
