@@ -83,7 +83,8 @@ public class BillSummarizerFragment extends Fragment implements HowToUseBillSumm
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        HowToUseBillSummarizer howToUseBillSummarizer = new HowToUseBillSummarizer(getActivity(), this);
+        HowToUseBillSummarizer howToUseBillSummarizer = new HowToUseBillSummarizer(getActivity(), this,
+                (ViewGroup) getActivity().findViewById(R.id.bill_summarizer_frame_layout));
         howToUseBillSummarizer.SetShowcaseViewBillSummarizer();
     }
 

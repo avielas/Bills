@@ -8,10 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.bills.bills.R;
 import com.bills.bills.howToUse.HowToUseWelcomeScreen;
+import com.bills.bills.howToUse.ViewEnablement;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -79,7 +81,7 @@ public class WelcomeScreenFragment extends Fragment{
             }
         });
 
-        HowToUseWelcomeScreen howToUseWelcomeScreen = new HowToUseWelcomeScreen(getActivity());
+        HowToUseWelcomeScreen howToUseWelcomeScreen = new HowToUseWelcomeScreen(getActivity(), (ViewGroup) getActivity().findViewById(R.id.welcome_frame_layout));
         howToUseWelcomeScreen.SetShowcaseViewStartCamera();
 
         view.findViewById(R.id.check_pass_code_button).setOnClickListener(new View.OnClickListener() {

@@ -19,26 +19,28 @@ import com.github.amlcurran.showcaseview.targets.ViewTarget;
  */
 
 public class HowToUseBillSummarizer {
+    private final String PREFS_SHOWCASE_INTERNAL = "showcase_internal";
     private Target mViewTarget;
     private Activity mActivity;
     private ShowcaseView mShowcaseView;
     private Integer mCounter = 0;
     private onFinishedListener mListener;
+    private ViewGroup mWorkOnView;
 
-    public HowToUseBillSummarizer(Activity activity, onFinishedListener listener){
+    public HowToUseBillSummarizer(Activity activity, onFinishedListener listener, ViewGroup workOnView){
         mActivity = activity;
         mListener = listener;
+        mWorkOnView = workOnView;
     }
 
     public void SetShowcaseViewBillSummarizer() {
-        final String PREFS_SHOWCASE_INTERNAL = "showcase_internal";
         if(mActivity
                 .getSharedPreferences(PREFS_SHOWCASE_INTERNAL, Context.MODE_PRIVATE)
                 .getBoolean("hasShot" + Constants.SHOT_ID_BILL_SUMMARIZER, false)){
             mListener.finished();
             return;
         }
-
+        ViewEnablement.DisableView(mWorkOnView);
         mViewTarget = new ViewTarget(R.id.common_bill_heading, mActivity);
         mShowcaseView = new ShowcaseView.Builder(mActivity)
                 .setTarget(mViewTarget)
@@ -81,6 +83,7 @@ public class HowToUseBillSummarizer {
                     break;
                 case 2:
                     mShowcaseView.hide();
+                    ViewEnablement.EnableView(mWorkOnView);
                     mListener.finished();
                     break;
             }

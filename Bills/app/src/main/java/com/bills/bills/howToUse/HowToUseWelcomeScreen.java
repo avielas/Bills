@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.bills.bills.R;
-import com.bills.bills.fragments.WelcomeScreenFragment;
 import com.bills.billslib.Contracts.Constants;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
@@ -18,16 +17,25 @@ import com.github.amlcurran.showcaseview.targets.ViewTarget;
  */
 
 public class HowToUseWelcomeScreen {
+    private final String PREFS_SHOWCASE_INTERNAL = "showcase_internal";
     private Target mViewTarget;
     private Activity mActivity;
     private ShowcaseView mShowcaseView;
     private Integer mCounter = 0;
+    private ViewGroup mWorkOnView;
 
-    public HowToUseWelcomeScreen(Activity activity){
+    public HowToUseWelcomeScreen(Activity activity, ViewGroup workOnView){
         mActivity = activity;
+        mWorkOnView = workOnView;
     }
 
     public void SetShowcaseViewStartCamera() {
+        if(mActivity
+                .getSharedPreferences(PREFS_SHOWCASE_INTERNAL, Context.MODE_PRIVATE)
+                .getBoolean("hasShot" + Constants.SHOT_ID_WELCOME_SCREEN, false)){
+            return;
+        }
+        ViewEnablement.DisableView(mWorkOnView);
         mViewTarget = new ViewTarget(R.id.start_camera_button, mActivity);
         mShowcaseView = new ShowcaseView.Builder(mActivity)
                 .setTarget(mViewTarget)
@@ -62,6 +70,7 @@ public class HowToUseWelcomeScreen {
                     break;
                 case 1:
                     mShowcaseView.hide();
+                    ViewEnablement.EnableView(mWorkOnView);
                     break;
             }
             mCounter++;
