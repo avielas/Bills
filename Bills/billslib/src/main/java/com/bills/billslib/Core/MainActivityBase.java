@@ -3,14 +3,12 @@ package com.bills.billslib.Core;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import com.bills.billslib.Contracts.PreparingEnvironmentUtil;
-
-import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * Created by avielavr on 6/10/2017.
@@ -24,20 +22,17 @@ public class MainActivityBase extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AskUserForPermissions(savedInstanceState);
+    }
 
+    private void AskUserForPermissions(Bundle savedInstanceState) {
         //first visit of on create
         if(savedInstanceState == null){
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)                != PackageManager.PERMISSION_GRANTED &&
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)                != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-                    Toast.makeText(this, "Camera and storage access is required!", Toast.LENGTH_SHORT).show();
-
-                } else {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE},
-                            REQUEST_CAMERA_AND_EXTERNAL_STORAGE_PERMISSIONS);
-                }
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE},
+                      REQUEST_CAMERA_AND_EXTERNAL_STORAGE_PERMISSIONS);
 
             }else if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 // Should we show an explanation?
@@ -72,11 +67,23 @@ public class MainActivityBase extends AppCompatActivity {
         }
     }
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//
-//        // Forward results to EasyPermissions
-//        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
-//    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+            @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CAMERA_AND_EXTERNAL_STORAGE_PERMISSIONS: {
+                //Is CAMERA permission granted?
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    AskUserForPermissions(null);
+                }
+                //Is READ_EXTERNAL_STORAGE permission granted?
+                if(grantResults.length > 0
+                        && grantResults[1] == PackageManager.PERMISSION_DENIED){
+                    AskUserForPermissions(null);
+                }
+                return;
+            }
+        }
+    }
 }
