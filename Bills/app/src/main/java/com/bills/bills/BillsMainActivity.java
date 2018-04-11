@@ -227,6 +227,7 @@ public class BillsMainActivity extends MainActivityBase implements
 
     @Override
     public void StartCamera() {
+
         InitCommonSession();
         mPassCodeResolver.GetPassCode(new PassCodeResolver.IPassCodeResolverCallback() {
             @Override

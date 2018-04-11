@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -19,6 +20,14 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.abbyy.mobile.ocr4.AssetDataSource;
+import com.abbyy.mobile.ocr4.DataSource;
+import com.abbyy.mobile.ocr4.Engine;
+import com.abbyy.mobile.ocr4.FileLicense;
+import com.abbyy.mobile.ocr4.License;
+import com.abbyy.mobile.ocr4.RecognitionConfiguration;
+import com.abbyy.mobile.ocr4.RecognitionManager;
+import com.abbyy.mobile.ocr4.layout.MocrPrebuiltLayoutInfo;
 import com.bills.bills.R;
 import com.bills.billslib.Contracts.BillRow;
 import com.bills.billslib.Contracts.Constants;
@@ -39,13 +48,15 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 
-public class BillAnalyzerFragment extends Fragment {
+public class BillAnalyzerFragment extends Fragment implements RecognitionManager.RecognitionCallback {
     private final String Tag = this.getClass().getName();
+    private final String TAG = this.getClass().getName();
 
     private OnBillAnalyzernteractionListener mListener;
 
@@ -436,7 +447,17 @@ public class BillAnalyzerFragment extends Fragment {
 
             }
         });
-        t.start();
+//        t.start();
+
+        Mat m = null;
+        try{
+            m=Utilities.Bytes2MatAndRotateClockwise90(_sessionId, mImage);
+        }catch (Exception e){
+
+        }
+        Bitmap image = Bitmap.createBitmap(m.width(), m.height(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(m, image);
+        startRecognition(image);
     }
 
     /**
@@ -489,5 +510,75 @@ public class BillAnalyzerFragment extends Fragment {
                 Toast.makeText(mContext, toastMessage, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    private void startRecognition(Bitmap image) {
+
+        final RecognitionConfiguration recognitionConfiguration = new RecognitionConfiguration();
+        recognitionConfiguration.setImageResolution( 0 );
+
+        int imageProcessingOptions = RecognitionConfiguration.ImageProcessingOptions.PROHIBIT_VERTICAL_CJK_TEXT;
+        imageProcessingOptions |= RecognitionConfiguration.ImageProcessingOptions.DETECT_PAGE_ORIENTATION;
+        imageProcessingOptions |= RecognitionConfiguration.ImageProcessingOptions.PREBUILD_WORDS_INFO;
+        imageProcessingOptions |= RecognitionConfiguration.ImageProcessingOptions.BUILD_WORDS_INFO;
+        recognitionConfiguration.setImageProcessingOptions( imageProcessingOptions );
+
+        recognitionConfiguration.setRecognitionMode( RecognitionConfiguration.RecognitionMode.FULL );
+
+//        recognitionConfiguration.setRecognitionLanguages( RecognitionContext
+//                .getRecognitionLanguages( recognitionTarget ) );
+        System.loadLibrary("MobileOcrEngine");
+//        Engine.loadNativeLibrary();
+//        PreferenceManager.setDefaultValues( this.getContext(), R.xml.preferences, true );
+
+        final DataSource assetDataSrouce = new AssetDataSource( this.getActivity().getAssets() );
+
+        final List<DataSource> dataSources = new ArrayList<DataSource>();
+        dataSources.add( assetDataSrouce );
+        try {
+            final String _licenseFile = "license";
+            final String _applicationID = "Android_ID";
+            final String _patternsFileExtension = ".mp3";
+            final String _dictionariesFileExtension = ".mp3";
+            final String _keywordsFileExtension = ".mp3";            
+            
+            Engine.createInstance( dataSources, new FileLicense( assetDataSrouce,
+                            _licenseFile, _applicationID ),
+                    new Engine.DataFilesExtensions( _patternsFileExtension,
+                            _dictionariesFileExtension,
+                            _keywordsFileExtension ) );
+            
+        } catch( final IOException e ) {
+            Log.d(TAG, "startRecognition: ");
+        } catch( final License.BadLicenseException e ) {
+            Log.d(TAG, "startRecognition: ");
+        }       
+        final RecognitionManager recognitionManager =
+                Engine.getInstance().getRecognitionManager( recognitionConfiguration );
+
+        try {
+            Object result = null;
+            result = recognitionManager.recognizeText( image, this );
+        } catch( final Throwable exception ) {
+        } finally {
+            try {
+                recognitionManager.close();
+            } catch( final IOException e ) {
+            }
+        }
+    }
+
+    @Override
+    public boolean onRecognitionProgress(int i, int i1) {
+        return false;
+    }
+
+    @Override
+    public void onRotationTypeDetected(RecognitionManager.RotationType rotationType) {
+
+    }
+
+    @Override
+    public void onPrebuiltWordsInfoReady(MocrPrebuiltLayoutInfo mocrPrebuiltLayoutInfo) {
+        Log.d("MMM", "onPrebuiltWordsInfoReady: mocrPrebuiltLayoutInfo");
     }
 }
