@@ -117,6 +117,7 @@ dependencies {
     compile android_support_card_view
     compile github_amlcurran_showcaseview
     testCompile junit
+    compile files('libs/MobileOcrEngine.jar')
 }
 apply plugin: 'com.google.gms.google-services'
 
