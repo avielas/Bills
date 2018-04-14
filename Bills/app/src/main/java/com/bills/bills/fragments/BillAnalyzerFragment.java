@@ -26,6 +26,7 @@ import com.abbyy.mobile.ocr4.Engine;
 import com.abbyy.mobile.ocr4.FileLicense;
 import com.abbyy.mobile.ocr4.License;
 import com.abbyy.mobile.ocr4.RecognitionConfiguration;
+import com.abbyy.mobile.ocr4.RecognitionLanguage;
 import com.abbyy.mobile.ocr4.RecognitionManager;
 import com.abbyy.mobile.ocr4.layout.MocrPrebuiltLayoutInfo;
 import com.bills.bills.R;
@@ -50,7 +51,9 @@ import org.opencv.core.Scalar;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -524,16 +527,20 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
 
         recognitionConfiguration.setRecognitionMode( RecognitionConfiguration.RecognitionMode.FULL );
 
+        //PreferenceManager.setDefaultValues( mContext, R.xml.preferences, true );
+
+        final DataSource assetDataSrouce = new AssetDataSource( this.getActivity().getAssets() );
+
+        final List<DataSource> dataSources = new ArrayList<DataSource>();
+        dataSources.add( assetDataSrouce );
+
 //        recognitionConfiguration.setRecognitionLanguages( RecognitionContext
 //                .getRecognitionLanguages( recognitionTarget ) );
         System.loadLibrary("MobileOcrEngine");
 //        Engine.loadNativeLibrary();
 //        PreferenceManager.setDefaultValues( this.getContext(), R.xml.preferences, true );
 
-        final DataSource assetDataSrouce = new AssetDataSource( this.getActivity().getAssets() );
 
-        final List<DataSource> dataSources = new ArrayList<DataSource>();
-        dataSources.add( assetDataSrouce );
         try {
             final String _licenseFile = "license";
             final String _applicationID = "Android_ID";
@@ -551,12 +558,16 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
             Log.d(TAG, "startRecognition: ");
         } catch( final License.BadLicenseException e ) {
             Log.d(TAG, "startRecognition: ");
-        }       
+        }
+
+        Set<RecognitionLanguage> langSet =  EnumSet.noneOf( RecognitionLanguage.class );
+        langSet.add(RecognitionLanguage.English);
+        recognitionConfiguration.setRecognitionLanguages(langSet);
+
         final RecognitionManager recognitionManager =
                 Engine.getInstance().getRecognitionManager( recognitionConfiguration );
-
+        Object result = null;
         try {
-            Object result = null;
             result = recognitionManager.recognizeText( image, this );
         } catch( final Throwable exception ) {
         } finally {
@@ -565,6 +576,7 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
             } catch( final IOException e ) {
             }
         }
+        Log.d("aa", result.toString());
     }
 
     @Override
