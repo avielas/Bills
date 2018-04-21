@@ -84,6 +84,7 @@ public class BillsMainActivity extends MainActivityBase implements
         SetDefaultUncaughtExceptionHandler();
         setContentView(R.layout.activity_bills_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         mBillSummarizerFragment = new BillSummarizerFragment();
         mWelcomeFragment = new WelcomeScreenFragment();
         mCameraFragment = new CameraFragment(mSessionId);

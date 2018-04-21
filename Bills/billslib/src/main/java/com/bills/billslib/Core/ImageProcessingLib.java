@@ -142,10 +142,11 @@ public class ImageProcessingLib {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
-        AdaptiveThreshold(rgba, 100, 33.0);
-        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
-        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
-        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        AdaptiveThreshold(rgba, 60, 10.0);
+//        AdaptiveThreshold(rgba, 100, 33.0);
+//        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+//        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+//        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
 //        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
 //        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
     }

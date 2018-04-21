@@ -7,6 +7,14 @@ import android.support.test.espresso.core.internal.deps.guava.collect.Iterables;
 import android.util.Log;
 import android.util.Pair;
 
+import com.abbyy.mobile.ocr4.AssetDataSource;
+import com.abbyy.mobile.ocr4.DataSource;
+import com.abbyy.mobile.ocr4.Engine;
+import com.abbyy.mobile.ocr4.FileLicense;
+import com.abbyy.mobile.ocr4.License;
+import com.abbyy.mobile.ocr4.RecognitionConfiguration;
+import com.abbyy.mobile.ocr4.RecognitionLanguage;
+import com.abbyy.mobile.ocr4.RecognitionManager;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Contracts.Enums.LogsDestination;
@@ -23,10 +31,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -46,6 +56,7 @@ public class TestBench {
     Context _context;
     private Double _testsAccuracyPercentSum = 0.0;
     private long _timeMs;
+    private static final Object mSyncObject = new Object();
 
     /*********** Thread Pool Configuration ************/
     private static int NUMBER_OF_CORES = 4;//Runtime.getRuntime().availableProcessors();
@@ -80,6 +91,7 @@ public class TestBench {
     @Test
     public void begin() throws Exception {
         _context = getInstrumentation().getContext();
+
         _sessionId = UUID.randomUUID();
         InitBillsLogToLogcat(_sessionId);
         _timeMs = System.currentTimeMillis();
@@ -104,11 +116,11 @@ public class TestBench {
                 ForeachValidateResults(brandModelDirectoriesToTest);
                 break;
             case TEST_PHONE:
-                _restaurantsNamesTestFilter = Arrays.asList("sinta1", "sinta2",
+                _restaurantsNamesTestFilter = Arrays.asList("sinta1"/*, "sinta2",
                                                             "pastaMarket1", "pastaMarket2", "pastaMarket3",
                                                             "iza1","iza2",
                                                             "dovrin1", "dovrin2", "dovrin3", "dovrin4", "dovrin5",
-                                                            "nola1", "nola2", /*"nola3",*/ "nola4", "nola5");
+                                                            "nola1", "nola2"*//* "nola3",*//*, "nola4", "nola5"*/);
                 _billsTestFilter = Arrays.asList(/*"ocrBytes.txt", "ocrBytes1.txt", "ocrBytes2.txt", "ocrBytes3.txt", "ocrBytes4.txt"*/);
                 sourceDirectory = Constants.TESSERACT_SAMPLE_DIRECTORY + Build.BRAND + "_" + Build.MODEL +"/";
                 ValidateOcrResultsOfBrandModelBills(_restaurantsNamesTestFilter, _billsTestFilter, sourceDirectory);
@@ -186,9 +198,13 @@ public class TestBench {
             List<String> currBills = restaurantBillsPair.getValue();
             for(int i=0; i < currBills.size(); i++)
             {
+                RecognitionManager recognitionManager;
+                synchronized (mSyncObject) {
+                    recognitionManager = getRecognitionManager();
+                }
                 mThreadPoolExecutor.execute(
                         new TestBill(_sessionId, rootBrandModelDirectory, restaurant, currBills.get(i), _isRunJustTM,
-                                accuracyPercentQueue, passedResultsQueue, failedResultsQueue));
+                                accuracyPercentQueue, passedResultsQueue, failedResultsQueue, recognitionManager));
             }
         }
 
@@ -360,5 +376,47 @@ public class TestBench {
             }
         }
         return false;
+    }
+
+    private RecognitionManager getRecognitionManager() {
+
+        final RecognitionConfiguration recognitionConfiguration = new RecognitionConfiguration();
+        recognitionConfiguration.setImageResolution( 0 );
+        int imageProcessingOptions = RecognitionConfiguration.ImageProcessingOptions.PROHIBIT_VERTICAL_CJK_TEXT;
+        imageProcessingOptions |= RecognitionConfiguration.ImageProcessingOptions.BUILD_WORDS_INFO;
+        recognitionConfiguration.setImageProcessingOptions( imageProcessingOptions );
+        recognitionConfiguration.setRecognitionMode( RecognitionConfiguration.RecognitionMode.FULL );
+        final DataSource assetDataSrouce = new AssetDataSource( getInstrumentation().getTargetContext().getAssets() );
+        final List<DataSource> dataSources = new ArrayList<DataSource>();
+        dataSources.add( assetDataSrouce );
+
+        System.loadLibrary("MobileOcrEngine");
+//        Engine.loadNativeLibrary();
+
+
+        try {
+            final String _licenseFile = "license";
+            final String _applicationID = "Android_ID";
+            final String _patternsFileExtension = ".mp3";
+            final String _dictionariesFileExtension = ".mp3";
+            final String _keywordsFileExtension = ".mp3";
+
+            Engine.createInstance( dataSources, new FileLicense( assetDataSrouce,
+                            _licenseFile, _applicationID ),
+                    new Engine.DataFilesExtensions( _patternsFileExtension,
+                            _dictionariesFileExtension,
+                            _keywordsFileExtension ) );
+
+        } catch( final IOException e ) {
+//            Log.d(TAG, "startRecognition: ");
+        } catch( final License.BadLicenseException e ) {
+//            Log.d(TAG, "startRecognition: ");
+        }
+
+        Set<RecognitionLanguage> langSet =  EnumSet.noneOf( RecognitionLanguage.class );
+        langSet.add(RecognitionLanguage.Digits);
+        recognitionConfiguration.setRecognitionLanguages(langSet);
+
+        return Engine.getInstance().getRecognitionManager( recognitionConfiguration );
     }
 }

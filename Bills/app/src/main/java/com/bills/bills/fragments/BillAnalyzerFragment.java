@@ -388,7 +388,7 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
                         ImageProcessingLib.PreprocessingForTM(billMat);
                         Utils.matToBitmap(billMat, processedBillBitmap);
 
-                        templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap);
+                        templateMatcher = new TemplateMatcher(mOcrEngine, processedBillBitmap, getRecognitionManager());
                         try {
                             templateMatcher.Match(_sessionId);
                             BillsLog.Log(_sessionId, LogLevel.Info, "Template matcher succeeded.", LogsDestination.BothUsers, Tag);
@@ -400,11 +400,12 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
                             return;
                         }
 
-                        ImageProcessingLib.PreprocessingForParsing(billMatCopy);
                         numOfItems = templateMatcher.priceAndQuantity.size();
 
                         /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
                         /***** Out Of Memory when running 4 threads parallel                                      *****/
+
+                        ImageProcessingLib.PreprocessingForParsing(billMatCopy);
                         Utils.matToBitmap(billMatCopy, processedBillBitmap);
                         templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
                         templateMatcher.Parsing(_sessionId, numOfItems);
@@ -450,17 +451,17 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
 
             }
         });
-//        t.start();
+        t.start();
 
-        Mat m = null;
-        try{
-            m=Utilities.Bytes2MatAndRotateClockwise90(_sessionId, mImage);
-        }catch (Exception e){
-
-        }
-        Bitmap image = Bitmap.createBitmap(m.width(), m.height(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(m, image);
-        startRecognition(image);
+//        Mat m = null;
+//        try{
+//            m=Utilities.Bytes2MatAndRotateClockwise90(_sessionId, mImage);
+//        }catch (Exception e){
+//
+//        }
+//        Bitmap image = Bitmap.createBitmap(m.width(), m.height(), Bitmap.Config.ARGB_8888);
+//        Utils.matToBitmap(m, image);
+//        startRecognition(image);
     }
 
     /**
@@ -495,7 +496,7 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
         public void run() {
             try {
                 mProgressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                mProgressDialog.setContentView(com.bills.billslib.R.layout.custom_dialog_progress);
+                mProgressDialog.setContentView(R.layout.custom_dialog_progress);
                 mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
                 mProgressDialog.setCancelable(false);
                 mProgressDialog.show();
@@ -514,31 +515,19 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
             }
         });
     }
-    private void startRecognition(Bitmap image) {
-
+    private RecognitionManager getRecognitionManager() {
         final RecognitionConfiguration recognitionConfiguration = new RecognitionConfiguration();
         recognitionConfiguration.setImageResolution( 0 );
-
         int imageProcessingOptions = RecognitionConfiguration.ImageProcessingOptions.PROHIBIT_VERTICAL_CJK_TEXT;
-        imageProcessingOptions |= RecognitionConfiguration.ImageProcessingOptions.DETECT_PAGE_ORIENTATION;
-        imageProcessingOptions |= RecognitionConfiguration.ImageProcessingOptions.PREBUILD_WORDS_INFO;
         imageProcessingOptions |= RecognitionConfiguration.ImageProcessingOptions.BUILD_WORDS_INFO;
         recognitionConfiguration.setImageProcessingOptions( imageProcessingOptions );
-
         recognitionConfiguration.setRecognitionMode( RecognitionConfiguration.RecognitionMode.FULL );
-
-        //PreferenceManager.setDefaultValues( mContext, R.xml.preferences, true );
-
         final DataSource assetDataSrouce = new AssetDataSource( this.getActivity().getAssets() );
-
         final List<DataSource> dataSources = new ArrayList<DataSource>();
         dataSources.add( assetDataSrouce );
 
-//        recognitionConfiguration.setRecognitionLanguages( RecognitionContext
-//                .getRecognitionLanguages( recognitionTarget ) );
         System.loadLibrary("MobileOcrEngine");
 //        Engine.loadNativeLibrary();
-//        PreferenceManager.setDefaultValues( this.getContext(), R.xml.preferences, true );
 
 
         try {
@@ -546,37 +535,25 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
             final String _applicationID = "Android_ID";
             final String _patternsFileExtension = ".mp3";
             final String _dictionariesFileExtension = ".mp3";
-            final String _keywordsFileExtension = ".mp3";            
-            
+            final String _keywordsFileExtension = ".mp3";
+
             Engine.createInstance( dataSources, new FileLicense( assetDataSrouce,
                             _licenseFile, _applicationID ),
                     new Engine.DataFilesExtensions( _patternsFileExtension,
                             _dictionariesFileExtension,
                             _keywordsFileExtension ) );
-            
+
         } catch( final IOException e ) {
-            Log.d(TAG, "startRecognition: ");
+//            Log.d(TAG, "startRecognition: ");
         } catch( final License.BadLicenseException e ) {
-            Log.d(TAG, "startRecognition: ");
+//            Log.d(TAG, "startRecognition: ");
         }
 
         Set<RecognitionLanguage> langSet =  EnumSet.noneOf( RecognitionLanguage.class );
-        langSet.add(RecognitionLanguage.English);
+        langSet.add(RecognitionLanguage.Digits);
         recognitionConfiguration.setRecognitionLanguages(langSet);
 
-        final RecognitionManager recognitionManager =
-                Engine.getInstance().getRecognitionManager( recognitionConfiguration );
-        Object result = null;
-        try {
-            result = recognitionManager.recognizeText( image, this );
-        } catch( final Throwable exception ) {
-        } finally {
-            try {
-                recognitionManager.close();
-            } catch( final IOException e ) {
-            }
-        }
-        Log.d("aa", result.toString());
+        return Engine.getInstance().getRecognitionManager( recognitionConfiguration );
     }
 
     @Override
