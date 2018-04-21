@@ -142,11 +142,15 @@ public class ImageProcessingLib {
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
+        /****** to add comment to disable ABBYY ******/
         AdaptiveThreshold(rgba, 60, 10.0);
+        /************ End add comment ***************/
+        /****** to remove comment to enable Tess-Two ******/
 //        AdaptiveThreshold(rgba, 100, 33.0);
 //        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
 //        Dilate(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
 //        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
+        /*************** End remove comment ***************/
 //        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
 //        Erode(rgba, 1, 2, StructureElement.RECTANGULAR.toString());
     }

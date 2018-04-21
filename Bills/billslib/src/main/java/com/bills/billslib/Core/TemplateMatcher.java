@@ -485,8 +485,11 @@ public class TemplateMatcher  {
                 }
 
                 String parsedNumberString;
+                /****** to remove comment to enable Tess-Two ******/
 //                mOCREngine.SetRectangle(entry);
+                /************ End remove comment ***************/
                 try{
+                    /****** to add comment to disable ABBYY ******/
                     Collection<Rect> innerEntry = new ArrayList<Rect>();
                     innerEntry.add(entry);
                     synchronized (mSyncObject) {
@@ -513,9 +516,12 @@ public class TemplateMatcher  {
                                 0).getText();
                     }
 
+                    parsedNumberString = CleaningABBYYParsedNumber(parsedNumberString);
+                    /************ End add comment ***************/
+                    /****** to remove comment to enable Tess-Two ******/
 //                    parsedNumberString = mOCREngine.GetUTF8Text();
 //                    parsedNumberString = CleaningParsedNumber(parsedNumberString);
-                    parsedNumberString = CleaningABBYYParsedNumber(parsedNumberString);
+                    /*************** End remove comment ***************/
                     parsedNumber = Double.parseDouble(parsedNumberString);
                 }
                 catch(Exception ex){
@@ -549,11 +555,16 @@ public class TemplateMatcher  {
 //                bitmap.recycle();
                 /**********************************************/
             }
+            /****** to remove comment to enable Tess-Two ******/
 //            mOCREngine.SetRectangle(entry.getValue());
+            /*************** End remove comment ***************/
+            /****** to add comment to disable ABBYY ******/
             Collection<Rect> innerEntry = new ArrayList<Rect>();
             innerEntry.add(entry.getValue());
             try {
+                /****** to remove comment to enable Tess-Two ******/
                 String parsedNumberString;// = mOCREngine.GetUTF8Text();
+                /*************** End remove comment ***************/
                 synchronized (mSyncObject) {
 
                     parsedNumberString = mRecognitionManager.recognizeTextRegion(
@@ -577,8 +588,11 @@ public class TemplateMatcher  {
                             },
                             0).getText();
                 }
-//                parsedNumberString = CleaningParsedNumber(parsedNumberString);
                 parsedNumberString = CleaningABBYYParsedNumber(parsedNumberString);
+                /************ End add comment ***************/
+                /****** to remove comment to enable Tess-Two ******/
+//                parsedNumberString = CleaningParsedNumber(parsedNumberString);
+                /*************** End remove comment ***************/
                 parsedNumber = Double.parseDouble(parsedNumberString);
             } catch (Exception e) {
                 String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
