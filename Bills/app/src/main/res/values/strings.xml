@@ -3,4 +3,45 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- TODO: to Remove! imported from ABBYY sample-->
+    <!-- Preferences labels -->
+    <string name="preference_label_category_recognition_languages">Recognition languages</string>
+    <string name="preference_label_category_recognition_mode">Recognition mode</string>
+    <string name="preference_label_category_image_processing_options">Image processing options</string>
+    <string name="preference_label_recognition_languages_ocr">Recognition languages</string>
+    <string name="preference_title_recognition_languages_ocr">OCR languages</string>
+    <string name="preference_dialog_recognition_languages_ocr">OCR languages</string>
+    <string name="preference_summary_recognition_languages_ocr">Specify which languages should be used for text recognition.</string>
+    <string name="preference_title_recognition_languages_bcr">BCR languages</string>
+    <string name="preference_dialog_recognition_languages_bcr">BCR languages</string>
+    <string name="preference_summary_recognition_languages_bcr">Specify which languages should be used for BCR recognition.</string>
+    <string name="preference_label_recognition_mode_full">Full mode</string>
+    <string name="preference_label_detect_page_orientation">Detect page orientation</string>
+    <string name="preference_label_prebuild_words_info">Prebuild words info</string>
+    <string name="preference_label_build_words_info">Build words info</string>
+    <!-- Error messages -->
+    <string name="dialog_error">Error</string>
+    <string name="error_bad_license">Bad license.</string>
+    <string name="error_no_permanent_data">No permanent data for recognition. European patterns, english dictionaries and keywords must be present.</string>
+    <string name="error_loading_image">Error loading image</string>
+    <!-- BCR dialogs -->
+    <string name="dialog_bcr">BCR</string>
+    <string name="error_no_data_found">No data found.</string>
+    <!-- Standard buttons captions -->
+    <string name="button_ok">OK</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_yes">Yes</string>
+    <string name="button_no">No</string>
+    <string name="button_close">Close</string>
+    <!-- Main activity labels -->
+    <string name="button_image_source">Image source</string>
+    <string name="button_preferences">Preferences</string>
+    <string name="button_recognize">Recognize Text</string>
+    <string name="button_recognize_bcr">Recognize BCR</string>
+    <string name="button_recognize_barcode">Recognize Barcode</string>
+    <string name="dialog_image_source">Select image source</string>
+    <string name="radio_from_resources">From resources</string>
+    <string name="radio_from_gallery">From gallery</string>
+    <string name="radio_from_camera">From camera</string>
 </resources>

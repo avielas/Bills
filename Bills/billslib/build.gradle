@@ -35,7 +35,7 @@ dependencies {
     compile support_appcompat_v7
     testCompile junit
     compile android_support_card_view
-    compile project(animatedLoadingIndicator)
-    compile project(openCVLibrary)
     implementation files('libs/activation.jar')
+    implementation files('libs/MobileOcrEngine.jar')
+    compile project(path: ':openCVLibrary330')
 }

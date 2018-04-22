@@ -4,6 +4,10 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
 
+import com.abbyy.mobile.ocr4.RecognitionManager;
+import com.abbyy.mobile.ocr4.layout.MocrImageRegion;
+import com.abbyy.mobile.ocr4.layout.MocrPrebuiltLayoutInfo;
+import com.abbyy.mobile.ocr4.layout.MocrTextBlock;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.LogLevel;
 import com.bills.billslib.Contracts.Enums.LogsDestination;
@@ -14,6 +18,7 @@ import com.bills.billslib.Utilities.Utilities;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +36,7 @@ public class TemplateMatcher  {
     public final ArrayList<Double[]> priceAndQuantity = new ArrayList<>();
     public ArrayList<Rect> itemLocationsRect = new ArrayList<>();
     public ArrayList<Bitmap> itemLocationsByteArray = new ArrayList<>();
+    private static final Object mSyncObject = new Object();
     public Bitmap mFullBillProcessedImage;
 //    Boolean secondColumnIsConnected;
 //    Boolean oneBeforeLastColumnConnected;
@@ -40,16 +46,19 @@ public class TemplateMatcher  {
     public LinkedHashMap<Rect, Rect>[] connectionsItemsArea;
     /****************************************/
 
+    private RecognitionManager mRecognitionManager;
+
     /**
      * @param ocrEngine     initialized ocr engine
      * @param fullBillPreprocessedImage full, processed and warped bill image
      */
-    public TemplateMatcher(IOcrEngine ocrEngine, Bitmap fullBillPreprocessedImage) {
+    public TemplateMatcher(IOcrEngine ocrEngine, Bitmap fullBillPreprocessedImage, RecognitionManager recognitionManager) {
         if (!ocrEngine.Initialized()) {
             throw new IllegalArgumentException("OCREngine must be initialized.");
         }
         mOCREngine = ocrEngine;
         mFullBillProcessedImage = fullBillPreprocessedImage;
+        mRecognitionManager = recognitionManager;
 //        secondColumnIsConnected = false;
 //        oneBeforeLastColumnConnected = false;
     }
@@ -474,10 +483,45 @@ public class TemplateMatcher  {
                     entry.top -= 3;
                     entry.bottom += 3;
                 }
-                mOCREngine.SetRectangle(entry);
+
+                String parsedNumberString;
+                /****** to remove comment to enable Tess-Two ******/
+//                mOCREngine.SetRectangle(entry);
+                /************ End remove comment ***************/
                 try{
-                    String parsedNumberString = mOCREngine.GetUTF8Text();
-                    parsedNumberString = CleaningParsedNumber(parsedNumberString);
+                    /****** to add comment to disable ABBYY ******/
+                    Collection<Rect> innerEntry = new ArrayList<Rect>();
+                    innerEntry.add(entry);
+                    synchronized (mSyncObject) {
+
+                        parsedNumberString = mRecognitionManager.recognizeTextRegion(
+                                mFullBillProcessedImage,
+                                new MocrImageRegion(innerEntry),
+                                new RecognitionManager.RecognitionCallback() {
+                                    @Override
+                                    public boolean onRecognitionProgress(int i, int i1) {
+                                        return false;
+                                    }
+
+                                    @Override
+                                    public void onRotationTypeDetected(RecognitionManager.RotationType rotationType) {
+
+                                    }
+
+                                    @Override
+                                    public void onPrebuiltWordsInfoReady(MocrPrebuiltLayoutInfo mocrPrebuiltLayoutInfo) {
+
+                                    }
+                                },
+                                0).getText();
+                    }
+
+                    parsedNumberString = CleaningABBYYParsedNumber(parsedNumberString);
+                    /************ End add comment ***************/
+                    /****** to remove comment to enable Tess-Two ******/
+//                    parsedNumberString = mOCREngine.GetUTF8Text();
+//                    parsedNumberString = CleaningParsedNumber(parsedNumberString);
+                    /*************** End remove comment ***************/
                     parsedNumber = Double.parseDouble(parsedNumberString);
                 }
                 catch(Exception ex){
@@ -511,10 +555,44 @@ public class TemplateMatcher  {
 //                bitmap.recycle();
                 /**********************************************/
             }
-            mOCREngine.SetRectangle(entry.getValue());
+            /****** to remove comment to enable Tess-Two ******/
+//            mOCREngine.SetRectangle(entry.getValue());
+            /*************** End remove comment ***************/
+            /****** to add comment to disable ABBYY ******/
+            Collection<Rect> innerEntry = new ArrayList<Rect>();
+            innerEntry.add(entry.getValue());
             try {
-                String parsedNumberString = mOCREngine.GetUTF8Text();
-                parsedNumberString = CleaningParsedNumber(parsedNumberString);
+                /****** to remove comment to enable Tess-Two ******/
+                String parsedNumberString;// = mOCREngine.GetUTF8Text();
+                /*************** End remove comment ***************/
+                synchronized (mSyncObject) {
+
+                    parsedNumberString = mRecognitionManager.recognizeTextRegion(
+                            mFullBillProcessedImage,
+                            new MocrImageRegion(innerEntry),
+                            new RecognitionManager.RecognitionCallback() {
+                                @Override
+                                public boolean onRecognitionProgress(int i, int i1) {
+                                    return false;
+                                }
+
+                                @Override
+                                public void onRotationTypeDetected(RecognitionManager.RotationType rotationType) {
+
+                                }
+
+                                @Override
+                                public void onPrebuiltWordsInfoReady(MocrPrebuiltLayoutInfo mocrPrebuiltLayoutInfo) {
+
+                                }
+                            },
+                            0).getText();
+                }
+                parsedNumberString = CleaningABBYYParsedNumber(parsedNumberString);
+                /************ End add comment ***************/
+                /****** to remove comment to enable Tess-Two ******/
+//                parsedNumberString = CleaningParsedNumber(parsedNumberString);
+                /*************** End remove comment ***************/
                 parsedNumber = Double.parseDouble(parsedNumberString);
             } catch (Exception e) {
                 String logMessage = "StackTrace: " + e.getStackTrace() + "\nException Message: " + e.getMessage();
@@ -524,6 +602,18 @@ public class TemplateMatcher  {
             }
             parsedNumbersArray[i - itemsAreaStart][j] = parsedNumber;
         }
+    }
+
+    private String CleaningABBYYParsedNumber(String parsedNumberString) {
+        parsedNumberString =
+                parsedNumberString.substring(parsedNumberString.indexOf("Text") + 5, parsedNumberString.indexOf("Words") - 1);
+        if(!parsedNumberString.contains("[0-9.]")){
+            parsedNumberString =
+                    parsedNumberString.replaceAll("[,]",".");
+            parsedNumberString =
+                    parsedNumberString.replaceAll("[^0-9.-]","");
+        }
+        return  parsedNumberString;
     }
 
     private String CleaningParsedNumber(String parsedNumberString) {

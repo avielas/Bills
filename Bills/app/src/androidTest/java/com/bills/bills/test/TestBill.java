@@ -4,6 +4,14 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.Pair;
 
+import com.abbyy.mobile.ocr4.AssetDataSource;
+import com.abbyy.mobile.ocr4.DataSource;
+import com.abbyy.mobile.ocr4.Engine;
+import com.abbyy.mobile.ocr4.FileLicense;
+import com.abbyy.mobile.ocr4.License;
+import com.abbyy.mobile.ocr4.RecognitionConfiguration;
+import com.abbyy.mobile.ocr4.RecognitionLanguage;
+import com.abbyy.mobile.ocr4.RecognitionManager;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
 import com.bills.billslib.Contracts.Enums.LogLevel;
@@ -20,10 +28,14 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -42,13 +54,14 @@ public class TestBill extends Thread{
     private Queue<Pair> _accuracyPercentQueue;
     private Queue<Pair> _passedResultsQueue;
     private Queue<Pair> _failedResultsQueue;
+    RecognitionManager _recognitionManager;
     private UUID _sessionId;
     private int _dragRectViewWidth = 1440;
     private int _dragRectViewHeight = 2308;
 
     public TestBill(final UUID sessionId, String rootBrandModelDirectory, String restaurant, String bill,
                     Boolean isRunJustTM, Queue<Pair> accuracyPercentQueue,
-                    Queue<Pair> passedResultsQueue, Queue<Pair> failedResultsQueue)
+                    Queue<Pair> passedResultsQueue, Queue<Pair> failedResultsQueue, RecognitionManager recognitionManager)
     {
         _sessionId = sessionId;
         _rootBrandModelDirectory = rootBrandModelDirectory;
@@ -61,6 +74,7 @@ public class TestBill extends Thread{
         _failedResultsQueue = failedResultsQueue;
         _fileName = _billFullName.substring(_billFullName.lastIndexOf("/")+1);
         _key = _restaurant + "_" + _fileName.subSequence(0, _fileName.lastIndexOf('.'));
+        _recognitionManager = recognitionManager;
     }
 
     @Override
@@ -150,7 +164,7 @@ public class TestBill extends Thread{
 //            warpedBillBitmap.recycle();
             /***********************************************************************/
 
-            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap);
+            templateMatcher = new TemplateMatcher(tesseractOCREngine, processedBillBitmap, _recognitionManager);
             try{
                 templateMatcher.Match(_sessionId);
             }
@@ -172,9 +186,11 @@ public class TestBill extends Thread{
                 return;
             }
 
-            ImageProcessingLib.PreprocessingForParsing(billMatCopy);
+
             /***** we use processedBillBitmap second time to prevent another Bitmap allocation due to *****/
             /***** Out Of Memory when running 4 threads parallel                                      *****/
+
+            ImageProcessingLib.PreprocessingForParsing(billMatCopy);
             Utils.matToBitmap(billMatCopy, processedBillBitmap);
             templateMatcher.InitializeBeforeSecondUse(processedBillBitmap);
             templateMatcher.Parsing(_sessionId, numOfItems);
@@ -288,5 +304,8 @@ public class TestBill extends Thread{
         accuracyPercent = ((lineNumber*2 - countInvalids)/(lineNumber*2)) * 100;
         return accuracyPercent;
     }
+
+
+
 }
 

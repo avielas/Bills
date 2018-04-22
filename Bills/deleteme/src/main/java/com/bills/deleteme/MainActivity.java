@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<PriceQuantityItem> mRows;
     static Random random = new Random(10);
 
-    final Object lock = new Object();
     final Object transactionLock = new Object();
     final ConcurrentHashMap<String, Integer> passCodes = new ConcurrentHashMap<>();
     final AtomicInteger newPassCode = new AtomicInteger(Integer.MIN_VALUE);
@@ -333,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public class MyHandler implements Transaction.Handler {
         @Override
         public Result doTransaction(final MutableData mutableData) {
-            synchronized (lock) {
+            synchronized (this) {
                 if (mutableData != null && mutableData.hasChildren()) {
                     if (mutableData.hasChild(mUid)) {
                         newPassCode.set(mutableData.child(mUid).getValue(Integer.class));

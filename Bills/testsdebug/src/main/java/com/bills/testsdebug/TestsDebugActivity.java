@@ -27,6 +27,14 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.abbyy.mobile.ocr4.AssetDataSource;
+import com.abbyy.mobile.ocr4.DataSource;
+import com.abbyy.mobile.ocr4.Engine;
+import com.abbyy.mobile.ocr4.FileLicense;
+import com.abbyy.mobile.ocr4.License;
+import com.abbyy.mobile.ocr4.RecognitionConfiguration;
+import com.abbyy.mobile.ocr4.RecognitionLanguage;
+import com.abbyy.mobile.ocr4.RecognitionManager;
 import com.bills.billslib.Contracts.Constants;
 import com.bills.billslib.Contracts.Enums.Language;
 import com.bills.billslib.Core.BillAreaDetector;
@@ -52,9 +60,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static android.view.View.GONE;
@@ -442,7 +452,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             @Override
             public void onClick(View arg0) {
                 try {
-                    templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBill);
+                    templateMatcher = new TemplateMatcher(tesseractOCREngine, _processedBill, getRecognitionManager());
                     templateMatcher.Match(_sessionId);
                     _warpedBill.recycle();
                     _processedBill.recycle();
@@ -763,5 +773,46 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             _originalImageView.setImageBitmap(_warpedBill);
             Preprocessing();
         }
+    }
+
+    private RecognitionManager getRecognitionManager() {
+        final RecognitionConfiguration recognitionConfiguration = new RecognitionConfiguration();
+        recognitionConfiguration.setImageResolution( 0 );
+        int imageProcessingOptions = RecognitionConfiguration.ImageProcessingOptions.PROHIBIT_VERTICAL_CJK_TEXT;
+        imageProcessingOptions |= RecognitionConfiguration.ImageProcessingOptions.BUILD_WORDS_INFO;
+        recognitionConfiguration.setImageProcessingOptions( imageProcessingOptions );
+        recognitionConfiguration.setRecognitionMode( RecognitionConfiguration.RecognitionMode.FULL );
+        final DataSource assetDataSrouce = new AssetDataSource( this.getAssets() );
+        final List<DataSource> dataSources = new ArrayList<DataSource>();
+        dataSources.add( assetDataSrouce );
+
+        System.loadLibrary("MobileOcrEngine");
+//        Engine.loadNativeLibrary();
+
+
+        try {
+            final String _licenseFile = "license";
+            final String _applicationID = "Android_ID";
+            final String _patternsFileExtension = ".mp3";
+            final String _dictionariesFileExtension = ".mp3";
+            final String _keywordsFileExtension = ".mp3";
+
+            Engine.createInstance( dataSources, new FileLicense( assetDataSrouce,
+                            _licenseFile, _applicationID ),
+                    new Engine.DataFilesExtensions( _patternsFileExtension,
+                            _dictionariesFileExtension,
+                            _keywordsFileExtension ) );
+
+        } catch( final IOException e ) {
+//            Log.d(TAG, "startRecognition: ");
+        } catch( final License.BadLicenseException e ) {
+//            Log.d(TAG, "startRecognition: ");
+        }
+
+        Set<RecognitionLanguage> langSet =  EnumSet.noneOf( RecognitionLanguage.class );
+        langSet.add(RecognitionLanguage.Digits);
+        recognitionConfiguration.setRecognitionLanguages(langSet);
+
+        return Engine.getInstance().getRecognitionManager( recognitionConfiguration );
     }
 }
