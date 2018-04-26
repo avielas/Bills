@@ -34,5 +34,6 @@ dependencies {
     compile firebase_ui_auth
     compile firebase_storage
     compile project(path: ':billslib')
+    compile 'org.tensorflow:tensorflow-android:1.2.0'
 }
 

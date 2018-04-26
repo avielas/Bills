@@ -38,4 +38,5 @@ dependencies {
     implementation files('libs/activation.jar')
     implementation files('libs/MobileOcrEngine.jar')
     compile project(path: ':openCVLibrary330')
+    compile 'org.tensorflow:tensorflow-android:1.2.0'
 }
