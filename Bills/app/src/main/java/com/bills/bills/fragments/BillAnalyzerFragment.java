@@ -8,7 +8,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -47,7 +46,6 @@ import com.bills.billslib.Utilities.Utilities;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -149,7 +147,7 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
                 doneButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        analyze();
+                        Analyze();
                     }
                 });
 
@@ -305,7 +303,7 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
         mHandler = null;
     }
 
-    private void analyze() {
+    private void Analyze() {
         mProgressDialog = new Dialog(mContext);
         mHandler.post(mShowProgressDialog);
 
@@ -464,22 +462,6 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
 //        startRecognition(image);
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnBillAnalyzernteractionListener {
-        void onBillAnalyzerSucceed(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath, int screenWidth);
-        void onBillAnalyzerFailed();
-        void onBillAnalyzerFailed(final byte[] image, String mRelativeDbAndStoragePath);
-    }
-
     // Create runnable for hiding progress dialog
     private final Runnable mHideProgressDialog = new Runnable() {
         public void run() {
@@ -569,5 +551,21 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
     @Override
     public void onPrebuiltWordsInfoReady(MocrPrebuiltLayoutInfo mocrPrebuiltLayoutInfo) {
         Log.d("MMM", "onPrebuiltWordsInfoReady: mocrPrebuiltLayoutInfo");
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnBillAnalyzernteractionListener {
+        void onBillAnalyzerSucceed(List<BillRow> rows, byte[] image, Integer passCode, String relativeDbAndStoragePath, int screenWidth);
+        void onBillAnalyzerFailed();
+        void onBillAnalyzerFailed(final byte[] image, String mRelativeDbAndStoragePath);
     }
 }

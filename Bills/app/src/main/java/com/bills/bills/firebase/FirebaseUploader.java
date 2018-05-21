@@ -64,30 +64,7 @@ public class FirebaseUploader {
         mUploadFailed.set(false);
         mUplodedRowsCounter.set(0);
         //Upload full bill image
-        final StorageMetadata ocrBytesMetadata = new StorageMetadata.Builder()
-                .setContentType("text/plain")
-                .build();
-
-        final StorageReference storageFullBillRef = mBillsPerUserStorageReference.child("ocrBytes.txt");
-
-        storageFullBillRef.putBytes(fullBillImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                BillsLog.Log(mSessionId, LogLevel.Info, "Uploaded full bill image", LogsDestination.BothUsers, Tag);
-                storageFullBillRef.updateMetadata(ocrBytesMetadata).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        BillsLog.Log(mSessionId, LogLevel.Info, "Uploaded full bill image MetaData", LogsDestination.BothUsers, Tag);
-                    }
-                });
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                mUploadFailed.set(true);
-                callback.OnFail("Failed to upload full bill image");
-            }
-        });
+        UploadFullBillImage(fullBillImage);
 
         //Upload rows to Storage and to DB
         Map<String, Object> dbItems = new HashMap<>();
