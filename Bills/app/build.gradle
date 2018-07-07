@@ -3,8 +3,8 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
     }
-    compileSdkVersion compile_sdk_version
-    buildToolsVersion build_tools_version
+    compileSdkVersion 27
+    buildToolsVersion '27.0.2'
     flavorDimensions "default"
     sourceSets.main {
         jniLibs.srcDir 'libs'
@@ -117,7 +117,7 @@ dependencies {
     compile android_support_card_view
     compile github_amlcurran_showcaseview
     testCompile junit
-    compile project(path: ':openCVLibrary330')
+    compile project(path: ':openCVLibrary341')
     compile project(':animatedloadingindicator')
 }
 apply plugin: 'com.google.gms.google-services'

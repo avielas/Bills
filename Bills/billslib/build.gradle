@@ -37,6 +37,6 @@ dependencies {
     compile android_support_card_view
     implementation files('libs/activation.jar')
     implementation files('libs/MobileOcrEngine.jar')
-    compile project(path: ':openCVLibrary330')
+    compile project(path: ':openCVLibrary341')
     compile 'org.tensorflow:tensorflow-android:1.2.0'
 }
