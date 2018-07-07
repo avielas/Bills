@@ -1,3 +1,4 @@
 include ':app', ':billslib', ':testsdebug', ':fetchstorage', ':testslib', ':animatedloadingindicator', ':billcaptureapp'
 include ':app', ':billslib', ':deleteme'
 include ':openCVLibrary330'
+include ':openCVLibrary341'

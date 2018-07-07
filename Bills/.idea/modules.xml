@@ -10,6 +10,7 @@
       <module fileurl="file://$PROJECT_DIR$/deleteme/deleteme.iml" filepath="$PROJECT_DIR$/deleteme/deleteme.iml" />
       <module fileurl="file://$PROJECT_DIR$/fetchstorage/fetchstorage.iml" filepath="$PROJECT_DIR$/fetchstorage/fetchstorage.iml" />
       <module fileurl="file://$PROJECT_DIR$/openCVLibrary330/openCVLibrary330.iml" filepath="$PROJECT_DIR$/openCVLibrary330/openCVLibrary330.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openCVLibrary341/openCVLibrary341.iml" filepath="$PROJECT_DIR$/openCVLibrary341/openCVLibrary341.iml" />
       <module fileurl="file://$PROJECT_DIR$/testsdebug/testsdebug.iml" filepath="$PROJECT_DIR$/testsdebug/testsdebug.iml" />
       <module fileurl="file://$PROJECT_DIR$/testslib/testslib.iml" filepath="$PROJECT_DIR$/testslib/testslib.iml" />
     </modules>

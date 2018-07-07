@@ -43,7 +43,7 @@ allprojects {
         build_tools_version = "27.0.2"
         //Externals
         tess_two = 'com.rmtheis:tess-two:8.0.0'
-        openCVLibrary = ':openCVLibrary330'
+        openCVLibrary = ':openCVLibrary341'
         animatedLoadingIndicator = ':animatedloadingindicator'
         //Firebase
         firebase_database = 'com.google.firebase:firebase-database:11.4.2'
