@@ -24,22 +24,20 @@ allprojects {
         version_code = 23
         version_name = "0.019"
         //SDK Versions
-        compile_sdk_version = 27
-        //compileSdkVersion - The compileSdkVersion is the version of the API the app is compiled against.
-        //This means you can use Android API features included in that version of the API (as well as all previous versions, obviously).
-        //If you try and use API 16 features but set compileSdkVersion to 15, you will get a compilation error. If you set compileSdkVersion
-        //to 16 you can still run the app on a API 15 device as long as your app's execution paths do not attempt to invoke any APIs specific to API 16.
+        /** minSdkVersion - This value is a hard floor below which the OS should
+         *  refuse to install the app. By setting this version to API level 19 (KitKat), you give
+         *  Android permission to install GeoQuiz on devices running KitKat or higher. **/
         min_sdk_version = 16
+        /** targetSdkVersion - This value tells Android which API level your app is designed to run on.
+         *  Most often this will be the latest Android release. **/
         target_sdk_version = 27
-        //targetSdkVersion - The targetSdkVersion has nothing to do with how your app is compiled or what APIs you can utilize.
-        //The targetSdkVersion is supposed to indicate that you have tested your app on (presumably up to and including) the version you specify.
-        //This is more like a certification or sign off you are giving the Android OS as a hint to how it should handle your app in terms of OS features.
-        //For example, as the documentation states:
-        //For example, setting this value to "11" or higher allows the system to apply a new default theme (Holo) to your app when running on Android 3.0 or higher...
-        //The Android OS, at runtime, may change how your app is stylized or otherwise executed in the context of the OS based on this value.
-        //There are a few other known examples that are influenced by this value and that list is likely to only increase over time.
-        //For all practical purposes, most apps are going to want to set targetSdkVersion to the latest released version of the API.
-        //This will ensure your app looks as good as possible on the most recent Android devices. If you do not specify the targetSdkVersion, it defaults to the minSdkVersion.
+        /** compile_sdk_version - This setting is not used to update the file. Whereas the
+         *  minimum and target SDK versions are placed in the manifest when you build your app
+         *  to advertise those values to the OS, the compile SDK version is private information
+         *  between you and the compiler. For instance, you might want to update the build target
+         *  when a new version of Android is released so that you can make use of the new methods
+         *  and classes it introduces **/
+        compile_sdk_version = 27
         build_tools_version = "27.0.2"
         //Externals
         tess_two = 'com.rmtheis:tess-two:9.0.0'
