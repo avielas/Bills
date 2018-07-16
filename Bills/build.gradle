@@ -25,8 +25,8 @@ allprojects {
         version_name = "0.019"
         //SDK Versions
         /** minSdkVersion - This value is a hard floor below which the OS should
-         *  refuse to install the app. By setting this version to API level 19 (KitKat), you give
-         *  Android permission to install GeoQuiz on devices running KitKat or higher. **/
+         *  refuse to install the app. By setting this version to API level 16 (Jelly Bean), you give
+         *  Android permission to install GeoQuiz on devices running Jelly Bean or higher. **/
         min_sdk_version = 16
         /** targetSdkVersion - This value tells Android which API level your app is designed to run on.
          *  Most often this will be the latest Android release. **/
