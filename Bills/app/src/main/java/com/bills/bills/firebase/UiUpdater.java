@@ -46,8 +46,10 @@ import com.google.firebase.storage.StorageReference;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.text.NumberFormat;
@@ -915,16 +917,18 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
         Mat srcMat = new Mat();
         Mat grayscaleMat = new Mat();
         Mat mask = new Mat();
+        Mat notMask = new Mat();
 
         try {
             Utils.bitmapToMat(src, srcMat);
 
             Imgproc.cvtColor(srcMat, grayscaleMat, Imgproc.COLOR_RGBA2GRAY);
-
+            Imgproc.erode(grayscaleMat, grayscaleMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5)));
             Imgproc.threshold(grayscaleMat, mask, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
 
-            srcMat.setTo(color, mask);
-
+            Core.bitwise_not(mask, notMask);
+            srcMat.setTo(new Scalar(0, 0, 0, 0), mask);
+            srcMat.setTo(new Scalar(255, 255, 255, 255), notMask);
             Bitmap dst = Bitmap.createBitmap(src.getWidth(), src.getHeight(), src.getConfig());
 
             Utils.matToBitmap(srcMat, dst);
@@ -935,6 +939,7 @@ public class UiUpdater implements View.OnClickListener, NumberPicker.OnValueChan
             srcMat.release();
             grayscaleMat.release();
             mask.release();
+            notMask.release();
         }
     }
 
