@@ -580,7 +580,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
             if(mat == null){
                 throw new Exception();
             }
-            BillAreaDetector areaDetector = new BillAreaDetector(_sessionId);
+            BillAreaDetector areaDetector = new BillAreaDetector(_sessionId, this);
             Point mTopLeft = new Point();
             Point mTopRight = new Point();
             Point mButtomLeft = new Point();
@@ -679,7 +679,7 @@ public class TestsDebugActivity extends MainActivityBase implements View.OnClick
                 _userCropFinished.setText("Done");
                 _userCropFinished.setOnClickListener(this);
                 _dragRectView = new DragRectView(this);
-                BillAreaDetector areaDetector = new BillAreaDetector(_sessionId);
+                BillAreaDetector areaDetector = new BillAreaDetector(_sessionId, this);
                 if (!OpenCVLoader.initDebug()) {
                     Log.d("aa", "Failed to initialize OpenCV.");
                 }

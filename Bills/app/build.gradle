@@ -29,6 +29,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    aaptOptions {
+        noCompress "tflite"
+        noCompress "lite"
+    }
+
     productFlavors {
         // When building a variant that uses this flavor, the following configurations
         // override those in the defaultConfig block.

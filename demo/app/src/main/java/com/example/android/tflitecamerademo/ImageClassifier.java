@@ -38,6 +38,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -122,11 +123,7 @@ public abstract class ImageClassifier {
     long startTime = SystemClock.uptimeMillis();
     runInference();
 
-    for(; i<5; ++i)
-    {
-      float[][][][] output = getArray(i);
-      SaveToFile(output, i);
-    }
+
 
     long endTime = SystemClock.uptimeMillis();
     Log.d(TAG, "Timecost to run model inference: " + Long.toString(endTime - startTime));
@@ -139,6 +136,13 @@ public abstract class ImageClassifier {
     SpannableString span = new SpannableString(duration + " ms");
     span.setSpan(new ForegroundColorSpan(android.graphics.Color.LTGRAY), 0, span.length(), 0);
     builder.append(span);
+
+    for(; i<5; ++i)
+    {
+      float[][][][] output = getArray(i);
+      SaveToFile(output, i);
+    }
+
   }
 
   void applyFilter() {
@@ -213,7 +217,7 @@ public abstract class ImageClassifier {
     String IMAGES_PATH = STORAGE_DIRECTORY + "/TesseractSample/imgs";
 //    SaveToPNGFile(bitmap, IMAGES_PATH + "/before.jpg");
 
-    String billPath = IMAGES_PATH + "/dovrin3.jpg";
+    String billPath = IMAGES_PATH + "/s3cap4.png";
 
     final BitmapFactory.Options opts = new BitmapFactory.Options();
     opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -408,25 +412,47 @@ public abstract class ImageClassifier {
 
     int[] convertedOutput = new int[480*480];
 
+    float min = 9999999;
+    float max = 0;
     for(int i=0; i<480; ++i){
       for(int j=0; j<480; ++j){
-//        Log.d("MMM", ((Float)(output[0][i][j][0])).toString());
-        output[0][i][j][0] = (float)Math.floor(255 * (1 - output[0][i][j][0]));
+        output[0][i][j][0] = 1 - output[0][i][j][0];
+        if(output[0][i][j][0] > max){
+          max = output[0][i][j][0];
+        }
 
-        int valueToReplicate = ((Float)output[0][i][j][0]).intValue();
+        if(output[0][i][j][0] < min){
+          min = output[0][i][j][0];
+        }
+      }
+    }
+
+    float delta = max - min;
+    float binSize = delta / 255;
+
+
+    for(int i=0; i<480; ++i){
+      for(int j=0; j<480; ++j){
+        output[0][i][j][0] = (float)Math.floor(255 * (output[0][i][j][0]));
+
+//        int valueToReplicate = ((Float)output[0][i][j][0]).intValue();
+        int valueToReplicate = ((Float)((output[0][i][j][0] - min) / binSize)).intValue();
 
         convertedOutput[480*i+j] = 0xff000000|(valueToReplicate<<16)| (valueToReplicate <<8) | valueToReplicate;
       }
     }
 
 
+    Bitmap bmp2 = Bitmap.createBitmap(480, 480, Bitmap.Config.ARGB_8888);
     Bitmap bmp = Bitmap.createBitmap(convertedOutput, 480, 480, Bitmap.Config.ARGB_8888);
-
+    int width = 480;
+    int height = 480;
+    bmp2 = Bitmap.createScaledBitmap(bmp, width, height, false);
     String STORAGE_DIRECTORY = Environment.getExternalStorageDirectory().toString();
     String IMAGES_PATH = STORAGE_DIRECTORY + "/TesseractSample/imgs";
 
     String billPath = IMAGES_PATH + "/dovrin3output" + index + ".jpg";
 
-    SaveToPNGFile(bmp,billPath);
+    SaveToPNGFile(bmp2,billPath);
   }
 }

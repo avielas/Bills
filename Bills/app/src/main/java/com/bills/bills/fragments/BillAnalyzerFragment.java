@@ -124,8 +124,8 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
                 mHandler.post(mShowProgressDialog);
 
                 Mat billMat = null;
-
                 try {
+
                     billMat = Utilities.Bytes2MatAndRotateClockwise90(_sessionId, mImage);
                 } catch (Exception ex) {
                     String logMessage = "failed to convert bytes to mat or rotating the image";
@@ -160,7 +160,7 @@ public class BillAnalyzerFragment extends Fragment implements RecognitionManager
                         return;
                     }
 
-                    BillAreaDetector areaDetector = new BillAreaDetector(_sessionId);
+                    BillAreaDetector areaDetector = new BillAreaDetector(_sessionId,  getActivity());
                     org.opencv.core.Point topLeft = new org.opencv.core.Point();
                     org.opencv.core.Point topRight = new org.opencv.core.Point();
                     org.opencv.core.Point buttomLeft = new org.opencv.core.Point();

@@ -2,6 +2,7 @@ package com.bills.bills;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -299,6 +301,25 @@ public class BillsMainActivity extends MainActivityBase implements
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
+
+        AssetManager am = getAssets();
+        InputStream is = null;
+        byte[] image2 = null;
+
+        try {
+            // round1:
+            //  - thresh = 70
+            //  - failed: 4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+            // round2:
+            // - thresh = 80
+            // - 7, 8, 9, 10, 11, 12, 13, 14
+
+            is = am.open("13.txt");
+            image2 = new byte[is.available()];
+            is.read(image2);
+        } catch (Exception ex) {
+            Toast.makeText(this, "Failed to load image from assets", Toast.LENGTH_LONG).show();
+        }
         mBillAnalyzerFragment.Init(image, mSessionId, mCurPassCode, mCurRelativeDbAndStoragePath, mContext);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, mBillAnalyzerFragment);

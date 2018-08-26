@@ -297,6 +297,7 @@ public class Utilities {
     }
 
     public static Mat Bytes2MatAndRotateClockwise90(final UUID sessionId, byte[] bytes) throws Exception {
+
         if (!OpenCVLoader.initDebug()) {
             BillsLog.Log(sessionId, LogLevel.Error, "Failed to initialize OpenCVLoader.", LogsDestination.BothUsers, Tag);
             return null;
