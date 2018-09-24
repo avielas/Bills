@@ -20,23 +20,12 @@
     tools:context="com.bills.bills.fragments.WelcomeScreenFragment">
 
 
-    <ImageView
-        android:id="@+id/city_bg_image_view"
-        android:layout_width="match_parent"
-        android:layout_height="410dp"
-        android:layout_weight="0.21"
-        android:src="@drawable/city_bg" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/city_bg"
         android:orientation="vertical"
         android:weightSum="1">
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="140dp"
-            android:layout_weight="0.21" />
 
         <ImageView
             android:id="@+id/imageView"
@@ -49,42 +38,19 @@
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:layout_weight="0.21"
-            android:background="@drawable/down_shade"
             android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="0.21">
-
-                <Button
-                    android:id="@+id/start_camera_button"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:background="@drawable/ic_scan_bill"/>
-
-                <Button
-                    android:id="@+id/check_pass_code_button"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:background="@drawable/ic_join_bill" />
-
-            </LinearLayout>
 
             <EditText
                 android:id="@+id/pass_code_edittext"
-                android:layout_width="120dp"
-                android:layout_height="80dp"
-                android:layout_gravity="right|center_vertical"
+                android:layout_width="240dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center_vertical|center_horizontal"
                 android:layout_weight="0.21"
                 android:ems="10"
-                android:gravity="top|right"
-                android:hint="הזן קוד"
+                android:gravity="center_vertical|center_horizontal"
+                android:hint="הזן מספר חשבון"
                 android:inputType="numberDecimal"
+                android:paddingRight="40dp"
                 android:textColor="#D50046"
                 android:textColorHighlight="#D50046"
                 android:textColorHint="#D50046"
@@ -92,16 +58,26 @@
                 android:textDirection="ltr"
                 android:textStyle="bold"
                 android:tooltipText="הזן קוד"
-                android:visibility="visible"
-                android:paddingRight="40dp"/>
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/check_pass_code_button"
+                android:layout_width="240dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                android:layout_weight="0.21"
+                android:background="@drawable/ic_join_bill" />
+
+            <Button
+                android:id="@+id/start_camera_button"
+                android:layout_width="240dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                android:layout_weight="0.21"
+                android:background="@drawable/ic_scan_bill" />
+
         </LinearLayout>
 
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/city_bg_l2_image_view"
-        android:layout_width="match_parent"
-        android:layout_height="410dp"
-        android:src="@drawable/city_bg_l2" />
 
 </FrameLayout>

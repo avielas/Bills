@@ -9,7 +9,6 @@
     tools:context="com.bills.bills.fragments.BillSummarizerFragment">
 
 
-
     <LinearLayout
         android:id="@+id/summary_area_layout"
         android:layout_width="match_parent"
@@ -19,14 +18,21 @@
         <LinearLayout
             android:id="@+id/headline_layout"
             android:layout_width="match_parent"
-            android:layout_height="46dp"
+            android:layout_height="wrap_content"
             android:background="@drawable/summary_screen_header"
-            android:orientation="horizontal">
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_summarizer_top_logo" />
 
             <TextView
                 android:id="@+id/passcode_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_gravity="center_vertical|center_horizontal"
                 android:fontFamily="@fonts/secular_one"
                 android:gravity="end"
                 android:textAlignment="viewEnd"
@@ -34,15 +40,6 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/heading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="חשבון"
-                android:textColor="@color/summarizer_medium"
-                android:textSize="36sp"
-                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
@@ -83,12 +80,13 @@
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:ems="10"
-                android:fontFamily="@fonts/secular_one"
                 android:gravity="center"
+                android:includeFontPadding="false"
                 android:text="מוצרים משותפים"
                 android:textColor="@color/summarizer_medium"
                 android:textSize="20dp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:includeFontPadding="false" />
         </LinearLayout>
 
         <ScrollView
@@ -98,13 +96,13 @@
             android:layout_gravity="bottom"
             android:layout_marginBottom="0dp"
             android:layout_marginTop="0dp">
+
             <LinearLayout
                 android:id="@+id/common_items_area_linearlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="right">
-            </LinearLayout>
+                android:gravity="right"
+                android:orientation="vertical"></LinearLayout>
 
         </ScrollView>
 
@@ -155,7 +153,7 @@
                 android:text="המוצרים שלי"
                 android:textColor="@color/summarizer_medium"
                 android:textSize="20dp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -166,6 +164,7 @@
             android:layout_gravity="top"
             android:layout_marginBottom="0dp"
             android:layout_marginTop="0dp">
+
             <LinearLayout
                 android:id="@+id/my_items_area_linearlayout"
                 android:layout_width="match_parent"
@@ -181,9 +180,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:background="@color/summarizer_light"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true">
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="30dp"
@@ -208,8 +207,8 @@
             android:gravity="left|center_vertical"
             android:hint="0"
             android:inputType="none"
-            android:textColor="@color/summarizer_dark"
-            android:textColorHint="@color/summarizer_dark" />
+            android:textColor="#737373"
+            android:textColorHint="#737373" />
 
         <EditText
             android:id="@+id/tip_percent_edittext"
@@ -223,8 +222,8 @@
             android:gravity="right|center"
             android:hint="0"
             android:inputType="none"
-            android:textColor="@color/summarizer_dark"
-            android:textColorHint="@color/summarizer_dark" />
+            android:textColor="#737373"
+            android:textColorHint="#737373" />
 
         <TextView
             android:layout_width="30dp"
