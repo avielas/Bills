@@ -4,7 +4,7 @@ android {
     signingConfigs {
     }
     compileSdkVersion 27
-    buildToolsVersion '27.0.2'
+    buildToolsVersion '27.0.3'
     flavorDimensions "default"
     sourceSets.main {
         jniLibs.srcDir 'libs'
@@ -61,7 +61,7 @@ android {
         abi {
             enable true
             reset()
-            include 'arm64-v8a', 'armeabi', 'armeabi-v7a', 'mips', 'mips64', 'x86', 'x86_64'
+            include 'arm64-v8a', 'armeabi-v7a','x86', 'x86_64'
         }
     }
     sourceSets {
@@ -70,7 +70,7 @@ android {
 }
 
 // Map for the version code that gives each ABI a value.
-ext.abiCodes = ['arm64-v8a': 1, 'armeabi': 2, 'armeabi-v7a': 3, 'mips': 4, 'mips64': 5, 'x86': 6, 'x86_64': 7]
+ext.abiCodes = ['arm64-v8a': 1, 'armeabi-v7a': 2, 'x86': 3, 'x86_64': 4]
 
 // For per-density APKs, create a similar map like this:
 // ext.densityCodes = ['mdpi': 1, 'hdpi': 2, 'xhdpi': 3]
