@@ -1,10 +1,9 @@
 *.iml
 .gradle
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
+/.idea
 .DS_Store
 /build
 /captures
 .externalNativeBuild
-/openCVLibrary330
+/openCVLibrary341/build
