@@ -5,8 +5,8 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
-        classpath 'com.google.gms:google-services:3.1.1'
+        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.google.gms:google-services:4.2.0'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -38,7 +38,7 @@ allprojects {
          *  when a new version of Android is released so that you can make use of the new methods
          *  and classes it introduces **/
         compile_sdk_version = 27
-        build_tools_version = "27.0.3"
+        build_tools_version = "29.0.2"
         //Externals
         tess_two = 'com.rmtheis:tess-two:9.0.0'
         openCVLibrary = ':openCVLibrary341'

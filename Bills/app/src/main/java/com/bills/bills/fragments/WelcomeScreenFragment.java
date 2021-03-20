@@ -81,8 +81,8 @@ public class WelcomeScreenFragment extends Fragment{
             }
         });
 
-        HowToUseWelcomeScreen howToUseWelcomeScreen = new HowToUseWelcomeScreen(getActivity(), (ViewGroup) getActivity().findViewById(R.id.welcome_frame_layout));
-        howToUseWelcomeScreen.SetShowcaseViewStartCamera();
+//        HowToUseWelcomeScreen howToUseWelcomeScreen = new HowToUseWelcomeScreen(getActivity(), (ViewGroup) getActivity().findViewById(R.id.welcome_frame_layout));
+//        howToUseWelcomeScreen.SetShowcaseViewStartCamera();
 
         view.findViewById(R.id.check_pass_code_button).setOnClickListener(new View.OnClickListener() {
             @Override

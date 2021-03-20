@@ -203,8 +203,8 @@ public abstract class ImageClassifier {
   }
 
   public void setUseNNAPI(Boolean nnapi) {
-    if (tflite != null)
-        tflite.setUseNNAPI(nnapi);
+//    if (tflite != null)
+//        tflite.setUseNNAPI(nnapi);
   }
 
   public void setNumThreads(int num_threads) {
